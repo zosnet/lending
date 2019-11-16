@@ -38,7 +38,7 @@ scopes.row<template>
           width="180"
         >
           <template slot-scope="scope">
-            <span v-for="(item, key) in scope.row.ratio" style="margin-right: 10px">
+            <span v-for="(item, key) in scope.row.ratio" style="margin-right: 10px" :key="key">
                 {{key}}: {{item}}
               </span>
           </template>
@@ -152,102 +152,6 @@ scopes.row<template>
     methods: {
       init () {
         this._getAssetList()
-        // config是以url为键名的对象
-        // let config = res.config
-        let aa = {
-          'carrier': {
-            'www.zos.io': {
-              'carrierList': {
-                'CNY': {
-                  'cashCarrier': 'carrier-cny',
-                  'lendCarrier': 'carrier-cny1'
-                },
-                'USD': {
-                  'cashCarrier': 'carrier-cny',
-                  'lendCarrier': 'carrier-cny1'
-                }
-              }
-            },
-            'lend.zos.io': {
-              'carrierList': {
-                'CNY': {
-                  'cashCarrier': 'carrier-cny',
-                  'lendCarrier': 'carrier-cny1'
-                },
-                'USD': {
-                  'cashCarrier': 'carrier-cny',
-                  'lendCarrier': 'carrier-cny1'
-                }
-              }
-            }
-          },
-          'maintenance_collateral_ratio_limit': {
-            'www.zos.io': {
-              'CNY': {
-                'BTC': 1.4,
-                'ZOS': 2.1
-              },
-              'USD': {
-                'ETH': 1.5,
-                'ZOS': 2.2
-              }
-            },
-            'lend.zos.io': {
-              'CNY': {
-                'BTC': 1.4,
-                'ZOS': 2.1
-              },
-              'USD': {
-                'ETH': 1.5,
-                'ZOS': 2.2
-              }
-            }
-          }
-        }
-        let ratioObj = aa.maintenance_collateral_ratio_limit
-        if (ratioObj) {
-          for (let i in ratioObj) {
-            if (window.location.host === i) {
-              this.isHas = true
-              let params = {}
-              params.symbol = i
-              params.ratio = ratioObj[i]
-              for (let ii in ratioObj[i]) {
-                params.newratio[ii] = ''
-              }
-              this.ratioData.push(params)
-              break
-            }
-          }
-          // if (this.isHas) {
-          //   ZOSInstance.carrier_update()
-          // } else {
-          //   ZOSInstance.carrier_create()
-          // }
-        }
-        // let config = aa.maintenance_collateral_ratio_limit
-        // this.ratioData = []
-        // for (let index in config) {
-        //   let params = {}
-        //   params.url = index
-        //   params.carrierList = config[index].carrierList
-        //   this.carrierData.push(params)
-        // }
-        // Apis.instance().db_api().exec('get_carrier_by_account', [this.$store.state.userDataSid])
-        //   .then(res => {
-        //     if (res.config) {
-        //       // config是以url为键名的对象
-        //       let config = res.config
-        //       let params = {}
-        //       for (let index in config) {
-        //         params.url = index
-        //         params.carrierList = config[index].carrierList
-        //         params.radio = config[index].maintenance_collateral_ratio_limit
-        //         this.carrierData.push(params)
-        //       }
-        //     }
-        //   })
-        //   .catch(err => console.log(err))
       },
       // 得到借贷的币种
       _getAssetList () {
@@ -323,7 +227,6 @@ scopes.row<template>
       // 编辑运营商
       handleEdit (row) {
         this.updateData = row
-        console.log(this.updateData, 'this.updateData')
         this.carrierVisible = true
       },
       // 提交了修改运营商后的回调

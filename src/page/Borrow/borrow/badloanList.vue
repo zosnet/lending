@@ -31,7 +31,7 @@
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.amount_to_loan.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
-              <div class="secondaryInfo">{{scope.row.loan_period}}{{$t('m.month')}}</div>
+              <div class="secondaryInfo">{{scope.row.loan_period}}{{$t('m.invest.perioduint' + scope.row.repayment_type.repayment_period_uint)}}</div>
             </template>
           </el-table-column>
 
@@ -204,6 +204,7 @@
           this.emptyListShow = 2
           let startIndex = (this.listQuery.page - 1) * this.listQuery.limit
           ZOSInstance.get_loan_orders([this.userId], [], statusArry, startIndex, this.listQuery.limit).then(res => {
+            console.log('web不良资产', res)
             this.refunding = res
             this.total = listNum
             this.loading = false

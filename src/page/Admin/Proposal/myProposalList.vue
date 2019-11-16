@@ -20,7 +20,12 @@
             </el-table-column>
             <el-table-column min-width="100px" :label="$t('m.params.proposalContent')">
               <template slot-scope="scope">
-                <el-button type="text" @click="handleShowInfo(scope.row)">{{scope.row.assetsSymbol}}  {{$t('m.proposalList.edit')}}</el-button>
+                <el-button type="text" @click="handleShowInfo(scope.row)">{{scope.row.assetsSymbol}}  {{scope.row.title}}</el-button>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('m.proposalList.create')" min-width="120px">
+              <template slot-scope="scope">
+                <span>{{scope.row.create_time  | formatData}}</span>
               </template>
             </el-table-column>
             <el-table-column :label="$t('m.proposalList.expiration')" min-width="120px">
@@ -184,7 +189,9 @@
   import ConfirmPassword from '/path-components/Login/ConfirmPassword'
   import getzosdialog from '/path-components/Chain/getzosDialog'
   import couponDialog from '/path-components/Chain/couponDialog'
+  import {Apis} from 'zosjs-ws'
   import async from 'async'
+  import filters from '/js-filters'
   import { ChainValidation } from 'zosjs/es'
   import Vue from 'vue'
 
@@ -242,10 +249,18 @@
           carrier_service_charge_rate: this.$t('m.params.carrierRate'),
           max_platform_service_charge_rate: this.$t('m.params.maxPlatformRate'),
           max_risk_margin: this.$t('m.params.maxRiskMargin'),
-          max_interest_rate: this.$t('m.params.rateVal'),
+          max_interest_rate: this.$t('m.params.rateVal3'),
           flags: this.$t('m.params.feederFlag'),
           feeders: this.$t('m.params.getFeeders'),
-          allowed_collateralize: this.$t('m.params.allowedCollate')
+          allowed_collateralize: this.$t('m.params.allowedCollate'),
+          locktoken_rates: this.$t('m.lockasseted.yearinterest'),
+          max_rate: this.$t('m.params.rateVal3'),
+          locktoken_min: this.$t('m.params.minSave'),
+          locktoken_max: this.$t('m.params.maxSave'),
+          vesting_seconds: this.$t('m.params.lockTime'),
+          pay_asset_name: this.$t('m.params.rateCollat'),
+          carrier_name: this.$t('m.params.inCarrier'),
+          payer_name: this.$t('m.params.payer')
         },
         showPrecision: {
           min_loan_amount: true,
@@ -314,14 +329,16 @@
     },
     filters: {
       formatSum: sum => {
-        return sum.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,')
+        if (sum) return sum.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,')
+        else return ''
       },
       formatPercent: (value, maxValue) => {
         let num = value / maxValue
         return Math.round(num * 100) / 100 + '%'
       },
       formatData: time => {
-        return time.toString().replace('T', ' ')
+        if (time) return time.toString().replace('T', ' ')
+        else return ''
       },
       formatProcess: process => {
         return Math.floor(process)
@@ -346,14 +363,51 @@
             this.loading = false
           }
           async.each(res, function (res, allcallback) {
-            ZOSInstance.get_object(res.operations[0][1].option_id).then(optionRes => {
-              res['assetsId'] = optionRes.get('asset_id')
-              ZOSInstance.get_object(optionRes.get('asset_id')).then(assetRes => {
-                res['assetsSymbol'] = assetRes.get('symbol')
-                res['assetsPrecision'] = assetRes.get('precision')
-                allcallback(null)
+            if (res.operations[0][0] !== 111) {
+              if (Number(res.operations[0][0]) === 51) res['title'] = other.$t('m.proposalList.lending') + other.$t('m.proposalList.add')
+              else if (Number(res.operations[0][0]) === 53) res['title'] = other.$t('m.proposalList.lending') + other.$t('m.proposalList.edit')
+              else if (Number(res.operations[0][0]) === 87) res['title'] = other.$t('m.proposalList.feederoption')
+              ZOSInstance.get_object(res.operations[0][1].option_id).then(optionRes => {
+                res['assetsId'] = optionRes.get('asset_id')
+                if (res.operations[0][0] === 53) res['repayment_type'] = res.operations[0][1].options.repayment_type
+                else res['repayment_type'] = '33'
+                ZOSInstance.get_object(optionRes.get('asset_id')).then(assetRes => {
+                  res['assetsSymbol'] = assetRes.get('symbol')
+                  res['assetsPrecision'] = assetRes.get('precision')
+                  allcallback(null)
+                })
               })
-            })
+            } else {
+              let options = JSON.parse(res.operations[0][1].sParam)
+              let type = ''
+              if (Number(options.lock_mode) === 0) type = other.$t('m.proposalList.dyoption')
+              else if (Number(options.lock_mode) === 1) type = other.$t('m.proposalList.fixedoption')
+              else if (Number(options.lock_mode) === 2) type = other.$t('m.proposalList.nodeoption')
+              if (Number(res.operations[0][1].op_type) === 1) res['title'] = type + other.$t('m.proposalList.add')
+              else if (Number(res.operations[0][1].op_type) === 0) res['title'] = type + other.$t('m.proposalList.edit')
+              res['options'] = options
+              if (Number(res.operations[0][1].op_type) === 0) {
+                ZOSInstance.get_object(options.op_id).then(optionRes => {
+                  res['option_id'] = options.op_id
+                  res['lock_mode'] = options.lock_mode
+                  res['assetsId'] = optionRes.get('asset_id')
+                  ZOSInstance.get_object(optionRes.get('asset_id')).then(assetRes => {
+                    res['assetsSymbol'] = assetRes.get('symbol')
+                    res['assetsPrecision'] = assetRes.get('precision')
+                    allcallback(null)
+                  })
+                })
+              } else {
+                res['option_id'] = ''
+                res['lock_mode'] = options.lock_mode
+                res['assetsId'] = res.operations[0][1].asset_lock
+                ZOSInstance.get_object(res['assetsId']).then(assetRes => {
+                  res['assetsSymbol'] = assetRes.get('symbol')
+                  res['assetsPrecision'] = assetRes.get('precision')
+                  allcallback(null)
+                })
+              }
+            }
           }, function (allerr) {
             other.tableData = res
             other.loading = false
@@ -399,7 +453,45 @@
       showInfo (originalData, newData, ayscfeed = '') {
         if (newData.changeInfo === undefined) {
           let changeArray = []
-          if (newData.operations[0][0] === 87) {
+          if (newData.operations[0][0] === 111) {
+            let options = newData.options
+            for (let key in options) {
+              let value = ''
+              let newValue = ''
+              if (key === 'pay_asset' || key === 'carrier' || key === 'payer' || key === 'version' || key === 'lock_mode' || key === 'pay_mode' || key === 'locktoken_level') continue
+              if (key === 'max_rate' || key === 'locktoken_min' || key === 'locktoken_max') {
+                value = originalData[key]
+                newValue = options[key]
+                value = filters.formatLegalCurrency3(value, '', newData.assetsPrecision)
+                newValue = filters.formatLegalCurrency3(newValue, '', newData.assetsPrecision)
+              } else if (key === 'locktoken_rates') {
+                if (options.lock_mode === 0) {
+                  originalData[key].forEach(item => {
+                    value = (item[1][0][1] / 10) + '‰' + '/' + this.$t('m.year')
+                  })
+                  options[key].forEach(item => {
+                    newValue = (item[1][0][1] / 10) + '‰' + '/' + this.$t('m.year')
+                  })
+                } else {
+                  originalData[key].forEach(item => {
+                    value += item[0] + this.$t('m.months') + '  ' + (item[1][0][1] / 10) + '‰/' + this.$t('m.year') + ' '
+                  })
+                  options[key].forEach(item => {
+                    newValue += item[0] + this.$t('m.months') + '  ' + (item[1][0][1] / 10) + '‰/' + this.$t('m.year') + ' '
+                  })
+                }
+              } else {
+                value = originalData[key]
+                newValue = options[key]
+              }
+              if (newData.new === true) value = ''
+              if (value !== newValue) {
+                changeArray.push({name: this.changeKeyName[key], value: value, newValue: newValue})
+              }
+            }
+            newData.changeInfo = changeArray
+            this.selectData = newData
+          } else if (newData.operations[0][0] === 87) {
             let newFeedOption = newData.operations[0][1].new_feed_option
             changeArray.push({name: this.changeKeyName.flags, value: this.checksArr[ayscfeed.flags].value, newValue: this.checksArr[newFeedOption.flags].value})
             // 修改后
@@ -424,6 +516,7 @@
           } else {
             let options = newData.operations[0][1].options
             for (let key in options) {
+              if (key === 'repayment_period_uint') continue
               let value = originalData[key]
               let newValue = options[key]
               if (this.showPrecision[key]) {
@@ -478,9 +571,9 @@
             }
           }
           newData.changeInfo = changeArray
+          this.selectData = newData
+          this.refreshShowInfo()
         }
-        this.selectData = newData
-        this.refreshShowInfo()
         this.changeInfoDialog = true
       },
       // 刷新展示的用户名
@@ -517,12 +610,41 @@
         })
       },
       handleShowInfo (row) {
-        this.ayscFeedOption = []
-        ZOSInstance.getBitlenderOption(row.assetsId).then(res => {
-          this.ayscFeedOption = res.feed_option
-          this.originalData[row.assetsId] = res.options
-          this.showInfo(this.originalData[row.assetsId], row, this.ayscFeedOption)
-        }).catch(err => console.log(err))
+        if (row.operations[0][0] !== 111) {
+          this.ayscFeedOption = []
+          ZOSInstance.getBitlenderOption(row.assetsId, row.repayment_type).then(res => {
+            this.ayscFeedOption = res.feed_option
+            this.originalData[row.assetsId] = res.options
+            this.showInfo(this.originalData[row.assetsId], row, this.ayscFeedOption)
+          }).catch(err => console.log(err))
+        } else {
+          this.ayscFeedOption = []
+          Apis.instance().db_api().exec('get_locktoken_option', [row.assetsId, row.lock_mode, false]).then(res => {
+            if (!res || !res.lockoptions) {
+              let lockoptions = {op_id: '', lock_mode: row.lock_mode, locktoken_rates: [], max_rate: 0, vesting_seconds: 0, locktoken_min: 0, locktoken_max: 0}
+              res = {lockoptions: lockoptions}
+              row['new'] = true
+            }
+            this.originalData[row.assetsId] = res.lockoptions
+            if (!row.options.pay_asset) row.options.pay_asset = '1.3.0'
+            if (!row.options.carrier) row.options.carrier = '1.2.0'
+            if (!row.options.payer) row.options.payer = '1.2.0'
+            Apis.instance().db_api().exec('get_objects', [[row.options.pay_asset, row.options.carrier, row.options.payer]]).then(res2 => {
+              row.options.pay_asset_name = res2[0].symbol
+              row.options.carrier_name = res2[1].name
+              row.options.payer_name = res2[2].name
+              if (!res.lockoptions.pay_asset) res.lockoptions.pay_asset = '1.3.0'
+              if (!res.lockoptions.carrier) res.lockoptions.carrier = '1.2.0'
+              if (!res.lockoptions.payer) res.lockoptions.payer = '1.2.0'
+              Apis.instance().db_api().exec('get_objects', [[res.lockoptions.pay_asset, res.lockoptions.carrier, res.lockoptions.payer]]).then(res1 => {
+                res.lockoptions.pay_asset_name = res1[0].symbol
+                res.lockoptions.carrier_name = res1[1].name
+                res.lockoptions.payer_name = res1[2].name
+                this.showInfo(this.originalData[row.assetsId], row, this.ayscFeedOption)
+              })
+            })
+          }).catch(err => console.log(err))
+        }
       },
       operConfrom () {
         this.conformLoading = true

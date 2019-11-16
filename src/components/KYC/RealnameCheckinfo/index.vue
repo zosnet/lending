@@ -81,7 +81,6 @@ export default {
     },
     // 获取充值地址
     init () {
-      console.log('kycInfo', this.kycInfo)
       if (this.kycInfo) {
         const that = this
         that.kycName = this.kycInfo.name

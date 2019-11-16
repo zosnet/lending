@@ -41,10 +41,11 @@
     </div>
     <h1>
       <!--活动细则-->
-      {{$t('m.invite.activity')}}
+      {{$t('m.invite.activity1')}}
     </h1>
-    <p>
-
+    <p style="margin-top: 30px">
+      {{$t('m.invite.inviteAct1')}}<br>
+      {{$t('m.invite.inviteAct2')}}<br>
     </p>
     <h1>
       <!--活动细则-->

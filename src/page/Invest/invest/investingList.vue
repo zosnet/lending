@@ -14,23 +14,27 @@
               <span class="margin-l10">{{scope.row.id}}</span>
             </template>
           </el-table-column>
+          <!-- 投资金额 -->
           <el-table-column width="160" :label="$t('m.investList.investSum')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.amount_to_invest.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol)}}
             </template>
           </el-table-column>
+          <!-- 投资时间 -->
           <el-table-column  width="180" :label="$t('m.investList.investTime')">
             <template slot-scope="scope">
               <span>{{scope.row.invest_time | formatDateStr}}</span>
             </template>
           </el-table-column>
+          <!-- 借款金额 -->
           <el-table-column width="200" :label="$t('m.investList.allInvestSum')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.amount_to_loan.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
             </template>
           </el-table-column>
+          <!-- 投资进度 -->
           <el-table-column  width="200" :label="$t('m.investList.investProgress')">
             <template slot-scope="scope">
               <div style="width: 60%; height:50px">

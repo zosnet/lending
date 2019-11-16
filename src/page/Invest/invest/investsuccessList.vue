@@ -14,24 +14,28 @@
               <span class="margin-l10">{{scope.row.id}}</span>
             </template>
           </el-table-column>
+          <!-- 投资金额 -->
           <el-table-column width="200" :label="$t('m.investList.investSum')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.amount_to_invest.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
             </template>
           </el-table-column>
+          <!-- 投资时间 -->
           <el-table-column  width="180" :label="$t('m.investList.investTime')">
             <template slot-scope="scope">
               <span>{{scope.row.invest_time | formatDateStr}}</span>
             </template>
           </el-table-column>
+          <!-- 已获收益 -->
           <el-table-column width="220" :label="$t('m.investList.earnedIncome')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.repay_interest_sum / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
             </template>
           </el-table-column>
-            <el-table-column :label="$t('m.borrow.pawnNumState')">
+          <!-- 抵押物数量/状态 -->
+          <el-table-column :label="$t('m.borrow.pawnNumState')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_collateralize.symbol}}</span>
               {{scope.row.amount_to_collateralize.amount / Math.pow(10, scope.row.asset_to_collateralize.precision) | formatLegalCurrencys(scope.row.asset_to_collateralize.symbol, scope.row.asset_to_collateralize.precision)}}

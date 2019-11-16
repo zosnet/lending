@@ -336,7 +336,6 @@
       // 关闭窗口
       handleClose () {
         this.ruleForm = Object.assign(this.ruleForm, this.defaultData)
-        console.log(this.ruleForm)
         this.updateData = null
         // this.visible = false
         this.$emit('bitCarrier', true)
@@ -390,7 +389,6 @@
             let radio = config[this.ruleForm.url].maintenance_collateral_ratio_limit = {}
             radio[this.lenderSymbol.symbol] = this.ruleForm.ratio
             ZOSInstance.carrier_create(this.$store.state.userName, this.$store.state.userName, '', config).then(res => {
-              console.log(res, '====')
             })
           }
           // this.$emit('bitCarrier', bool)

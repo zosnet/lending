@@ -254,17 +254,14 @@
         this.loading = false
       }
     },
+    destroyed () {
+      this.$root.$off('RpcConnectionStatus')
+    },
     mounted () {
-      if (this.$store.state.initFinished) {
-        this.getNodeData()
-      } else {
-        this.$root.$on('initFinished', (data) => {
-          this.getNodeData()
-        })
-        this.$root.$on('initFail', (data) => {
-          this.getNodeData()
-        })
-      }
+      this.getNodeData()
+      this.$root.$on('RpcConnectionStatus', (data) => {
+        this.connectSucess()
+      })
     }
   }
 </script>

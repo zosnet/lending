@@ -8,11 +8,21 @@
       </div>
     </h1>
     <div class="line" style="margin: 15px 0px;height: 2px"></div>
-    <div class="wrap"  v-if="loading<=0">
+    <div class="wrap">
       <el-tabs v-model="activeTabName">
-        <el-tab-pane :label="$t('m.params.operator')" name="first">
-          <div class="feel margin-t40" style="align-items: center" v-if="permissions">
-            <span class="margin-l10" style="width: 120px">{{$t('m.orderList.bitType')}}:</span>
+        <el-tab-pane :label="$t('m.params.loperator')" name="first">
+          <div class="feel margin-t10" style="align-items: center" >
+           <span class="margin-l10">{{$t('m.transfer.XZMS')}}:</span>
+          <el-select v-model="selectedType" value-key="id" :placeholder="$t('m.transfer.XZMS')" @change="typeGet">
+            <el-option
+              v-for="item in Type"
+              :key="item.id"
+              :label="$t(item.label)"
+              :value="item">
+            </el-option>
+          </el-select> &nbsp;&nbsp;&nbsp;&nbsp;
+           <span v-if="permissions">
+            <span class="margin-l10">{{$t('m.orderList.bitType')}}:</span>
             <el-select
               v-model="cashSymbol"
               value-key="id"
@@ -29,9 +39,8 @@
             </el-select>
             <el-button type="primary" style="margin-left: 10px" :disabled="addDisabled" @click="addRatioInput">{{$t('m.params.addFeeder')}}</el-button>
             <span style="flex: 1"></span>
-
+            </span>
           </div>
-
           <el-table
             :data="carriersData"
             style="width: 90%">
@@ -78,10 +87,20 @@
             >
               <template slot-scope="scope">
           <span v-for="(item, key) in scope.row.ratio" :key="key">
-            {{key}}: {{item}}
+            {{key}}: {{Number(item).toFixed(0)}}%
           </span>
-              </template>
-            </el-table-column>
+             </template>
+           </el-table-column>
+           <el-table-column
+              prop="addrate"
+              :label="$t('m.borrow.addrate')"
+            >
+            <template slot-scope="scope">
+            <span v-for="(item, key) in scope.row.rate" :key="key">
+            {{key}}: {{Number(item).toFixed(0)}}%
+            </span>
+            </template>
+          </el-table-column>
             <el-table-column :label="$t('m.orderList.operation')" v-if="permissions" width="180">
               <template slot-scope="scope">
                 <el-button
@@ -92,113 +111,8 @@
             </el-table-column>
           </el-table>
         </el-tab-pane>
-        <el-tab-pane :label="$t('m.params.gateway')" name="second">
-          <!--<span style="width: 120px">{{$t('m.params.chooseGateway')}}:</span>-->
-          <!--<el-select v-model="gateway" multiple :placeholder="$t('m.transfer.QXZ')" class="margin-l10"-->
-                     <!--:disabled="!permissions">-->
-            <!--<el-option-->
-              <!--v-for="item in gatewayList"-->
-              <!--:key="item[1]"-->
-              <!--:label="item[0]"-->
-              <!--:value="item[0]">-->
-            <!--</el-option>-->
-          <!--</el-select>-->
-
-
-
-          <div class="feel margin-t40" style="align-items: center">
-            <span class="margin-l10" style="width: 120px">{{$t('m.orderList.bitType')}}:</span>
-            <el-select
-              v-model="cashSymbolGateway"
-              value-key="id"
-              :placeholder="$t('m.transfer.XZBZ')"
-              class="margin-l10"
-              v-if="permissions"
-            >
-              <el-option
-                v-for="item in cListGateway"
-                :key="item.id"
-                :label="item.symbol"
-                :disabled="item.disabled"
-                :value="item">
-              </el-option>
-            </el-select>
-            <el-button type="primary" style="margin-left: 10px" v-if="permissions" :disabled="addDisabledGateway" @click="addRatioInputGateway">{{$t('m.params.addFeeder')}}</el-button>
-            <span style="flex: 1"></span>
-
-          </div>
-
-          <el-table
-            :data="gatewaysData"
-            style="width: 90%">
-            <el-table-column
-              prop="param"
-              :label="$t('m.orderList.bitType')"
-              width="120">
-            </el-table-column>
-            <el-table-column
-              prop="cashCarrier"
-              :label="$t('m.params.gateway')"
-              width="280">
-              <template slot-scope="scope">
-                <el-select v-model="scope.row.gateway" :placeholder="$t('m.pChose')" v-if="permissions">
-                  <el-option
-                    v-for="item in scope.row.gatewayList"
-                    :key="item"
-                    :label="item"
-                    :value="item">
-                  </el-option>
-                </el-select>
-                <span v-if="!permissions">{{scope.row.gateway}}</span>
-              </template>
-            </el-table-column>
-            <el-table-column :label="$t('m.orderList.operation')" v-if="permissions">
-              <template slot-scope="scope">
-                <el-button
-                  size="mini"
-                  type="danger"
-                  @click="handleDeleteGateway(scope.$index, scope.row)">{{$t('m.params.del')}}</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-
-
-        </el-tab-pane>
-        <!--<el-tab-pane :label="$t('m.params.author')" name="three">-->
-          <!--<div class="feel margin-t40 margin-l10" style="align-items: center">-->
-            <!--<span style="width: 120px">{{$t('m.params.chooseAuthor')}}:</span>-->
-            <!--<el-select-->
-              <!--v-model="author"-->
-              <!--multiple-->
-              <!--:placeholder="$t('m.transfer.QXZ')"-->
-              <!--class="margin-l10"-->
-              <!--:disabled="!permissions"-->
-            <!--&gt;-->
-              <!--<el-option-->
-                <!--v-for="item in authorList"-->
-                <!--:key="item[1]"-->
-                <!--:label="item[0]"-->
-                <!--:value="item[0]">-->
-              <!--</el-option>-->
-            <!--</el-select>-->
-          <!--</div>-->
-        <!--</el-tab-pane>-->
-        <el-tab-pane :label="$t('m.params.theme')" name="four">
-          <div class="feel margin-t40 margin-l10" style="align-items: center">
-            <span style="width: 120px">{{$t('m.params.chooseTheme')}}:</span>
-            <el-select v-model="chooseTheme" :placeholder="$t('m.transfer.QXZ')" class="margin-l10"
-                       :disabled="!permissions">
-              <el-option
-                v-for="(item,index) in ($store.state.lang === '1' ? themeList : themeListEn)"
-                :key="index"
-                :label="item.name"
-                :value="item.styles">
-              </el-option>
-            </el-select>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane :label="$t('m.params.carrierCount')" name="five">
-          <div class="feel margin-t40" style="align-items: center">
+        <el-tab-pane :label="$t('m.params.carrierCount')" name="second">
+          <div class="feel margin-t10" style="align-items: center">
             <span class="margin-l10" style="width: 120px">{{$t('m.params.chooseCarrier')}}:</span>
             <el-select
               v-model="carriersDym"
@@ -287,227 +201,139 @@
             </el-table>
           </div>
         </el-tab-pane>
+        <el-tab-pane v-if="(this.$store.state.loanMode & 0x08) > 0" :label="$t('m.params.sellpair')" name="third">
+          <div  class="feel margin-t10" style="align-items: center" v-if="permissions" >
+           <span class="margin-l10">{{$t('m.orderList.bitType')}}:</span>
+           <el-select
+              v-model="firstSymbol"
+              value-key="id"
+              :placeholder="$t('m.transfer.XZBZ')"
+              class="margin-l10"
+            >
+            <el-option
+                v-for="item in sellList"
+                :key="item.id"
+                :label="item.symbol"
+                :disabled="item.disabled"
+                :value="item">
+            </el-option>
+             </el-select>
+            <el-select
+              v-model="secondSymbol"
+              value-key="id"
+              :placeholder="$t('m.transfer.XZBZ')"
+              class="margin-l20"
+            >
+              <el-option
+                v-for="item in sellList"
+                :key="item.id"
+                :label="item.symbol"
+                :disabled="item.disabled"
+                :value="item">
+              </el-option>
+            </el-select>
+            <el-button type="primary" style="margin-left: 10px" :disabled="addPairDisabled" @click="addPair">{{$t('m.params.addFeeder')}}</el-button>
+          </div>
+          <el-table
+            :data="sellPairData"
+            style="width: 90%">
+            <el-table-column
+              prop="param"
+              :label="$t('m.orderList.bitType')"
+              width="120">
+               <template slot-scope="scope">
+                {{scope.row.first_symbol}}
+               </template>
+            </el-table-column>
+            <el-table-column
+              prop="cashCarrier"
+              :label="$t('m.orderList.bitType')"
+              width="200">
+              <template slot-scope="scope">
+                {{scope.row.second_symbol}}
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('m.orderList.operation')" v-if="permissions" width="180">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handlePairDelete(scope.$index, scope.row)">{{$t('m.params.del')}}</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane :label="$t('m.params.gateway')" name="four">
+          <div class="feel margin-t10" v-if="permissions" style="align-items: center">
+            <span class="margin-l10" style="width: 120px">{{$t('m.orderList.bitType')}}:</span>
+            <el-select
+              v-model="cashSymbolGateway"
+              value-key="id"
+              :placeholder="$t('m.transfer.XZBZ')"
+              class="margin-l10"
+            >
+              <el-option
+                v-for="item in cListGateway"
+                :key="item.id"
+                :label="item.symbol"
+                :disabled="item.disabled"
+                :value="item">
+              </el-option>
+            </el-select>
+            <el-button type="primary" style="margin-left: 10px" v-if="permissions" :disabled="addDisabledGateway" @click="addRatioInputGateway">{{$t('m.params.addFeeder')}}</el-button>
+            <span style="flex: 1"></span>
+
+          </div>
+
+          <el-table
+            :data="gatewaysData"
+            style="width: 90%">
+            <el-table-column
+              prop="param"
+              :label="$t('m.orderList.bitType')"
+              width="120">
+            </el-table-column>
+            <el-table-column
+              prop="cashCarrier"
+              :label="$t('m.params.gateway')"
+              width="280">
+              <template slot-scope="scope">
+                <el-select v-model="scope.row.gateway" :placeholder="$t('m.pChose')" v-if="permissions">
+                  <el-option
+                    v-for="item in scope.row.gatewayList"
+                    :key="item"
+                    :label="item"
+                    :value="item">
+                  </el-option>
+                </el-select>
+                <span v-if="!permissions">{{scope.row.gateway}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column :label="$t('m.orderList.operation')" v-if="permissions">
+              <template slot-scope="scope">
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDeleteGateway(scope.$index, scope.row)">{{$t('m.params.del')}}</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane :label="$t('m.params.theme')" name="five">
+          <div class="feel margin-t10 margin-l10" style="align-items: center">
+            <span style="width: 120px">{{$t('m.params.chooseTheme')}}:</span>
+            <el-select v-model="chooseTheme" :placeholder="$t('m.transfer.QXZ')" class="margin-l10"
+                       :disabled="!permissions">
+              <el-option
+                v-for="(item,index) in ($store.state.lang === '1' ? themeList : themeListEn)"
+                :key="index"
+                :label="item.name"
+                :value="item.styles">
+              </el-option>
+            </el-select>
+          </div>
+        </el-tab-pane>
       </el-tabs>
-
-      <!--<h1 class="fw">{{$t('m.params.operator')}}</h1>-->
-      <!--<div class="line" style="margin: 15px 0px;"></div>-->
-      <!--<div class="feel margin-t40" style="align-items: center">-->
-        <!--<span class="margin-l10" style="width: 120px">{{$t('m.orderList.bitType')}}:</span>-->
-        <!--<el-select-->
-          <!--v-model="cashSymbol"-->
-          <!--value-key="id"-->
-          <!--:placeholder="$t('m.transfer.XZBZ')"-->
-          <!--class="margin-l10"-->
-          <!--v-if="permissions"-->
-        <!--&gt;-->
-          <!--<el-option-->
-            <!--v-for="item in cList"-->
-            <!--:key="item.id"-->
-            <!--:label="item.symbol"-->
-            <!--:disabled="item.disabled"-->
-            <!--:value="item">-->
-          <!--</el-option>-->
-        <!--</el-select>-->
-        <!--<el-button type="primary" style="margin-left: 10px" v-if="permissions" :disabled="addDisabled" @click="addRatioInput">{{$t('m.params.addFeeder')}}</el-button>-->
-        <!--<span style="flex: 1"></span>-->
-
-      <!--</div>-->
-
-      <!--<el-table-->
-        <!--:data="carriersData"-->
-        <!--style="width: 90%">-->
-        <!--<el-table-column-->
-          <!--prop="param"-->
-          <!--:label="$t('m.orderList.bitType')"-->
-          <!--width="120">-->
-        <!--</el-table-column>-->
-        <!--<el-table-column-->
-          <!--prop="cashCarrier"-->
-          <!--:label="$t('m.params.loanCarrier')"-->
-          <!--width="200">-->
-          <!--<template slot-scope="scope">-->
-            <!--<el-select v-model="scope.row.cashCarrier.lendCarrier" :placeholder="$t('m.pChose')" v-if="permissions">-->
-              <!--<el-option-->
-                <!--v-for="item in scope.row.cashCarrier.carrierList"-->
-                <!--:key="item"-->
-                <!--:label="item"-->
-                <!--:value="item">-->
-              <!--</el-option>-->
-            <!--</el-select>-->
-            <!--<span v-if="!permissions">{{scope.row.cashCarrier.lendCarrier}}</span>-->
-          <!--</template>-->
-        <!--</el-table-column>-->
-        <!--<el-table-column-->
-          <!--prop="lendCarrier"-->
-          <!--:label="$t('m.params.investCarrier')"-->
-          <!--width="200">-->
-          <!--<template slot-scope="scope">-->
-            <!--<el-select v-model="scope.row.lendCarrier.investCarrier" :placeholder="$t('m.pChose')" v-if="permissions">-->
-              <!--<el-option-->
-                <!--v-for="item in scope.row.cashCarrier.carrierList"-->
-                <!--:key="item"-->
-                <!--:label="item"-->
-                <!--:value="item">-->
-              <!--</el-option>-->
-            <!--</el-select>-->
-            <!--<span v-if="!permissions">{{scope.row.lendCarrier.investCarrier}}</span>-->
-          <!--</template>-->
-        <!--</el-table-column>-->
-        <!--<el-table-column-->
-          <!--prop="ratio"-->
-          <!--:label="$t('m.borrow.radio')"-->
-        <!--&gt;-->
-          <!--<template slot-scope="scope">-->
-          <!--<span v-for="(item, key) in scope.row.ratio" :key="key">-->
-            <!--{{key}}: {{item}}-->
-          <!--</span>-->
-          <!--</template>-->
-        <!--</el-table-column>-->
-        <!--<el-table-column :label="$t('m.orderList.operation')" v-if="permissions" width="180">-->
-          <!--<template slot-scope="scope">-->
-            <!--<el-button-->
-              <!--size="mini"-->
-              <!--type="danger"-->
-              <!--@click="handleDelete(scope.$index, scope.row)">{{$t('m.params.del')}}</el-button>-->
-          <!--</template>-->
-        <!--</el-table-column>-->
-      <!--</el-table>-->
-
-      <!--<h1 class="fw margin-t40">{{$t('m.set.permission')}}</h1>-->
-      <!--<div class="line" style="margin: 15px 0px;"></div>-->
-      <!--<div class="feel margin-t40 margin-l10" style="align-items: center">-->
-        <!--<span style="width: 120px">{{$t('m.params.chooseGateway')}}:</span>-->
-        <!--<el-select v-model="gateway" multiple :placeholder="$t('m.transfer.QXZ')" class="margin-l10"-->
-                   <!--v-if="permissions">-->
-          <!--<el-option-->
-            <!--v-for="item in gatewayList"-->
-            <!--:key="item[1]"-->
-            <!--:label="item[0]"-->
-            <!--:value="item[0]">-->
-          <!--</el-option>-->
-        <!--</el-select>-->
-      <!--</div>-->
-      <!--<div class="feel margin-t40 margin-l10" style="align-items: center">-->
-        <!--<span style="width: 120px">{{$t('m.params.chooseAuthor')}}:</span>-->
-        <!--<el-select-->
-          <!--v-model="author"-->
-          <!--multiple-->
-          <!--:placeholder="$t('m.transfer.QXZ')"-->
-          <!--class="margin-l10"-->
-          <!--v-if="permissions"-->
-        <!--&gt;-->
-          <!--<el-option-->
-            <!--v-for="item in authorList"-->
-            <!--:key="item[1]"-->
-            <!--:label="item[0]"-->
-            <!--:value="item[0]">-->
-          <!--</el-option>-->
-        <!--</el-select>-->
-      <!--</div>-->
-      <!--<h1 class="fw margin-t40">{{$t('m.params.theme')}}</h1>-->
-      <!--<div class="line" style="margin: 15px 0px;"></div>-->
-      <!--<div class="feel margin-t40 margin-l10" style="align-items: center">-->
-        <!--<span style="width: 120px">{{$t('m.params.chooseTheme')}}:</span>-->
-        <!--<el-select v-model="chooseTheme" :placeholder="$t('m.transfer.QXZ')" class="margin-l10"-->
-                   <!--v-if="permissions">-->
-          <!--<el-option-->
-            <!--v-for="(item,index) in themeList"-->
-            <!--:key="index"-->
-            <!--:label="item.name"-->
-            <!--:value="item.styles">-->
-          <!--</el-option>-->
-        <!--</el-select>-->
-      <!--</div>-->
-      <!--<h1 class="fw margin-t40">{{$t('m.params.carrierCount')}}</h1>-->
-      <!--<div class="line" style="margin: 15px 0px;"></div>-->
-      <!--<div class="feel margin-t40" style="align-items: center">-->
-        <!--<span class="margin-l10" style="width: 120px">{{$t('m.params.chooseCarrier')}}:</span>-->
-        <!--<el-select-->
-          <!--v-model="carriersDym"-->
-          <!--value-key="id"-->
-          <!--:placeholder="$t('m.pChose')"-->
-          <!--class="margin-l10"-->
-          <!--@change="_carriersDym"-->
-        <!--&gt;-->
-          <!--<el-option-->
-            <!--v-for="item in carriersDymList"-->
-            <!--:key="item"-->
-            <!--:label="item"-->
-            <!--:value="item">-->
-          <!--</el-option>-->
-        <!--</el-select>-->
-      <!--</div>-->
-      <!--<div class="feel" style="align-items: center">-->
-        <!--<el-table-->
-          <!--:data="dynamicData"-->
-          <!--style="width: 100%">-->
-          <!--<el-table-column-->
-            <!--prop="name"-->
-            <!--:label="$t('m.params.operator')"-->
-          <!--&gt;-->
-          <!--</el-table-column>-->
-          <!--<el-table-column-->
-            <!--prop="loan"-->
-            <!--:label="$t('m.mustLoan')"-->
-          <!--&gt;-->
-            <!--<template slot-scope="scope">-->
-            <!--<span v-for="item in scope.row.loan">-->
-              <!--{{item.symbol}}: {{item.amount}}<br>-->
-            <!--</span>-->
-            <!--</template>-->
-          <!--</el-table-column>-->
-          <!--<el-table-column-->
-            <!--prop="invest"-->
-            <!--:label="$t('m.toInvest')"-->
-          <!--&gt;-->
-            <!--<template slot-scope="scope">-->
-            <!--<span v-for="item in scope.row.invest">-->
-              <!--{{item.symbol}}: {{item.amount}}<br>-->
-            <!--</span>-->
-            <!--</template>-->
-          <!--</el-table-column>-->
-          <!--<el-table-column-->
-            <!--prop="risk"-->
-            <!--:label="$t('m.borrow.risk')"-->
-          <!--&gt;-->
-            <!--<template slot-scope="scope">-->
-            <!--<span v-for="item in scope.row.risk">-->
-              <!--{{item.symbol}}: {{item.amount}}<br>-->
-            <!--</span>-->
-            <!--</template>-->
-          <!--</el-table-column>-->
-          <!--<el-table-column-->
-            <!--prop="fee"-->
-            <!--:label="$t('m.borrow.fee')"-->
-          <!--&gt;-->
-            <!--<template slot-scope="scope">-->
-            <!--<span v-for="item in scope.row.fee">-->
-              <!--{{item.symbol}}: {{item.amount}}<br>-->
-            <!--</span>-->
-            <!--</template>-->
-          <!--</el-table-column>-->
-          <!--<el-table-column-->
-            <!--prop="recycle"-->
-            <!--:label="$t('m.params.recovery')"-->
-          <!--&gt;-->
-            <!--<template slot-scope="scope">-->
-            <!--<span v-for="item in scope.row.recycle">-->
-              <!--{{item.symbol}}: {{item.amount}}<br>-->
-            <!--</span>-->
-            <!--</template>-->
-          <!--</el-table-column>-->
-          <!--<el-table-column-->
-            <!--prop="recycleloan"-->
-            <!--:label="$t('m.params.taste')"-->
-          <!--&gt;-->
-            <!--<template slot-scope="scope">-->
-            <!--<span v-for="item in scope.row.recycleloan">-->
-              <!--{{item.symbol}}: {{item.amount}}<br>-->
-            <!--</span>-->
-            <!--</template>-->
-          <!--</el-table-column>-->
-        <!--</el-table>-->
-      <!--</div>-->
     </div>
 
     <confirm-dialog :carrierVisible="carrierVisible" @submitCarrier="submitCarrier" :carrierUpdate="updateContents"></confirm-dialog>
@@ -536,7 +362,7 @@
   import confirmDialog from '/path-components/Admin/confirmDialog'
   import deepClone from '/js-utils/deepClone'
   import {toggleClass} from '/js-utils/until'
-  import { getLocalStore, isTheme } from '/js-utils/storage'
+  import { getLocalStore, isTheme, setStore, getStore } from '/js-utils/storage'
   export default {
     components: {passwordDialog, confirmDialog},
     data () {
@@ -546,9 +372,13 @@
         cList: [],
         cashSymbol: {},
         cListGateway: [],
+        AssetList: {},
         cashSymbolGateway: {},
+        firstSymbol: {id: undefined},
+        secondSymbol: {id: undefined},
         gatewaysData: [],
         carriersData: [],
+        sellPairData: [],
         ratioSelect: false,
         cashCarrier: '',
         lendCarrier: '',
@@ -565,6 +395,7 @@
         isSubmit: true,
         id: '',
         copycList: [],
+        sellList: [],
         copycListGateway: [],
         carrierAdmin: false,
         isModified: false,
@@ -580,6 +411,9 @@
         copyAuthor: [],
         gateway: [],
         author: [],
+        Type: [],
+        selectedType: {},
+        selectedTypeLast: '',
         isGateway: true,
         isAuthor: true,
         chooseTheme: '',
@@ -629,6 +463,13 @@
           return false
         }
       },
+      addPairDisabled () {
+        if (this.firstSymbol === undefined || this.secondSymbol === undefined || this.firstSymbol.id === undefined || this.secondSymbol.id === undefined || this.firstSymbol.id === this.secondSymbol.id) {
+          return true
+        } else {
+          return false
+        }
+      },
       addDisabledGateway () {
         if (this.cashSymbolGateway.id === undefined) {
           return true
@@ -672,6 +513,18 @@
           next()
         }
       },
+      // 选择不同币种，请求不同的参数
+      typeGet (val) {
+        if (this.selectedTypeLast !== val) {
+          this.selectedTypeLast = val
+          setStore('selectedTypeAdminCarriers', val)
+          // 币种的相关数据
+          this.carriersData = []
+          this.loading = 1
+          this._getConfig()
+          this.loading--
+        }
+      },
       _listUpdate (index, data) {
         return new Promise((resolve, reject) => {
           let listUpdate = false
@@ -701,7 +554,7 @@
       // 检查用户是否有修改
       isUpdate () {
         return new Promise((resolve, reject) => {
-          Apis.instance().db_api().exec('get_account_config', [this.$store.state.userDataSid, ['carrierList']]).then(res => {
+          Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['carrierList' + ZOSInstance.getOptionIndex(this.selectedType.id)]]).then(res => {
             if (res && res[0]) {
               if (this.carriersData.length < 1) {
                 this.isModified = true
@@ -733,7 +586,7 @@
       // 检查用户是否有修改
       isUpdateGateway () {
         return new Promise((resolve, reject) => {
-          Apis.instance().db_api().exec('get_account_config', [this.$store.state.userDataSid, ['gatewayList']]).then(res => {
+          Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['gatewayList']]).then(res => {
             if (res && res[0]) {
               if (this.gatewaysData.length < 1) {
                 this.isModified = true
@@ -755,6 +608,23 @@
               } else {
                 this.isModified = true
               }
+            }
+            return resolve(this.isModified)
+          })
+        })
+      },
+      // 检查用户是否有修改
+      isUpdateSellPair () {
+        return new Promise((resolve, reject) => {
+          Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['sellPair']]).then(res => {
+            if (res && res[0]) {
+              if (res[0] !== JSON.stringify(this.sellPairData)) {
+                this.isModified = true
+              } else {
+                this.isModified = false
+              }
+            } else {
+              if (this.sellPairData.length >= 1) this.isModified = true
             }
             return resolve(this.isModified)
           })
@@ -910,8 +780,8 @@
       },
       _isUpate () {
         let arr = []
-        return Promise.all([this.isUpdate(), this.isUpdateGateway(), this._listUpdate('theme', [this.chooseTheme])]).then(res => {
-          if (!res[0] && !res[1] && !res[2]) {
+        return Promise.all([this.isUpdate(), this.isUpdateGateway(), this._listUpdate('theme', [this.chooseTheme]), this.isUpdateSellPair()]).then(res => {
+          if (!res[0] && !res[1] && !res[2] && !res[3]) {
             this.$message({
               message: this.$t('m.params.noupdate'),
               type: 'warning'
@@ -923,7 +793,7 @@
                 let configIndex = ''
                 let ob = ''
                 if (index === 0) {
-                  configIndex = 'carrierList'
+                  configIndex = 'carrierList' + ZOSInstance.getOptionIndex(this.selectedType.id)
                   ob = {}
                   this.carriersData.forEach(val => {
                     ob[val.param] = {}
@@ -938,9 +808,9 @@
                     ob[val.param] = {}
                     ob[val.param] = val.gateway
                   })
-                // } else if (index === 2) {
-                //   configIndex = 'authorList'
-                //   ob = this.author
+                } else if (index === 3) {
+                  configIndex = 'sellPair'
+                  ob = this.sellPairData
                 } else {
                   configIndex = 'theme'
                   ob = [this.chooseTheme]
@@ -975,11 +845,15 @@
         this.administrator = this.$store.state.admin
         this.isModified = false
         this.isSubmit = false
+        this.Type = ZOSInstance.getOptionSupport(this.$store.state.loanMode)
+        this.selectedType = getStore('selectedTypeAdminCarriers') ? JSON.parse(getStore('selectedTypeAdminCarriers')) : this.Type[0]
+        if (this.Type.length === 1) this.selectedType = this.Type[0]
         this._getAssetList()
         this.carrierAccounts()
         this._author()
         this._theme()
         this._listAuthors()
+        this._getSellPair()
         this.loading = this.loading - 1
       },
       _listAuthors () {
@@ -1064,22 +938,47 @@
       // 得到借贷的币种
       _getAssetList () {
         this.loading = this.loading + 1
-        ZOSInstance.getAssetList()
+        ZOSInstance.getCashBitAssetList().then(ass => {
+          this.AssetList = ass
+          this.cListGateway = deepClone(this.AssetList.cash_list)
+          this.cListGateway.push.apply(this.cListGateway, this.AssetList.bit_list)
+          ZOSInstance.getAssetList()
+            .then(res => {
+              if (res && (res.cash_list)) {
+                this.copycList = deepClone(res.cash_list)
+                this.cList = deepClone(res.cash_list)
+                this.copycListGateway = deepClone(res.cash_list)
+                this._getConfig()
+                this._getConfigGateway()
+                this._gateway()
+                this.loading = this.loading - 1
+              } else {
+                this.loading = this.loading - 1
+              }
+            }).catch(err => {
+              this.loading = this.loading - 1
+              console.log(err)
+              this.$message({
+                message: err,
+                type: 'warning'
+              })
+            })
+        }).catch(err => {
+          this.loading = this.loading - 1
+          console.log(err)
+          this.$message({
+            message: err,
+            type: 'warning'
+          })
+        })
+
+        this.loading = this.loading + 1
+        ZOSInstance.getAssetListByType(0x00000080)
           .then(res => {
-            if (res && (res.cash_list)) {
-              this.copycList = deepClone(res.cash_list)
-              this.cList = deepClone(res.cash_list)
-              this.copycListGateway = deepClone(res.cash_list)
-              this.cListGateway = deepClone(res.cash_list)
-              this._getConfig()
-              this._getConfigGateway()
-              this._gateway()
-              this.loading = this.loading - 1
-              console.log(this.loading)
-            } else {
-              this.loading = this.loading - 1
-              return false
+            if (res) {
+              this.sellList = deepClone(res)
             }
+            this.loading = this.loading - 1
           })
           .catch(err => {
             this.loading = this.loading - 1
@@ -1107,9 +1006,27 @@
           })
       },
       // 得到运营商参数结构体
+      _getSellPair () {
+        this.loading = this.loading + 1
+        this.sellPairData = []
+        Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['sellPair']]).then(res => {
+          if (res && res[0]) {
+            this.sellPairData = JSON.parse(res[0])
+          }
+          this.loading--
+        }).catch(err => {
+          this.loading--
+          console.log(err)
+          this.$message({
+            message: err,
+            type: 'warning'
+          })
+        })
+      },
+      // 得到运营商参数结构体
       _getConfig () {
         this.loading = this.loading + 1
-        Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['carrierList']])
+        Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['carrierList' + ZOSInstance.getOptionIndex(this.selectedType.id)]])
           .then(res => {
             if (res && res[0]) {
               // config是以url为键名的对象
@@ -1119,6 +1036,7 @@
               for (let i in config) {
                 this.loading = this.loading + 1
                 let params = {}
+                let carrier = {}
                 let loanCarriers = {}
                 params.param = i
                 params.cashCarrier = {}
@@ -1146,16 +1064,32 @@
                   params.cashCarrier.carrierList = listName
                   return Apis.instance().db_api().exec('get_account_by_name', [config[i].investCarrier])
                 }).then(getId => {
+                  carrier = getId
                   // 根据这个对应币种，去查询他的运营商，
-                  return Apis.instance().db_api().exec('get_account_config', [getId.id, ['collateral_ratio_' + i]])
+                  return Apis.instance().db_api().exec('get_account_config', [carrier.id, ['collateral_ratio_' + ZOSInstance.getOptionIndex(this.selectedType.id) + i]])
                 }).then(getCon => {
-                  if (getCon && getCon[0]) {
+                  if (getCon && getCon[0] && getCon[0] !== '') {
                     let config = JSON.parse(getCon[0])
                     for (let ii in config) {
                       if (i === ii) {
                         params.ratio = config[ii]
                       }
                     }
+                  } else {
+                    params.ratio = []
+                  }
+                  // 根据这个对应币种，去查询他的运营商，
+                  return Apis.instance().db_api().exec('get_account_config', [carrier.id, ['add_rate_' + ZOSInstance.getOptionIndex(this.selectedType.id) + i]])
+                }).then(getCon => {
+                  if (getCon && getCon[0] && getCon[0] !== '') {
+                    let config = JSON.parse(getCon[0])
+                    for (let ii in config) {
+                      if (i === ii) {
+                        params.rate = config[ii]
+                      }
+                    }
+                  } else {
+                    params.rate = []
                   }
                   this.carriersData.push(params)
                   this.loading = this.loading - 1
@@ -1164,6 +1098,8 @@
               }
               // let newArr = [...new Set(this.carriersDymList)]
               // this.carriersDymList = newArr.sort()
+            } else {
+              this._disabled()
             }
             this.loading = this.loading - 1
           })
@@ -1233,7 +1169,8 @@
       },
       // 是否禁用
       _disabledGateway () {
-        this.cListGateway = deepClone(this.copycListGateway)
+        this.cListGateway = deepClone(this.AssetList.cash_list)
+        this.cListGateway.push.apply(this.cListGateway, this.AssetList.bit_list)
         this.cListGateway.forEach((item, index) => {
           this.gatewaysData.forEach((_item, _index) => {
             if (_item.param === item.symbol) {
@@ -1241,6 +1178,29 @@
             }
           })
         })
+      },
+      addPair () {
+        let re = false
+        for (let index = 0; index < this.sellPairData.length; index++) {
+          let item = this.sellPairData[index]
+          if ((item.first_id === this.firstSymbol.id && item.second_id === this.secondSymbol.id) || (item.second_id === this.firstSymbol.id && item.first_id === this.secondSymbol.id)) {
+            this.$message({
+              message: this.firstSymbol.symbol + ',' + this.secondSymbol.symbol + '   ' + this.$t('m.params.same'),
+              type: 'warning'
+            })
+            re = true
+            break
+          }
+        }
+        if (re) return
+        let add = {
+          first_id: this.firstSymbol.id,
+          first_symbol: this.firstSymbol.symbol,
+          second_id: this.secondSymbol.id,
+          second_symbol: this.secondSymbol.symbol,
+          need_author: false
+        }
+        this.sellPairData.push(add)
       },
       // 添加一行
       addRatioInput () {
@@ -1316,6 +1276,9 @@
         this.carriersData.splice(index, 1)
         this._disabled()
       },
+      handlePairDelete (index, row) {
+        this.sellPairData.splice(index, 1)
+      },
       // 删除一行
       handleDeleteGateway (index, row) {
         this.gatewaysData.splice(index, 1)
@@ -1374,16 +1337,16 @@
               param.invest = this.setData(ress[0].invest, asset)
             })
             Apis.instance().db_api().exec('get_objects', [this.getJSON(ress[0].collateralize_risk)]).then(asset => {
-              param.risk = this.setData(ress[0].risk, asset)
+              param.risk = this.setData(ress[0].collateralize_risk, asset)
             })
             Apis.instance().db_api().exec('get_objects', [this.getJSON(ress[0].fee)]).then(asset => {
               param.fee = this.setData(ress[0].fee, asset)
             })
             Apis.instance().db_api().exec('get_objects', [this.getJSON(ress[0].recycle_collateralize)]).then(asset => {
-              param.recycle = this.setData(ress[0].recycle, asset)
+              param.recycle = this.setData(ress[0].recycle_collateralize, asset)
             })
             Apis.instance().db_api().exec('get_objects', [this.getJSON(ress[0].recycle_loan)]).then(asset => {
-              param.recycleloan = this.setData(ress[0].recycleloan, asset)
+              param.recycleloan = this.setData(ress[0].recycle_loan, asset)
               this.dynamicData.push(param)
             })
           }
@@ -1409,7 +1372,11 @@
         return arr
       }
     },
+    destroyed () {
+      setStore('carierAdmin', this.activeTabName)
+    },
     mounted () {
+      this.activeTabName = getStore('carierAdmin') ? getStore('carierAdmin') : 'first'
       this.loading = 1
       if (this.$store.state.initFinished) {
         this.init()

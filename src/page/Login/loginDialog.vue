@@ -4,6 +4,9 @@
     :visible.sync="visible"
     width="30%"
     @close="close"
+    :close-on-press-escape="false"
+    :close-on-click-modal="false"
+    :modal="false"
     :append-to-body="isAppend"
   >
     <div v-loading.fullscreen.lock="mainloading" :element-loading-text="$t('m.loading')" style="min-height: 220px">
@@ -13,6 +16,7 @@
             <div v-if="loginPage" class="content">
               <ul class="common-form">
                 <li class="margin-b20">
+                  <div >{{membership}} </div>
                   <div class="input">
                     <input type="text" v-model="ruleForm.userName"
                            @keyup="ruleForm.userName = ruleForm.userName.replace(/[^\w\.\-\/]/ig,'');onNameChange()"
@@ -30,7 +34,7 @@
               <!--登陆-->
               <div style="margin-top: 25px; display: flex; flex-direction: column">
                 <y-button :text="$t('m.login')"
-                          :classStyle="ruleForm.userPwd&& ruleForm.userName?'main-btn':'disabled-btn'"
+                          :classStyle="isDisabled?'main-btn':'disabled-btn'"
                           @btnClick="mainloading = true;login()"
                           style="flex:1"
                 ></y-button>
@@ -45,7 +49,8 @@
 <script>
   import YButton from '/path-components/element/YButton'
   import {ZOSInstance} from 'zos-wallet-js'
-  import {ChainStore} from 'zosjs/es'
+  import {Apis} from 'zosjs-ws'
+  import { ChainStore, FetchChain } from 'zosjs/es'
   import {setStore, setLocalStore, getLocalStore} from '/js-utils/storage'
   export default {
     props: {
@@ -74,21 +79,37 @@
         },
         autoLogin: false,
         logintxt: this.$t('m.login'),
+        validName: false,
+        membership: '',
+        userID: '',
+        isvisible: false,
+        timename: undefined,
         mainloading: true
       }
     },
     computed: {
       count () {
         return this.$store.state.login
+      },
+      isDisabled () {
+        return this.ruleForm.userPwd && this.ruleForm.userName && this.validName
       }
     },
     watch: {
       visible: {
         handler: function (val, oldVal) {
+          this.isvisible = val
           if (val === false) {
             this.ruleForm.userPwd = ''
             // this.ruleForm.userName = ''
             this.mainloading = false
+          } else {
+            if (this.$store.state.connectionStatus === 'closed' || this.$store.state.connectionStatus === 'error') {
+              this.validName = false
+              this.membership = this.$t('m.page.connection')
+            } else {
+              if (this.ruleForm.userName !== null) this.onNameChange()
+            }
           }
         },
         deep: true
@@ -100,8 +121,49 @@
         this.$emit('bitlenderLendOrder', false)
         this.$store.state.loginPath = undefined
       },
+      isLifetimeMember (expirationDate) {
+        return expirationDate === '1969-12-31T23:59:59'
+      },
+      isBasicMember (expirationDate) {
+        return (
+          new Date(expirationDate).getTime() >
+          new Date('1969-12-31T23:59:59').getTime()
+        )
+      },
+      getMemberShip (account) {
+        let membership = 'basic'
+        let membershipExpirationDate = account.membership_expiration_date
+        if (membershipExpirationDate) {
+          if (this.isLifetimeMember(membershipExpirationDate)) {
+            membership = 'lifetime'
+          } else if (!this.isBasicMember(membershipExpirationDate)) {
+            membership = 'annual'
+          }
+        }
+        return membership
+      },
       onNameChange () {
-        ChainStore.getAccount(this.ruleForm.userName, true)
+        if (this.$store.state.connectionStatus === 'closed' || this.$store.state.connectionStatus === 'error' || Apis.instance().db_api() === undefined) {
+          this.validName = false
+          this.membership = this.$t('m.page.connection')
+        } else if (this.ruleForm.userName === undefined || this.ruleForm.userName.length <= 0) {
+          this.validName = false
+          this.membership = this.$t('m.member.accountName')
+        } else {
+          this.ruleForm.userName = this.ruleForm.userName.trim()
+          this.validName = false
+          this.membership = this.$t('m.member.no')
+          Apis.instance().db_api().exec('get_account_by_name', [this.ruleForm.userName]).then((account) => {
+            if (account) {
+              this.userID = account.id
+              this.validName = true
+              this.membership = this.$t('m.member.' + this.getMemberShip(account))
+              FetchChain('getAccount', this.userID, 5000)
+            }
+          }).catch(err => {
+            console.log(err)
+          })
+        }
       },
       open (t, m) {
         this.$notify.info({
@@ -126,6 +188,23 @@
           message: m
         })
       },
+      connectWait () {
+        if (Apis.instance().db_api() !== undefined) {
+          clearInterval(this.timename)
+          this.timename = undefined
+          this.onNameChange()
+        }
+      },
+      connectSucess (data) {
+        if (this.isvisible !== true) return
+        if (this.ruleForm.userName !== null && data === 'connect') {
+          this.timename = setInterval(this.connectWait, 3000)
+        }
+        if (data !== 'connect') {
+          this.validName = false
+          this.membership = this.$t('m.page.connection')
+        }
+      },
       login () {
         this.logintxt = this.$t('m.login')
         if (!this.ruleForm.userName || !this.ruleForm.userPwd) {
@@ -133,6 +212,10 @@
           this.mainloading = false
           return false
         }
+        this.ruleForm.userName = this.ruleForm.userName.trim()
+        this.ruleForm.userPwd = this.ruleForm.userPwd.trim()
+        FetchChain('getAccount', this.userID, 5000)
+        this.$store.state.accountObj = undefined
         let userId = ZOSInstance.accountLogin(this.ruleForm.userName, this.ruleForm.userPwd)
         if (userId) {
           this.$store.state.userDataSid = undefined
@@ -153,6 +236,12 @@
             this.$router.push(this.$store.state.loginPath)
           }
           this.$store.state.loginPath = undefined
+          ZOSInstance.get_user_phoneinfo(this.$store.state.userDataSid).then(res => {
+            if (res !== undefined) {
+              this.$store.state.userInfo.phone = res.mobile
+              this.$store.state.userInfo.mail = res.mail
+            }
+          })
         } else {
           // '账号或者密码错误!'
           this.$message(this.$t('m.register.nameErr'))
@@ -161,9 +250,12 @@
       },
       init_geetest () {
         this.ruleForm.userName = getLocalStore('userNameLast')
-        if (this.ruleForm.userName !== null) ChainStore.getAccount(this.ruleForm.userName, true)
+        if (this.ruleForm.userName !== null) this.onNameChange()
         this.login()
       }
+    },
+    destroyed () {
+      this.$root.$off('RpcConnectionStatus')
     },
     mounted () {
       // 组件创建完成，属性已绑定，但DOM还没有生成前就要loading,等请求完成后，再显示DOM
@@ -174,6 +266,9 @@
           this.init_geetest()
         })
       }
+      this.$root.$on('RpcConnectionStatus', (data) => {
+        this.connectSucess(data)
+      })
     },
     components: {
       YButton,

@@ -4,9 +4,12 @@
         :title="$t('m.inputPassword')"
         @close="close"
         :visible.sync="visible"
+        :close-on-press-escape="false"
+        :close-on-click-modal="false"
         width="30%"
-        :before-close="handleClose">
-        <div v-loading="loading" :element-loading-text="$t('m.transfer.being')" style="min-height: 4vw;">
+        :before-close="handleClose"
+        >
+        <div v-loading="loading" :element-loading-text="$t('m.transfer.being')">
           <!--为了确保资金安全，请输入密码-->
           <span>{{$t('m.investDetails.inputPass')}}</span>
           <el-input type="password" v-model="password" ></el-input>

@@ -1,6 +1,6 @@
 <template>
   <div class="w store-content" style="max-width: 1152px">
-    <div v-loading="loadingmain" :element-loading-text="$t('m.loading')" style="min-height: 10vw;">
+    <div v-loading="loadingmain && false" :element-loading-text="$t('m.loading')" style="min-height: 10vw;">
       <div v-show="!loadingmain" class="margin-t10">
           <!--第一部分的统计-->
           <div class="feel feel-top margin-b20">
@@ -90,7 +90,7 @@
                       <p class="f12 opacity5">{{$t('m.home.obtained')}}({{baseSymbol}})</p>
                   </div>
                 </div>
-                <div style="flex:1"></div>
+                <div style="height: 96px;"></div>
                 <div class="chart-bottom">
                   <div class="chart-bottom-0">
                     <span class="f20">
@@ -98,9 +98,7 @@
                     </span>
                     <br>
                     <!--借款金额-->
-                    <span class="f12 opacity5">{{$t('m.home.amount')}}(
-                      {{baseSymbol}}
-                      )</span>
+                    <span class="f12 opacity5">{{$t('m.home.amount1')}} ({{baseSymbol}})</span>
                   </div>
                   <div class="chart-bottom-0">
                     <span class="f20">
@@ -108,15 +106,13 @@
                     </span>
                     <br>
                     <!--抵押物数量-->
-                    <span class="f12 opacity5">{{$t('m.borrow.pawnNum')}}(
-                      {{quoteSymbol}}
-                      )</span>
+                    <span class="f12 opacity5">{{$t('m.borrow.pawnNum1')}} ({{quoteSymbol}})</span>
                   </div>
                   <div class="chart-bottom-0">
                     <span class="f20">{{guarantee}}%</span>
                     <br>
                     <!--平均保本率-->
-                    <span class="f12 opacity5">{{$t('m.home.average')}}</span>
+                    <span class="f12 opacity5" v-html="$t('m.home.average')"> </span>
                   </div>
                 </div>
               </div>
@@ -226,15 +222,15 @@
 
         <div class="advantage margin-b10">
           <!--业务优势-->
-          <h1 class="list f16">{{$t('m.home.business')}}</h1>
-          <div class="list">
+          <h1 class="list flex flex-h f20">{{$t('m.home.business')}}</h1>
+          <div class="list flex flex-h ">
             <div class="list-item">
               <img :src="`/static/images/advantage01${_theme}.png`" width="100" height="100" />
               <div class="caption">
                 <!--借款门槛低-->
                 <h3>{{$t('m.home.threshold')}}</h3>
                 <!--押币就能借，随时可还-->
-                <p>{{$t('m.home.anyTime')}}</p>
+                <p>{{$t('m.home.anyTime') | formatCompanyName}}</p>
               </div>
             </div>
             <div class="list-item">
@@ -243,7 +239,7 @@
                 <!--福利多样-->
                 <h3>{{$t('m.home.welfare')}}</h3>
                 <!--邀请好友，交易挖矿 月月精彩活动不断-->
-                <p>{{$t('m.home.activity')}}</p>
+                <p>{{$t('m.home.activity') | formatCompanyName}}</p>
               </div>
             </div>
             <div class="list-item">
@@ -251,10 +247,7 @@
               <div class="caption">
                 <!--种类多样-->
                 <h3>{{$t('m.home.diversity')}}</h3>
-                <p>USD、CNY、ETH、BTC
-                  <!--都支持持币用户短期融资新选择-->
-                  {{$t('m.home.financing')}}
-                </p>
+                <p>{{$t('m.home.financing') | formatCompanyName}}</p>
               </div>
             </div>
             <div class="list-item">
@@ -263,29 +256,29 @@
                 <!--借款收益高-->
                 <h3>{{$t('m.home.income')}}</h3>
                 <!--100元起投，收益高-->
-                <p>{{$t('m.home.investment')}}</p>
+                <p>{{$t('m.home.investment') | formatCompanyName}}</p>
               </div>
             </div>
-            <div class="list-item">
+            <!-- <div class="list-item">
               <img :src="`/static/images/advantage05${_theme}.png`" width="100" height="100" />
               <div class="caption">
-                <!--业务全球化-->
+                <业务全球化>
                 <h3>{{$t('m.home.globalization')}}</h3>
-                <!--轻松享受来自世界各地的金融资源和服务-->
+                <轻松享受来自世界各地的金融资源和服务>
                 <p>{{$t('m.home.enjoy')}}</p>
               </div>
-            </div>
+            </div> -->
           </div>
 
         </div>
 
         <div class="advantage margin-b10">
-          <h1 class="list f16">
+          <h1 class="list flex flex-h f20">
             <!--使用流程-->
             {{$t('m.home.process')}}
           </h1>
-          <div class="list using-progress">
-            <div class="using-progress-list margin-b40">
+          <div class="list  flex flex-h using-progress">
+            <div class="using-progress-list flex flex-h margin-b40">
               <div class="using-progress-left">
                 <img :src="`/static/images/using01${_theme}.png`" width="114" height="78" />
                 <div class="caption">
@@ -296,15 +289,15 @@
 
               <ul class="using-progress-right">
                 <!--点击右上角的注册/登录，注册您的新账号；如果已有账号，可以直接登录-->
-                <li>· {{$t('m.home.corner')}}</li>
+                <li>· {{$t('m.home.corner') | formatCompanyName}}</li>
                 <!--您的账号为区块链上的唯一身份认证，请务必牢记并保持好密码-->
-                <li>· {{$t('m.home.identity')}}</li>
+                <li>· {{$t('m.home.identity') | formatCompanyName}}</li>
                 <!--一个账号可以使用zos旗下的多种产品-->
-                <li>· {{$t('m.home.products')}}</li>
+                <li>· {{$t('m.home.products') | formatCompanyName}}</li>
               </ul>
             </div>
 
-            <div class="using-progress-list margin-b40">
+            <div class="using-progress-list flex flex-h margin-b40">
               <div class="using-progress-left">
                 <img :src="`/static/images/using02${_theme}.png`" width="114" height="78" />
                 <div class="caption">
@@ -315,15 +308,15 @@
 
               <ul class="using-progress-right">
                 <!--进入”资产”模块，可以查看你的资产-->
-                <li>· {{$t('m.home.assets')}}</li>
+                <li>· {{$t('m.home.assets') | formatCompanyName}}</li>
                 <!--点击充值/充币，可以把法币或者数字货币充到你的账户中-->
-                <li>· {{$t('m.home.account')}}</li>
+                <li>· {{$t('m.home.account') | formatCompanyName}}</li>
                 <!--充值法币时，需要先做kyc认证-->
-                <li>· {{$t('m.home.fiat')}}</li>
+                <li>· {{$t('m.home.fiat') | formatCompanyName}}</li>
               </ul>
             </div>
 
-            <div class="using-progress-list margin-b40">
+            <div class="using-progress-list flex flex-h margin-b40">
               <div class="using-progress-left">
                 <img :src="`/static/images/using03${_theme}.png`" width="114" height="78" />
                 <div class="caption">
@@ -334,16 +327,16 @@
 
               <ul class="using-progress-right">
                 <!--资产里有数字资产或法币资产时，你就可以借款或者投资-->
-                <li>· {{$t('m.home.tender')}}</li>
+                <li>· {{$t('m.home.tender') | formatCompanyName}}</li>
                 <!--借款成功后，你需要按月归还利息以保证抵押物安全和信用-->
-                <li>· {{$t('m.home.ensure')}}</li>
-                <li>· {{$t('m.home.interest')}}</li>
+                <li>· {{$t('m.home.ensure') | formatCompanyName}}</li>
+                <li>· {{$t('m.home.interest') | formatCompanyName}}</li>
                 <!--如果借方违约，运营商会处理抵押物以保证投资方的权益-->
-                <li>· {{$t('m.home.borrower')}}</li>
+                <li>· {{$t('m.home.borrower') | formatCompanyName}}</li>
               </ul>
             </div>
 
-            <div class="using-progress-list">
+            <div class="using-progress-list flex flex-h">
               <div class="using-progress-left margin-b10">
                 <img :src="`/static/images/using04${_theme}.png`" width="114" height="78" />
                 <div class="caption">
@@ -354,9 +347,9 @@
 
               <ul class="using-progress-right">
                 <!--借款所得和投资收益会及时进入你的资产中-->
-                <li>· {{$t('m.home.timely')}}</li>
+                <li>· {{$t('m.home.timely') | formatCompanyName}}</li>
                 <!--你可以随时提走你的借款和投资收益-->
-                <li>· {{$t('m.home.returns')}}</li>
+                <li>· {{$t('m.home.returns') | formatCompanyName}}</li>
               </ul>
             </div>
             <div class="using-progress-list" style="padding-bottom: 0">
@@ -366,7 +359,7 @@
               <ul class="using-progress-right" style="background: none;padding-right:0; padding-bottom: 0; margin-bottom: 0">
                 <!--点击这里，-->
                 <!--查看更多帮助信息-->
-                <h2 class="list more" style="padding-bottom: 0"><a>{{$t('m.home.click')}}</a><span style="color: #000">{{$t('m.home.see')}}</span></h2>
+                <!-- <h2 class="list more" style="padding-bottom: 0"><a>{{$t('m.home.click')}}</a><span style="color: #000">{{$t('m.home.see')}}</span></h2> -->
               </ul>
 
             </div>
@@ -376,9 +369,9 @@
 
         <div class="advantage margin-b10">
           <!--安全保障-->
-          <h1 class="list f16">{{$t('m.home.security')}}</h1>
-          <div class="security">
-            <div class="security-left">
+          <h1 class="list flex flex-h f20">{{$t('m.home.security')}}</h1>
+          <div class="security flex-h flex-vertical-center">
+            <div class="security-left flex-v">
               <div class="security-left-top">
                 <span>01</span>
                 <!--投资本金有保障-->
@@ -388,17 +381,17 @@
               <!--区块链合约执行运营商承诺的保本率-->
               <p>{{$t('m.home.breakeven')}}</p>
             </div>
-            <div class="security-right">
+            <div class="security-right flex-v">
               <img src="/static/images/security01.png" width="400" height="400" />
             </div>
           </div>
 
-          <div class="security">
-            <div class="security-right">
+          <div class="security flex-h flex-vertical-center">
+            <div class="security-right flex-v">
               <img src="/static/images/security02.png" width="400" height="400" />
             </div>
 
-            <div class="security-left">
+            <div class="security-left flex-v">
               <div class="security-left-top">
                 <span>02</span>
                 <!--足额抵押有保障-->
@@ -411,8 +404,8 @@
 
           </div>
 
-          <div class="security" style="padding-bottom: 30px">
-            <div class="security-left">
+          <div class="security flex-h flex-vertical-center" style="padding-bottom: 30px">
+            <div class="security-left flex-v">
               <div class="security-left-top">
                 <span>03</span>
                 <!--运营商风险拨备-->
@@ -422,7 +415,7 @@
               <!--运营商按业务量比例提供风险拨备，用于投资赔付-->
               <p>{{$t('m.home.provide')}}</p>
             </div>
-            <div class="security-right">
+            <div class="security-right flex-v">
               <img src="/static/images/security03.png" width="400" height="400" />
             </div>
           </div>
@@ -449,8 +442,6 @@
         investCount: '',
         todayLoanCount: '',
         todayInvestCount: '',
-        // 交易对的所有数据
-        arrayTotal: [],
         arrayToday: [],
         activeName: 'first',
         tableDataNew: [],
@@ -482,7 +473,6 @@
         currentWeek: [],
         currentMonth: [],
         baseQuote: [],
-        baseQuoteId: [],
         // selectTypeArr
         selectTypeArr: [
           {
@@ -598,7 +588,7 @@
       tradingShow () {
         if (this.tradingOnValue_sel === this.tradingOnValue.market) return
         this.tradingOnValue_sel = this.tradingOnValue.market
-        if (this.arrayTotal.length > 0) {
+        if (this.baseQuote.length > 0) {
           this.tradingShowValue = this.tradingOnValue.market
           setStore('tradingOnValue', this.tradingOnValue)
         }
@@ -995,6 +985,13 @@
           ]
         }, true)
       },
+      isLoan (item) {
+        let arr = this.$store.state.loanAssetArr.filter(a => {
+          return a[0].id === item.key.base
+        })
+        if (arr.length > 0) return true
+        else return false
+      },
       init () {
         this.loadingmain = true
         this.tradingOnValue_sel = 1000000
@@ -1009,12 +1006,11 @@
             this.investCount = res.all_total_invest_count
             this.todayLoanCount = res.all_today_loan_count
             this.todayInvestCount = res.all_today_invest_count
-            this.arrayTotal = res.array_total
             this.baseQuote = []
-            this.arrayTotal.forEach(item => {
-              this.baseQuote.push(item)
+            res.array_total.forEach(item => {
+              if (this.isLoan(item)) this.baseQuote.push(item)
             })
-            if (res.array_total.length > 0) {
+            if (this.baseQuote.length > 0) {
               this.tradingOnValue = getStore('tradingOnValue') ? JSON.parse(getStore('tradingOnValue')) : this.baseQuote[0]
               this.tradingShowValue = this.baseQuote[0].market
             }
@@ -1186,9 +1182,6 @@
         color: #000;
       }
       .list{
-        display: flex;
-        flex-direction: row;
-        flex: 1;
         justify-content: center;
         padding-top: 30px;
         padding-bottom: 18px;
@@ -1211,9 +1204,6 @@
       .using-progress {
         flex-direction: column;
         .using-progress-list{
-          display: flex;
-          flex: 1;
-          flex-direction: row;
           justify-content: center;
           align-items: center;
           .using-progress-left{
@@ -1234,15 +1224,11 @@
       margin-top: -30px;
     }
     .security {
-      display: flex;
-      flex: 1;
-      flex-direction: row;
-      justify-content: space-evenly;
-      align-items: center;
+      // justify-content: space-evenly;
+      // flex: 0 0 80px;
+      margin-left: calc((100% - 600px)/3);
       .security-left {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
+         width: 400px;
         .security-left-top {
           color: #f5f5f5;
           font-size: 150px;
@@ -1261,6 +1247,9 @@
           color: #8D8F98;
         }
       }
+      .security-right {
+         width: 400px;
+      }
     }
   }
   @media (max-width: 767px) {
@@ -1271,8 +1260,8 @@
       }
     }
     .using-progress-list{
-      flex-direction: column !important;
-      flex: 1;
+      // flex-direction: column !important;
+      // flex: 1;
       padding-left: 34px;
       padding-right: 34px;
     }
@@ -1287,7 +1276,7 @@
       justify-content: center !important;
     }
     /* 安全保障 */
-    .security {
+    .security1 {
       flex-direction: column !important;
     }
     .security .security-left {
@@ -1371,9 +1360,9 @@
   /* 大屏幕（大桌面显示器，大于等于 1200px） */
   @media (min-width: 1200px) {
     .home-index .advantage .list .list-item{
-      min-width: 200px;
+      min-width: 250px;
       p{
-        max-width: 172px;
+        max-width: 222px;
       }
     }
     .using-progress-left{
@@ -1384,7 +1373,7 @@
     }
     /* 安全保障 */
     .security .security-left {
-      max-width: 300px;
+      max-width: 400px;
       justify-content: flex-start;
       align-items: flex-start;
     }
@@ -1495,7 +1484,8 @@
     }
   }
   .chart-top{
-    flex: 1;
+    //flex: 1;
+    height: 76px;
     flex-direction: row;
     display: flex;
     align-items: center;
@@ -1506,7 +1496,8 @@
   }
   .chart-bottom{
     display: flex;
-    flex:1;
+    //flex:1;
+    height: 76px;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;

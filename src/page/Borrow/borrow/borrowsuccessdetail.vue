@@ -7,10 +7,10 @@
           <span style="float: left">{{$t('m.borrowsuccess.repayment_state')}}</span>
         </div>
         <dl class="title">
-          <repay-info :tableListData="tableListData" :isShow="true"></repay-info>
+          <repay-info :tableListData="tableListData" :isCurLoginUser="isCurLoginUser" :isShow="true"></repay-info>
           <div class="line"></div>
           <!--借款信息-->
-          <loan-info :items="items" :isAddCollate="isAddCollate"></loan-info>
+          <loan-info :items="items" :isCurLoginUser="isCurLoginUser" @closeMortageAdd="closeMortageAdd"></loan-info>
           <!--已冻结-->
           <dd>{{$t('m.borrowsuccess.pawnState')}}: {{$t('m.borrow.frozen')}}</dd>
           <collateralize-info :infoData="items" :isFeed="true"></collateralize-info>
@@ -68,8 +68,8 @@
     watch: {
     },
     computed: {
-      isAddCollate () {
-        if (this.$route.query.accName === this.$store.state.userName) {
+      isCurLoginUser () {
+        if (this.$route.query.accName === this.$store.state.userName && this.$store.state.login) {
           return true
         } else {
           return false
@@ -78,6 +78,9 @@
     },
     methods: {
       // 请求数据之后，把数据给data
+      closeMortageAdd (v) {
+        if (v) this.init()
+      },
       init () {
         this.mainloading = true
         ChainStore.setLoginAccount(this.$store.state.userDataSid)

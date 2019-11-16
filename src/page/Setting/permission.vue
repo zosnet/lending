@@ -102,9 +102,9 @@
           </el-row>
           <el-row :gutter="20">
             <!--公钥-->
-            <el-col :span="16">{{$t('m.permission.publicKey')}}:</el-col>
+            <el-col :span="16">{{$t('m.permission.publicKey')}}:
+            <span v-if="!isEncMemo(memo.memoPublicKey)" style="color: red">{{$t('m.permission.noEncKey')}}</span></el-col>
           </el-row>
-
             <el-row :gutter="20" >
               <el-col :span="14">{{memo.memoPublicKey}}</el-col>
               <el-col :span="6">
@@ -132,6 +132,46 @@
         </el-col>
       </el-row>
 
+      <el-row :gutter="20" class="lh50 margin-t10">
+        <el-col :span="2" class="f16">
+          <!--信息密钥-->
+          {{$t('m.permission.authKey')}}
+        </el-col>
+        <el-col :span="18">
+          <el-row :gutter="20">
+            <!--Active Key，可控制转帐、管理零钱权限-->
+            <el-col :span="16">{{$t('m.permission.authorKey')}}</el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <!--公钥-->
+            <el-col :span="16">{{$t('m.permission.publicKey')}}:</el-col>
+          </el-row>
+            <el-row :gutter="20" >
+              <el-col :span="14">{{auth.authPublicKey}}</el-col>
+              <el-col :span="6">
+                <el-button type="primary" @click="showPrivateKey(auth.authPublicKey, 4);">
+                  <!--'查看私钥': '隐藏私钥'-->
+                  {{!authqcodeShow ? $t('m.permission.privateKeyShow') : $t('m.permission.privateKeyHidden')}}
+                </el-button>
+              </el-col>
+            </el-row>
+            <div v-show="authqcodeShow">
+              <el-row :gutter="20">
+                <!--私钥-->
+                <el-col :span="16">{{$t('m.permission.privateKey')}}:</el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <el-col :span="16">{{auth.authPrivateKey}}</el-col>
+              </el-row>
+              <el-row :gutter="20">
+                <!--id是公钥-->
+                <el-col :span="16"><div :id="auth.authPublicKey+'authqcodeShow'"></div></el-col>
+              </el-row>
+            </div>
+
+
+        </el-col>
+      </el-row>
 
     </div>
   </div>
@@ -147,6 +187,7 @@
         mainqcodeShow: false,
         moneyqcodeShow: false,
         momqcodeShow: false,
+        authqcodeShow: false,
         // 整体加载中
         loading: true,
         owner: {
@@ -160,6 +201,10 @@
         memo: {
           memoPublicKey: '',
           memoPrivateKey: ''
+        },
+        auth: {
+          authPublicKey: '',
+          authPrivateKey: ''
         },
         // 输入密码弹窗
         comfirmPassword: false,
@@ -192,6 +237,7 @@
               this.owner.ownerPublicKey = res.owner // 数组
               this.active.activePublicKey = res.active // 数组
               this.memo.memoPublicKey = res.memo
+              this.auth.authPublicKey = res.auth
             }
           })
           .catch(err => {
@@ -213,15 +259,23 @@
               this.active.activePrivateKey = privateKey
               this.moneyqcodeShow = !this.moneyqcodeShow
               this.qcode(publicKey + 'moneyqcodeShow', privateKey)
-            } else {
+            } else if (publicKeyIndex === '3') {
               this.memo.memoPrivateKey = privateKey
               this.momqcodeShow = !this.momqcodeShow
               this.qcode(publicKey + 'momqcodeShow', privateKey)
+            } else if (publicKeyIndex === '4') {
+              this.auth.authPrivateKey = privateKey
+              this.authqcodeShow = !this.authqcodeShow
+              this.qcode(publicKey + 'authqcodeShow', privateKey)
             }
           }
         } else {
           this.comfirmPassword = false
         }
+      },
+      isEncMemo (val) {
+        if (/111111111111111111111/.test(val) || /6FUsQ2hYRj1JSvabewWfUWTXyoDq6btmfLFjmXwby5GJgzEvT5/.test(val)) return false
+        else return true
       },
       // 显示对应的私钥
       showPrivateKey (val, publicKeyIndex) {
@@ -239,9 +293,16 @@
           }
         } else if (publicKeyIndex === 3) {
           if (!this.momqcodeShow) {
-            this.comfirmPassword = true
+            if (this.isEncMemo(val)) this.comfirmPassword = true
+            else this.bitlenderLendOrder(true)
           } else {
             this.momqcodeShow = !this.momqcodeShow
+          }
+        } else if (publicKeyIndex === 4) {
+          if (!this.authqcodeShow) {
+            this.comfirmPassword = true
+          } else {
+            this.authqcodeShow = !this.authqcodeShow
           }
         }
         localStorage.setItem('publicKeyIndex', publicKeyIndex)

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="w margin-b10 secondary">
+    <div class="wn margin-b10 secondary">
       <div class="nav-secondary">
         <router-link to="/balance/balances" class="dHMsll gTHKWe">
           <a @click="changePage(1)" class="dHMsll gTHKWe" >
@@ -17,7 +17,31 @@
               <div class="bgdPDV">{{$t('m.zhanglist')}}</div>
             </div>
           </a>
-        </router-link>        
+        </router-link>
+        <router-link to="/balance/authors" class="dHMsll gTHKWe">
+          <a @click="changePage(3)" class="dHMsll gTHKWe">
+            <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===3}">
+              <!--认证人-->
+              <div class="bgdPDV">{{$t('m.params.author')}}</div>
+            </div>
+          </a>
+        </router-link>
+         <router-link to="/balance/withdrawlock" class="dHMsll gTHKWe">
+          <a @click="changePage(4)" class="dHMsll gTHKWe">
+            <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===4}">
+              <!--提取锁定币-->
+              <div class="bgdPDV">{{$t('m.withdrawlock')}}</div>
+            </div>
+          </a>
+        </router-link>
+        <router-link to="/balance/operationslist" class="dHMsll gTHKWe">
+          <a @click="changePage(5)" class="dHMsll gTHKWe">
+            <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===5}">
+              <!--操作记录-->
+              <div class="bgdPDV">{{$t('m.operlist')}}</div>
+            </div>
+          </a>
+        </router-link>
       </div>
     </div>
     <div class="router-main">
@@ -59,6 +83,12 @@
           this.changePage(1)
         } else if (this.$route.path === '/balance/balanceslist') {
           this.changePage(2)
+        } else if (this.$route.path === '/balance/authors') {
+          this.changePage(3)
+        } else if (this.$route.path === '/balance/withdrawlock') {
+          this.changePage(4)
+        } else if (this.$route.path === '/balance/operationslist') {
+          this.changePage(5)
         }
       }
     },

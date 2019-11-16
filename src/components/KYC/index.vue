@@ -5,16 +5,16 @@
       :visible.sync="hintKycDialog"
       @close="close"
       width="30%">
-      <h3>{{$t('m.authentication.noKyc')}}</h3>
-      <span slot="footer" class="dialog-footer">
+      <h3 v-loading="loading" :element-loading-text="$t('m.applyWaiting')" >{{$t('m.authentication.noKyc')}}</h3>
+      <span slot="footer" class="dialog-footer" >
           <!--坖 消-->
-          <el-button @click="$parent.hintKycDialog=false">{{$t('m.cancel')}}</el-button>
+          <el-button @click="closeAuthentication()">{{$t('m.cancel')}}</el-button>
           <el-button type="primary" @click="goAuthentication()">{{$t('m.transfer.goto')}}</el-button>
       </span>
       </el-dialog>
       <!--KYC-->
       <realname-checkinfo :visible="checkinfoDialog" :kycInfo="kycInfo" :kycStatus="kycStatusCode" @close='onCheckinfoClose' @success="onCheckinfoSuccess"></realname-checkinfo>
-      <realname-authentication :visible="authenticationDialog" :authorid="authorid" :kycUrl="kycurl" @close='onAuthenticationClose' @success="onAuthenticationSuccess"></realname-authentication>
+      <realname-authentication :visible="authenticationDialog" :authorid="authorid" :kycUrl="kycurl" @close='onAuthenticationClose'  @success="onAuthenticationSuccess"></realname-authentication>
     </div>
 </template>
 <script>
@@ -51,6 +51,8 @@ export default {
   data () {
     return {
       checkinfoDialog: false,
+      loading: false,
+      updateRecode: false,
       authenticationDialog: false
     }
   },
@@ -67,16 +69,21 @@ export default {
     },
     onAuthenticationClose (updateRecode) {
       this.authenticationDialog = false
+      this.hintKycDialog = false
+      this.$parent.hintKycDialog = false
       this.close(updateRecode)
       console.log('onAuthenticationClose', updateRecode)
     },
     onAuthenticationSuccess () {
     },
+    closeAuthentication () {
+      this.hintKycDialog = false
+      this.$parent.hintKycDialog = false
+    },
     goAuthentication () {
       this.hintKycDialog = false
       this.$parent.hintKycDialog = false
       this.authenticationDialog = true
-      this.close(false)
     }
   },
   mounted () {

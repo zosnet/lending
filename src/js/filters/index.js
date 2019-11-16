@@ -4,14 +4,43 @@
  * @param  {[type]} string [法币类型]
  * @return {[string]} [返回处理格式后数据]
  */
+var companyName = 'ZOS'
+const formatBaseCurrency = (value, precision) => {
+  let num = Number(value).toFixed(precision)
+  let numex = num
+  let prex = ''
+  if (num < 0) {
+    numex = -numex
+    prex = '-'
+  }
+  return prex + Math.floor(numex).toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,') + num.toString().slice(num.length - precision - 1, num.length)
+}
 const formatLegalCurrency = (value, type, precision = 2) => {
   if (typeof (precision) === 'undefined' || Number(precision) < 2) {
     console.log(precision, 'please input precision')
     precision = 2
   }
   if (type !== 'undefind') {
-    let num = Number(value).toFixed(precision)
-    return type.toString() + ' ' + Math.floor(value).toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,') + num.toString().slice(num.length - precision - 1, num.length)
+    return type.toString() + ' ' + formatBaseCurrency(value, precision)
+  }
+}
+
+const formatLegalCurrency2 = (value, type, precision = 2) => {
+  if (typeof (precision) === 'undefined' || Number(precision) < 2) {
+    console.log(precision, 'please input precision')
+    precision = 2
+  }
+  if (type !== 'undefind') {
+    return formatBaseCurrency(value, precision) + ' ' + type
+  }
+}
+const formatLegalCurrency3 = (value, type, precision = 2) => {
+  if (typeof (precision) === 'undefined' || Number(precision) < 2) {
+    console.log(precision, 'please input precision')
+    precision = 2
+  }
+  if (type !== 'undefind') {
+    return formatBaseCurrency(value / Math.pow(10, precision), precision) + ' ' + type
   }
 }
 
@@ -21,8 +50,7 @@ const formatLegalCurrencys = (value, type, precision = 2) => {
     precision = 2
   }
   if (type !== 'undefind') {
-    let num = Number(value).toFixed(precision)
-    return Math.floor(value).toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,') + num.toString().slice(num.length - precision - 1, num.length)
+    return formatBaseCurrency(value, precision)
   }
 }
 
@@ -47,7 +75,6 @@ const formatDecimalCurrency = (value) => {
 }
 
 const formatDecimal = (num, val) => {
-  console.log(num, 'num')
   let mnum = num.toString()
   let nums = mnum.substring(mnum.indexOf('.') + 1)
   let decimal = 0
@@ -162,6 +189,10 @@ const formatDateStrHour = (dateStr) => {
   const datestr = dateStr.toString()
   return datestr.substring(0, datestr.indexOf('T'))
 }
+const formatDateStrHour1 = (dateStr) => {
+  const datestr = dateStr.toString()
+  return datestr.substring(0, datestr.indexOf(':'))
+}
 
 const formatProposalTime = (str) => {
   function add (m) { return m < 10 ? '0' + m : m }
@@ -186,19 +217,32 @@ const formatLocalTime = (str) => {
   let s = time.getSeconds()
   return y + '-' + add(m) + '-' + add(d) + ' ' + add(h) + ':' + add(mm) + ':' + add(s)
 }
+const formatCompanyName = (value) => {
+  if (value === undefined || value == null || value.length < 3) return value
+  return value.toString().replace(/ZOS/ig, companyName)
+}
 
+const setCompanyName = (name) => {
+  companyName = name
+}
 export default {
+  formatBaseCurrency,
   formatLegalCurrency,
   formatLegalCurrencys,
+  formatLegalCurrency2,
+  formatLegalCurrency3,
   formatDigitalCurrency,
   digitUppercase,
   converPercentage,
   dateDiffDay,
   formatDateStr,
   formatDateStrHour,
+  formatDateStrHour1,
   rePayState,
+  setCompanyName,
   formatDecimal,
   formatDecimalCurrency,
   formatLocalTime,
+  formatCompanyName,
   formatProposalTime
 }

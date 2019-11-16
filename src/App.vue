@@ -27,12 +27,19 @@
         mainloading: true
       }
     },
+    methods: {
+      handleClose () {
+        this.mainloading = false
+        this.dialogVisible = false
+      }
+    },
     created () {
       this.$root.$on('initFinished', _ => {
         this.mainloading = false
       })
       this.$root.$on('initFail', (data) => {
         this.mainloading = false
+        this.dialogVisible = true
       })
     }
   }

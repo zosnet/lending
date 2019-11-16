@@ -4,7 +4,7 @@
       <div class="basicInfo">
         <span style="float: left">
           <!--资金周转-->
-        <span style="float: left">{{items.id}}  {{$t('m.borrowing.turnover')}}{{items.repay_interest.length}}{{$t('m.month')}}_{{items.loan_time}}</span>
+        <span style="float: left">{{items.id}}  {{$t('m.borrowing.turnover')}}{{items.repay_interest.length}}{{$t('m.invest.perioduint' + items.repayment_type.repayment_period_uint)}}_{{items.loan_time}}</span>
         </span>
       </div>
 
@@ -12,7 +12,7 @@
         <dl class="title">
           <div v-if="items.order_state !== 17 && items.order_state !== 18 && items.order_state !== 19">
             <dt>{{$t('m.borrowsuccess.repayment_state')}}</dt>
-            <repay-info :tableListData="tableListData"></repay-info>
+            <repay-info :tableListData="tableListData" :isCurLoginUser="isCurLoginUser"></repay-info>
             <div class="line"></div>
           </div>
 
@@ -98,6 +98,13 @@ export default {
         this.items.order_state === 19
       ) {
         return this.$t('m.returned')
+      }
+    },
+    isCurLoginUser () {
+      if (this.$route.query.accName === this.$store.state.userName && this.$store.state.login) {
+        return true
+      } else {
+        return false
       }
     }
   },

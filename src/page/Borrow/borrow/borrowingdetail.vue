@@ -1,9 +1,9 @@
 <template>
-  <div v-loading="loading" :element-loading-text="$t('m.loading')" style="min-height: 10vw;" class="jyNVPQ">
+  <div v-loading="loading || confirming" :element-loading-text="$t('m.loading')" style="min-height: 10vw;" class="jyNVPQ">
     <div class="grid-container" v-if="!loading">
       <div class="detail-content pr"> <!-- Ella -->
         <el-button style="position: absolute; right: 30px; top: 25px; z-index: 99"
-                   v-show="isCurrentUser"
+                   v-show="!isCurUser"
                    @click="addInvestClick(orderId)"
                    type="primary" size="mini" round>{{$t('m.historyinfo.gotoInvest')}}</el-button>
         <el-tabs activeName="detail">
@@ -17,7 +17,7 @@
                   <div>{{items.current_invest.amount / Math.pow(10, items.asset_to_loan.precision) | formatLegalCurrency(items.asset_to_loan.symbol, items.asset_to_loan.precision)}}</div>
                 </div>
               </el-col>
-              <el-col :span="10">
+              <el-col :span="8">
                 <div class="detail-item">
                   <!--投资进度-->
                   <span>{{$t('m.investList.investProgress')}}</span>
@@ -33,6 +33,10 @@
                   <div>{{items.expiration_time | dateDiffDay($store.state.curDate)}}</div>
                 </div>
               </el-col>
+              <el-col :span="2">
+              <el-button v-if="items.order_state === 1 && isCurrentUser" @click="Remove(items)" type="primary">{{$t('m.borrow.removeOrder')}}</el-button>
+              </el-col>
+
             </el-row>
           </el-tab-pane>
         </el-tabs>
@@ -42,17 +46,27 @@
             <el-row>
               <el-col :span="10">
                 <div class="detail-item">
-                  <span>{{$t('m.borrow.loanAmount')}}:</span>
-                  <div>{{items.amount_to_loan.amount / Math.pow(10, items.asset_to_loan.precision)  | formatLegalCurrency(items.asset_to_loan.symbol, items.asset_to_loan.precision)}}</div>
+                  <span>{{$t('m.transfer.XZMS')}}:</span>
+                  <div>{{$t('m.invest.periodmode' + TypeIndex.repayment_period_uint)}}
+                       {{$t('m.invest.repayment' + TypeIndex.repayment_type)}}</div>
                 </div>
               </el-col>
             </el-row>
             <el-row>
               <el-col :span="10">
                 <div class="detail-item">
+                  <span>{{$t('m.borrow.loanAmount')}}:</span>
+                  <div>{{items.amount_to_loan.amount / Math.pow(10, items.asset_to_loan.precision)  | formatLegalCurrency(items.asset_to_loan.symbol, items.asset_to_loan.precision)}}</div>
+                </div>
+              </el-col>
+            </el-row>
+
+            <el-row>
+              <el-col :span="10">
+                <div class="detail-item">
                   <!--借款时长-->
                   <span>{{$t('m.investingdetail.JKSC')}}:</span>
-                  <div>{{items.loan_period}}{{$t('m.month')}}</div>
+                  <div>{{items.loan_period}}{{$t('m.invest.perioduint' + TypeIndex.repayment_period_uint)}}</div>
                 </div>
               </el-col>
             </el-row>
@@ -61,7 +75,7 @@
                 <div class="detail-item">
                   <!--利率-->
                   <span>{{$t('m.params.interestRate')}}:</span>
-                  <div>{{items.interest_rate | converPercentage}}/{{$t('m.year')}}</div>
+                  <div>{{items.interest_rate | converPercentage}}/{{$t('m.invest.perioduint' + TypeIndex.repayment_period_uint)}}</div>
                 </div>
               </el-col>
             </el-row>
@@ -90,7 +104,7 @@
               <el-col :span="4">
                 <div class="detail-item">
                   <!--增加抵押-->
-                  <el-button type="primary" @click="addDYW(items)" v-show="showHistory">{{$t('m.borrow.addCollateral')}}</el-button>
+                  <el-button v-if="items.need_add_collateralize > 0 && items.order_state < 12 && isCurrentUser" type="primary" @click="addDYW(items)" v-show="showHistory">{{$t('m.borrow.addCollateral')}}</el-button>
                 </div>
               </el-col>
             </el-row>
@@ -135,17 +149,21 @@
         ></mortage-dialog>
       </div>
     </div>
+    <!--输入资金密码-->
+    <password-dialog :visible="comfirmPass" @bitlenderLendOrder="bitlenderLendOrder" :isAppend="true"></password-dialog>
     <!--登录-->
     <login-dialog :visible="$store.state.loginPath !== undefined"></login-dialog>
   </div>
 </template>
 <script>
   import mortageDialog from '/path-components/Chain/mortageDialog'
+  import passwordDialog from '/path-components/Login/passwordDialog'
   import {ZOSInstance} from 'zos-wallet-js'
   import { loginToPath } from '/js-utils/until'
   import loginDialog from '/path-page/Login/loginDialog'
   export default {
     components: {
+      passwordDialog,
       mortageDialog,
       loginDialog,
       'bidder': () => import('/path-components/Lending/bidder'),
@@ -157,6 +175,7 @@
         orderId: '',
         userName: '',
         userId: '',
+        comfirmPass: false,
         // 详情
         items: {},
         feeDis: {},
@@ -165,7 +184,9 @@
         // 增加抵押物的弹窗
         addPawnDialog: false,
         loading: true,
+        confirming: false,
         initStatus: false,
+        TypeIndex: {repayment_period_uint: 1},
         appointtemI: ''
       }
     },
@@ -202,6 +223,7 @@
           this.feeData = res.feeData
           this.itemList = res.investorsList
           this.loading = false
+          this.TypeIndex = res.repayment_type
         }).catch(error => {
           this.$message({
             message: error,
@@ -210,6 +232,31 @@
           this.loading = false
         })
         // Ella
+      },
+      bitlenderLendOrder (bool) {
+        this.comfirmPass = false
+        if (bool) {
+          this.confirming = true
+          ZOSInstance.bitlender_remove_operation(this.items.issuer, this.items.id).then(res => {
+            ZOSInstance.broadcastTransaction(res.tr).then(res => {
+              this.$message({
+                message: this.$t('m.borrow.removeOrder') + this.$t('m.invest.success'),
+                type: 'success'
+              })
+              this.items.order_state = 19
+              this.confirming = false
+            }).catch((err) => {
+              console.log(err)
+              this.confirming = false
+            })
+          }).catch((err) => {
+            this.confirming = false
+            console.log(err)
+          })
+        }
+      },
+      Remove (item) {
+        this.comfirmPass = true
       },
       addDYW (item) {
         let itemObj = {}
@@ -226,8 +273,16 @@
           return true
         }
       },
+      isCurUser () {
+        return this.$route.query.accName === this.$store.state.userName
+      },
       isCurrentUser () {
-        return this.$store.state.userDataSid !== this.$route.query.accID
+        if (this.items.order_state === 19) return false
+        if (this.items.issuer === this.$store.state.userDataSid && this.$store.state.login) {
+          return true
+        } else {
+          return false
+        }
       }
     },
     mounted () {

@@ -99,14 +99,11 @@
                     <input type="checkbox" name="agreement2" v-model="agreement2" size="medium" style="font-size: 50px" />
                     <label for="agreement2" class="margin-l10">{{$t('m.register.isRead')}}
                       <br>
-                      <a @click="open($t('m.register.policyTitle'), $t('m.register.policy'))">{{$t('m.register.agreement')}}</a></label>
-                    <!--<el-checkbox class="agree" v-model="agreement2">-->
-                    <!--&lt;!&ndash;我已阅读并同意遵守&ndash;&gt;-->
-                    <!--{{$t('m.register.isRead')}}-->
-                    <!--</el-checkbox>-->
-                    <!--隐私条款','本网站将不会严格遵守有关法律法规和本隐私政策所载明的内容收集、使用您的信息-->
-                    <!--用户协议-->
+                      <a @click="open1($t('m.register.policyTitle'), $t('m.register.policy'))">{{$t('m.register.agreement')}}</a> {{'     '}}
+                      <a @click="open2($t('m.register.policyTitle'), $t('m.register.policy'))">{{$t('m.register.terms')}}</a>
+                    </label>
                   </div>
+
 
                   <div style="margin-bottom: 30px; display: flex">
                     <y-button
@@ -148,7 +145,6 @@
   import {ChainStore, ChainValidation} from 'zosjs/es'
   import { setStore, removeStore } from '/js-utils/storage.js'
   import http from '/js-api/public'
-  import { checkUsernameLength, checkUsernameBegin, checkRegName } from '/js-utils/validate'
   require('/path-static/geetest/gt.js')
   export default {
     data () {
@@ -193,6 +189,7 @@
         },
         set: function (val) {
           this.registered.userName = val.toLowerCase()
+          this.registered.userName = this.registered.userName.trim()
         }
       },
       isDisabled () {
@@ -208,11 +205,21 @@
           this.refer = url.split('=')[1]
         }
       },
-      open (t, m) {
-        this.$notify.info({
-          title: t,
-          message: m
-        })
+      open1 (t, m) {
+        if (this.$store.state.lang === '1') window.open('https://www.zos.io/PrivacyPolicy.html', '_blank')
+        else window.open('https://www.zos.io/PrivacyPolicy.html', '_blank')
+        // /*this.$notify.info({
+        //   title: t,
+        //   message: m
+        // })*/
+      },
+      open2 (t, m) {
+        if (this.$store.state.lang === '1') window.open('https://www.zos.io/PrivacyPolicy.html', '_blank')
+        else window.open('https://www.zos.io/PrivacyPolicy.html', '_blank')
+        // /*this.$notify.info({
+        //   title: t,
+        //   message: m
+        // })*/
       },
       messageSuccess () {
         this.$message({
@@ -247,11 +254,13 @@
         } else {
           this.$router.push(this.$router.options.nextpath)
         }
-        this.$router.options.nextpath = undefined
       },
       regist () {
         this.disabledReg = false
         this.registxt = this.$t('m.registing')
+        this.registered.userName = this.registered.userName.trim()
+        this.registered.userPwd = this.registered.userPwd.trim()
+        this.registered.userPwd2 = this.registered.userPwd2.trim()
         let userName = this.registered.userName
         let userPwd = this.registered.userPwd
         let userPwd2 = this.registered.userPwd2
@@ -267,11 +276,6 @@
           this.disabledReg = true
           return false
         }
-        if (checkRegName(userName)) {
-          this.message(this.$t('m.register.unReg'))
-          this.registxt = this.$t('m.register.title')
-          return false
-        }
         if (!identifyCode || identifyCode === '' || identifyCode.length !== 4) {
           // '账号密码不能为空!'
           this.message(this.$t('m.register.correctCode'))
@@ -280,22 +284,8 @@
           this.disabledReg = true
           return false
         }
-        if (checkUsernameLength(userName)) {
-          // '账户只能输入1-63位字符!'
-          this.message(this.$t('m.register.characters'))
-          this.registxt = this.$t('m.register.title')
-          this.disabledReg = true
-          return false
-        }
-        if (checkUsernameBegin(userName)) {
-          // '账号名必须以字母开头!'
-          this.message(this.$t('m.register.letterBegin'))
-          this.registxt = this.$t('m.register.title')
-          this.disabledReg = true
-          return false
-        }
-        let err = ChainValidation.is_account_name_error(userName, true)
-        if (err) {
+        let err = this.validateAccountName(userName)
+        if (err !== null) {
           // '验证用户名的合法性'
           this.message(err)
           this.registxt = this.$t('m.register.title')
@@ -310,6 +300,14 @@
           this.disabledReg = true
           return false
         }
+        err = this.validatePassword(userPwd)
+        if (err !== null) {
+          this.message(err)
+          this.registxt = this.$t('m.register.title')
+          this.disabledReg = true
+          return false
+        }
+
         if (userPwd2 !== userPwd) {
           // '两次输入的密码不相同!'
           this.message(this.$t('m.register.noSame'))
@@ -372,11 +370,18 @@
                     this.$store.state.userName = this.ruleForm.userName
                     this.$store.state.login = true
                     setStore('userName', userName)
+                    this.$store.state.accountObj = undefined
                     let acc = ChainStore.getAccount(userName, true)
                     if (acc) {
                       setStore('userId', acc.get('id'))
                       this.$store.state.userDataSid = acc.get('id')
                       ChainStore.setLoginAccount(this.$store.state.userDataSid)
+                      ZOSInstance.get_user_phoneinfo(this.$store.state.userDataSid).then(res => {
+                        if (res !== undefined) {
+                          this.$store.state.userInfo.phone = res.mobile
+                          this.$store.state.userInfo.mail = res.mail
+                        }
+                      })
                     }
                     this.gotoPath()
                   }
@@ -425,12 +430,52 @@
       onError (e) {
         console.log('onError', e)
       },
+      validatePassword (value) {
+        let errorstr = null
+        if (value === '') {
+          errorstr = this.$t('m.register.name_input.empty')
+        } else {
+          let localePaths = ChainValidation.is_password_error(value)
+          if (localePaths) {
+            // console.log('error name', localePaths)
+            let localePath = localePaths.split('.')
+            if (localePath.length === 2) {
+              errorstr = this.$t('m.register.name_input.' + localePath[0])
+              errorstr += this.$t('m.register.name_input.' + localePath[1])
+            } else {
+              errorstr = localePaths
+            }
+          }
+        }
+        return errorstr
+      },
+      validateAccountName (value) {
+        let errorstr = null
+        if (value === '') {
+          errorstr = this.$t('m.register.name_input.empty')
+        } else {
+          let localePaths = ChainValidation.is_account_name_error(value, false, 9, 63)
+          if (localePaths) {
+            // console.log('error name', localePaths)
+            let localePath = localePaths.split('.')
+            if (localePath.length === 2) {
+              errorstr = this.$t('m.register.name_input.' + localePath[0])
+              errorstr += this.$t('m.register.name_input.' + localePath[1])
+            } else {
+              errorstr = localePaths
+            }
+          }
+        }
+        return errorstr
+      },
       onUserNameChange () {
-        if (checkRegName(this.registered.userName)) {
-          this.message(this.$t('m.register.unReg'))
+        let err = this.validateAccountName(this.registered.userName)
+        if (err !== null) {
+          this.message(err)
           this.registxt = this.$t('m.register.title')
           return false
         }
+        this.registered.userName = this.registered.userName.trim()
         ZOSInstance.checkAccountExists(this.registered.userName).then((res) => {
           for (const key in res) {
             if (res[key][0] === this.registered.userName) {
@@ -441,14 +486,6 @@
               return false
             }
           }
-          let err = ChainValidation.is_account_name_error(this.registered.userName, true)
-          if (err) {
-            this.message(err)
-            this.registxt = this.$t('m.register.title')
-            this.showPayAccount = false
-            return false
-          }
-
           /*
           if (this.registered.userName.length < 3) {
             this.showPayAccount = true
@@ -465,7 +502,6 @@
           }
           */
           Apis.instance().db_api().exec('is_cheap_name', [this.registered.userName]).then(res => {
-            console.log('res', res)
             if (res) {
               this.showPayAccount = false
             } else {
@@ -481,14 +517,17 @@
         })
       },
       loadVerifyingImg () {
-        http.fetchGet(this.$store.state.settingsAPIs.DEFAULT_FAUCET + '/getcaptcha')
-          .then((res) => {
-            this.captchaId = res.captchaid
-            this.verifyimgData = 'data:image/png;base64, ' + res.img
-          })
-          .catch((err) => {
-            console.log(err)
-          })
+        http.fetchGet(ZOSInstance.getFaucetAddress() + '/getcaptcha', {
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        }).then((res) => {
+          this.captchaId = res.captchaid
+          this.verifyimgData = 'data:image/png;base64, ' + res.img
+        }).catch((err) => {
+          console.log(err)
+        })
       },
       // 注册前清空缓存,因为发现同一个浏览器，登录两个账号，数据同步了
       removeLocal () {

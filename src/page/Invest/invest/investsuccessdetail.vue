@@ -20,19 +20,19 @@
             <!--预计总收益-->
             {{$t('m.investingdetail.yujiZSY')}}
             :
-            {{(investData.amount_to_invest.amount / Math.pow(10, investData.asset_to_loan.precision) * (investData.interest_rate.interest_rate / 10000)) * investData.order_info.loan_period | formatLegalCurrency(investData.asset_to_loan.symbol, investData.asset_to_loan.precision)}}
+            {{investData.expect_sum / Math.pow(10, investData.asset_to_loan.precision) | formatLegalCurrency(investData.asset_to_loan.symbol, investData.asset_to_loan.precision)}}
           </div>
           <div v-if="investState === 1" class="margin-l20">
             <!--预计收益率-->
             {{$t('m.investingdetail.yujiSYL')}}
-            : {{(investData.interest_rate.interest_rate / 10 * investData.order_info.loan_period).toFixed(1)}}‰
+            : {{(investData.expect_sum * 1000 / investData.amount_to_invest.amount).toFixed(1)}}‰
           </div>
         </div>
 
         <div class="pr">
           <div v-if="investData.order_state !== 17 && investData.order_state !== 18 && investData.order_state !== 19">
             <!--利息-->
-            <repay-info :tableListData="tableListData" :isInvest="true"></repay-info>
+            <repay-info :tableListData="tableListData" :isInvest="true" :isCurLoginUser="isCurLoginUser"></repay-info>
           </div>
           <!--状态图标-->
           <img v-if="investData.order_state===13 && investState === 2" src="/static/images/state_verification.png" class="recycle">
@@ -62,11 +62,14 @@
           <li style="line-height: 35px">{{$t('m.investingdetail.borrowOrder')}}:
             <a @click="borrowOrderId">{{investData.order_id}}</a>
           </li>
+          <!--借款模式-->
+          <li style="line-height: 35px">{{$t('m.transfer.XZMS')}}: {{$t('m.invest.periodmode' + investData.order_info.repayment_type.repayment_period_uint)}}{{$t('m.invest.repayment' + investData.order_info.repayment_type.repayment_type)}}</li>
+          <!--借款金额-->
           <li style="line-height: 35px">{{$t('m.borrow.loanAmount')}}: {{investData.amount_to_loan.amount / Math.pow(10, investData.asset_to_loan.precision) | formatLegalCurrency(investData.asset_to_loan.symbol, investData.asset_to_loan.precision)}}</li>
           <!--借款时长-->
-          <li style="line-height: 35px">{{$t('m.investingdetail.JKSC')}}: {{investData.order_info.loan_period}}{{$t('m.month')}}</li>
+          <li style="line-height: 35px">{{$t('m.investingdetail.JKSC')}}: {{investData.order_info.loan_period}} {{$t('m.invest.perioduint' + investData.order_info.repayment_type.repayment_period_uint)}}</li>
           <!--借款利率-->
-          <li style="line-height: 35px">{{$t('m.borrow.borrowRate')}}: {{investData.interest_rate.interest_rate | converPercentage}}</li>
+          <li style="line-height: 35px">{{$t('m.borrow.borrowRate')}}: {{investData.interest_rate.interest_rate | converPercentage}} /{{$t('m.invest.perioduint' + investData.order_info.repayment_type.repayment_period_uint)}}</li>
           <!--发布时间-->
           <li style="line-height: 35px">{{$t('m.investingdetail.FBSJ')}}: {{investData.order_info.loan_time | formatDateStr}}</li>
           <!--开始计息时间-->
@@ -162,6 +165,13 @@
           }
         } else {
           return this.$t('m.orderList.freeze')
+        }
+      },
+      isCurLoginUser () {
+        if (this.$route.query.accName === this.$store.state.userName && this.$store.state.login) {
+          return true
+        } else {
+          return false
         }
       }
     },

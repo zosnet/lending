@@ -19,7 +19,7 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        :label="$t('m.borrow.radio')" prop="ratio"
+        :label="$t('m.borrow.addrato')" prop="ratio"
       >
         <el-input v-model.number="ruleForm.ratio" @change="_ratio" type="number" max-length="6">
           <template slot="append">%</template>

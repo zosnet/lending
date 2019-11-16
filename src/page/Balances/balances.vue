@@ -7,28 +7,45 @@
             <!--数字资产-->
             <span>{{$t('m.orderList.numberZC')}}</span>
           </div>
-          <div class="ZHZZL" >
+          <div class="ZHZZL">
             <div v-for="(item,index) in allLenderBalance" :key="index">
-              <div class="hgJtCZ" @click="changePage(index, 1)">
-                <div class="fAptwk">
-                  <div class="" style="flex: 0 0 80px;">
+              <div class="hgJtCZ1" @click="changePage(index, 1)">
+                <div class="item_top">
+                  <div class="icon_info">
                     <img width="30" height="30" v-bind:src="`/static/images/${item.symbol.toUpperCase()}.png`" :onerror="errorImg01" />
+                    <span>{{item.symbol}}</span>
                   </div>
-                  <div style="flex: 1;padding: 2px">
-                    <span style="height: 35px;line-height: 35px">{{item.symbol}}</span>
-                    <!--可用-->
-                    <span style="height: 35px;line-height: 35px">{{$t('m.transfer.KY')}} {{item.amount / Math.pow(10, item.precision) | formatLegalCurrency('', item.precision)}}</span>
-                    <!--冻结-->
-                    <span style="height: 35px;line-height: 35px">{{$t('m.orderList.freeze')}} {{item.lock_amount / Math.pow(10, item.precision) | formatLegalCurrency('', item.precision)}}</span>
-                  </div>
-                  <div class="btn-group-account">
+                  <div class="operation_info">
                     <!--充币-->
-                    <el-button v-if="item.asset_id !== '1.3.0'" size="small" @click="deposit(item.asset_id)">{{$t('m.orderList.depositMoney')}}</el-button>
+                    <el-button  v-if="item.asset_id !== '1.3.0'" size="small" @click="deposit(item.asset_id)">{{$t('m.orderList.depositMoney')}}</el-button>
+                    <el-button  v-if="item.asset_id === '1.3.0'" size="small" @click="deposit(item.asset_id)">{{$t('m.orderList.mapMoney')}}</el-button>
                     <!--提币-->
                     <el-button v-if="item.asset_id !== '1.3.0'" size="small" @click="withdraw(item.asset_id)">{{$t('m.orderList.WithdrawMoney')}}</el-button>
                     <!--转账-->
                     <el-button size="small" @click="transfer(item)">{{$t('m.transfer.title')}}</el-button>
                   </div>
+                </div>
+                <div class="item_middle">
+                  <div class="item_middle_block" v-if="Number(item.all_amount)!==item.amount">
+                    <span class="item_title">{{$t('m.orderList.totalamount')}}</span>
+                    <span class="item_number">{{item.all_amount | formatLegalCurrency('', item.precision)}}</span>
+                  </div>
+                  <div class="item_middle_block">
+                    <span class="item_title">{{$t('m.transfer.KY')}}</span>
+                    <span class="item_number">{{item.amount | formatLegalCurrency('', item.precision)}}</span>
+                  </div>
+                </div>
+                <div class="item_info">
+                  <span v-if="Number(item.invest_lock)>0">{{$t('m.orderList.invest')}} {{item.invest_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.lending_lock)>0">{{$t('m.orderList.lending')}} {{item.lending_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.vesting_lock)>0">{{$t('m.orderList.vesting')}} {{item.vesting_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.identify_lock)>0">{{$t('m.orderList.identify')}} {{item.identify_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.fixed_lock)>0">{{$t('m.orderList.fixedlock')}} {{item.fixed_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.dy_lock)>0">{{$t('m.orderList.dylock')}} {{item.dy_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.node_lock)>0">{{$t('m.orderList.nodelock')}} {{item.node_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="item.asset_id === '1.3.0'">
+                    <span v-if="coupon>0">{{$t('m.orderList.coupon')}} {{ coupon | formatLegalCurrency('', item.precision)}}</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -38,7 +55,7 @@
           <!-- 选择币种 -->
           <div class="feel">
               <div>
-                <el-select v-model="selectSymbol" :placeholder="$t('m.transfer.selectCurreny')">
+                <el-select v-model="selectSymbol" :placeholder="$t('m.transfer.selectCurreny')" size="medium">
                   <el-option
                     v-for="item in allLenderList"
                     :key="item.id"
@@ -49,10 +66,9 @@
                   </el-option>
                 </el-select>
               </div>
-              <span style="flex:1"></span>
-              <div style="flex: 1; margin-right: 20px" class="text-right">
+              <div class="feel_btn">
                 <!--充币-->
-                <el-button size="small" @click="deposit(selectSymbol)">{{$t('m.orderList.depositMoney')}}</el-button>
+                <el-button size="medium" @click="deposit(selectSymbol)">{{$t('m.orderList.depositMoney')}}</el-button>
               </div>
           </div>
         </el-card >
@@ -61,26 +77,39 @@
             <!--法定资产-->
             <span>{{$t('m.orderList.statutory')}}</span>
           </div>
-          <div class="ZHZZL" >
+          <div class="ZHZZL">
             <div v-for="(item,index) in allCashBalance" :key="index">
-              <div class="hgJtCZ" @click="changePage(index, 0)">
-                <div class="fAptwk">
-                  <div class="" style="flex: 0 0 50px;">
+              <div class="hgJtCZ1" @click="changePage(index, 0)">
+                <div class="item_top">
+                  <div class="icon_info">
                     <img width="30" height="30" v-bind:src="`/static/images/${item.symbol.toUpperCase()}.png`" :onerror="errorImg01">
+                    <span>{{item.symbol}}</span>
                   </div>
-                  <div style="flex: 1;padding: 2px">
-                    <span style="height: 35px;line-height: 35px">{{item.symbol}}</span>
-                    <!--可用-->
-                    <span style="height: 35px;line-height: 35px">{{$t('m.transfer.KY')}} {{item.amount / Math.pow(10, item.precision) | formatLegalCurrency('', item.precision)}}</span>
-                    <!--冻结-->
-                    <span style="height: 35px;line-height: 35px">{{$t('m.orderList.freeze')}} {{item.lock_amount / Math.pow(10, item.precision) | formatLegalCurrency('', item.precision)}}</span>
-                  </div>
-                  <div class="btn-group-account">
+                  <div class="operation_info">
                     <!--充值-->
                     <el-button size="small" @click="deposit(item.asset_id)">{{$t('m.orderList.topup')}}</el-button>
                     <!--提现-->
                     <el-button size="small"  @click="withdraw(item.asset_id)">{{$t('m.orderList.Withdraw')}}</el-button>
                   </div>
+                </div>
+                <div class="item_middle">
+                  <div class="item_middle_block" v-if="Number(item.all_amount)!==item.amount">
+                    <span class="item_title">{{$t('m.orderList.totalamount')}}</span>
+                    <span class="item_number">{{item.all_amount | formatLegalCurrency('', item.precision)}}</span>
+                  </div>
+                  <div class="item_middle_block">
+                    <span class="item_title">{{$t('m.transfer.KY')}}</span>
+                    <span class="item_number">{{item.amount | formatLegalCurrency('', item.precision)}}</span>
+                  </div>
+                </div>
+                <div class="item_info">
+                  <span v-if="Number(item.invest_lock)>0">{{$t('m.orderList.invest')}} {{item.invest_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.lending_lock)>0">{{$t('m.orderList.lending')}} {{item.lending_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.vesting_lock)>0">{{$t('m.orderList.vesting')}} {{item.vesting_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.identify_lock)>0">{{$t('m.orderList.identify')}} {{item.identify_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.fixed_lock)>0">{{$t('m.orderList.fixedlock')}} {{item.fixed_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.dy_lock)>0">{{$t('m.orderList.dylock')}} {{item.dy_lock | formatLegalCurrency('', item.precision)}}</span>
+                  <span v-if="Number(item.node_lock)>0">{{$t('m.orderList.nodelock')}} {{item.node_lock | formatLegalCurrency('', item.precision)}}</span>
                 </div>
               </div>
             </div>
@@ -90,7 +119,7 @@
           <!-- 选择币种 -->
           <div class="feel">
               <div>
-                <el-select v-model="selectLoanSymbol" :placeholder="$t('m.transfer.selectCurreny')">
+                <el-select v-model="selectLoanSymbol" :placeholder="$t('m.transfer.selectCurreny')" size="medium">
                   <el-option
                     v-for="item in allCashSelect"
                     :key="item.id"
@@ -101,10 +130,9 @@
                   </el-option>
                 </el-select>
               </div>
-              <span style="flex:1"></span>
-              <div style="flex: 1; margin-right: 20px" class="text-right">
+              <div class="feel_btn">
                 <!--充币-->
-                <el-button size="small" @click="deposit(selectLoanSymbol)">{{$t('m.orderList.topup')}}</el-button>
+                <el-button size="medium" @click="deposit(selectLoanSymbol)">{{$t('m.orderList.topup')}}</el-button>
               </div>
           </div>
         </el-card>
@@ -113,10 +141,10 @@
 
     <div class="jvhNys UMJSF VsGOO margin-t10">
       <div class="bugpkJ">
-        <el-tabs type="card" @tab-click="handleRecordTabClick">
+        <el-tabs @tab-click="handleRecordTabClick">
           <el-button class="update-recode-btn" size="small" @click="refreshRecode()">{{$t('m.orderList.refresh')}}</el-button>
           <el-tab-pane :label="$t('m.orderList.gatewayRecords')">
-            <el-card>
+            <el-card style="border:none;">
               <div>
                 <div class="panel-body no-padding">
                   <el-table
@@ -185,7 +213,7 @@
             </el-card>
           </el-tab-pane>
           <el-tab-pane :label="$t('m.orderList.kycRecords')" name="kycRecords">
-            <el-card>
+            <el-card style="border:none;">
               <div>
                 <div class="panel-body no-padding">
                   <el-table
@@ -205,11 +233,12 @@
                         <span v-if="scope.row.status==='0'">{{$t('m.authentication.kycState1')}}</span>
                         <span v-else-if="scope.row.status==='2'">{{$t('m.authentication.kycState3')}}:{{scope.row.remark}} </span>
                         <span v-else>{{$t('m.authentication.kycState2')}}</span>
+                        <span v-if="scope.row.remark"> : {{scope.row.remark}}</span>
                       </template>
                     </el-table-column>
                     <el-table-column min-width="120" :label="$t('m.orderList.operTime')">
                       <template slot-scope="scope">
-                        <span>{{scope.row.createdtime | formatProposalTime}}</span>
+                        <span>{{ _getTimezoneDate(scope.row.createdtime) | formatDateStr }}</span>
                       </template>
                     </el-table-column>
                     <el-table-column :label="$t('m.authentication.name')">
@@ -241,7 +270,7 @@
     <!--转账-->
     <transfer v-if="dialogVisibleTransfer" :transferId="transferId" :visible="dialogVisibleTransfer" @closeTransfer="closeTransfer"></transfer>
     <!--充提-->
-    <recharge-coin :visible="gatewayWebDialog" :dialogType="gatewayWebDialogType" :recordOrder="recordOrder" :assetId="withdrawAssetId" :getwayID="getwayId"  @close='rechargeclose' ></recharge-coin>
+    <recharge-coin :visible="gatewayWebDialog" :defGateway="exchangeGateway" :dialogType="gatewayWebDialogType" :recordOrder="recordOrder" :assetId="withdrawAssetId" :gatewayId="getwayId"  @close='rechargeclose' ></recharge-coin>
     <!--联系方式提示-->
     <el-dialog
       :title="$t('m.transfer.gatewayContacts')"
@@ -266,10 +295,11 @@
   </div>
 </template>
 <script>
-  import {Apis} from 'zosjs-ws'
+  // import {Apis} from 'zosjs-ws'
   import RechargeCoin from '/path-components/ChargeCoin'
+  import {Apis} from 'zosjs-ws'
   import {ZOSInstance} from 'zos-wallet-js'
-  import { getTimezoneDate } from '/js-utils/until'
+  // import { formatProposalTime1 } from '/js-utils/until'
   import {ChainStore} from 'zosjs/es'
   import {getLocalStore, setLocalStore, removeLocalStore} from '/js-utils/storage'
   import {orderRecordList, getGatewayContact, getkycStatusList} from '/js-api/index'
@@ -300,19 +330,22 @@
         },
         rechargeDialog: false,
         rechargeAddress: '',
+        coupon: 0,
         withdrawAssetId: '',
         getwayId: undefined,
         recordList: [],
         showrecordList: [],
-        recordOrder: undefined,
+        recordOrder: false,
         gatewayContacts: [],
         gatewayContactsShowKey: '',
         gatewayContactsDialog: false,
         recordLoading: false,
         gatewayWebDialog: false,
+        gatewayDoing: false,
         gatewayWebDialogType: '',
         selectSymbol: '',
         selectLoanSymbol: '',
+        exchangeGateway: {},
         total: 0,
         kycRecordLoading: false,
         kycStatusList: false
@@ -322,6 +355,9 @@
     },
     methods: {
       // 导航栏文字样式改变
+      _getTimezoneDate (x) {
+        return ZOSInstance.getTimezoneDateByUnix(x)
+      },
       changePage (v, t) {
         if (t === 0) this.choosePageCash = v
         else this.choosePageBit = v
@@ -335,6 +371,8 @@
       },
       rechargeclose (update, updateKycRecode) {
         this.gatewayWebDialog = false
+        this.exchangeGateway = undefined
+        this.recordOrder = false
         if (update) this.updateRecordList()
         if (updateKycRecode) this.loadkycStatusList()
       },
@@ -349,6 +387,8 @@
         this.getwayId = undefined
         this.withdrawAssetId = assetId
         this.gatewayWebDialogType = 'withdraw'
+        this.recordOrder = false
+        this.exchangeGateway = undefined
         this.gatewayWebDialog = true
       },
       deposit (assetId) {
@@ -362,6 +402,8 @@
         this.getwayId = undefined
         this.withdrawAssetId = assetId
         this.gatewayWebDialogType = 'deposit'
+        this.recordOrder = false
+        this.exchangeGateway = undefined
         this.gatewayWebDialog = true
       },
       getRecordList (v) {
@@ -378,9 +420,23 @@
       },
       saveOrders (array) {
         for (let index = 0; index < array.length; index++) {
-          if (array[index].url === '') array.splice(index, 1)
+          if (array[index].url === '') array.splice(index--, 1)
         }
         setLocalStore(this.$store.state.userName + 'gatewayOrders', array)
+      },
+      isSameGateway (v) {
+        if (v.length <= 0) return false
+        let a = this.recordList.filter((val) => {
+          return v[0].orderNo === val.orderNo && ZOSInstance.getTimezoneDateByGmt(v[0].time) === val.time
+        })
+        return a.length > 0
+      },
+      isSameKyc (v) {
+        if (v.length <= 0) return false
+        let a = this.kycStatusList.filter((val) => {
+          return v[0].id === val.id && v[0].createdtime === val.createdtime
+        })
+        return a.length > 0
       },
       loadRecordList (v) {
         this.recordLoading = true
@@ -392,62 +448,60 @@
           let loadCount = 0
           let saveO = false
           gatewayOrders.forEach(element => {
-            orderRecordList(element.url, {userNo: userid}).then(res => {
-              let array = res.ordersList
-              if (res.ordersList === undefined || res.ordersList.length <= 0) {
-                element.url = ''
-                saveO = true
-                array = []
-              }
-              for (let index = 0; index < array.length; index++) {
-                let order = array[index]
-                order['url'] = element.url
-                order.time = getTimezoneDate(order.time)
-                order['gatewayName'] = ''
-                ZOSInstance.get_account(order.gatewayId).then(acc => {
-                  order.gatewayName = acc.get('name')
-                }).catch(err => {
-                  console.log(err)
-                })
-                let contactKey = order.gatewayId
-                if (contactKey !== '' && !this.gatewayContacts[contactKey]) {
-                  this.gatewayContacts[contactKey] = true
-                  getGatewayContact(element.url, {ceGatewayId: order.gatewayId}).then(res1 => {
-                    this.gatewayContacts[contactKey] = res1.contacts
-                  })
+            if (element.url && element.url.length > 3) {
+              orderRecordList(element.url, {userNo: userid}).then(res => {
+                let array = res.ordersList
+                if (res.ordersList === undefined || res.ordersList.length <= 0 || this.isSameGateway(res.ordersList)) {
+                  element.url = ''
+                  saveO = true
+                  array = []
                 }
-                this.recordList.push(order)
-              }
-              loadCount++
-              if (loadCount === gatewayOrders.length) {
-                this.recordLoading = false
-                this.recordList.sort(function (a, b) {
-                  let m = new Date(a.time).getTime()
-                  let n = new Date(b.time).getTime()
-                  return n - m
-                })
-                this.total = this.recordList.length
-                this.getRecordList(1)
-                if (saveO) this.saveOrders(gatewayOrders)
-              }
-            }).catch(err => {
-              console.log(err)
-              this.$message({
-                message: this.$t('m.httpUtils.warning') + element.url,
-                type: 'error'
+                for (let index = 0; index < array.length; index++) {
+                  let order = array[index]
+                  order['url'] = element.url
+                  order.time = ZOSInstance.getTimezoneDateByGmt(order.time)
+                  order['gatewayName'] = ''
+                  ZOSInstance.get_account(order.gatewayId).then(acc => {
+                    order.gatewayName = acc.get('name')
+                  }).catch(err => {
+                    console.log(err)
+                  })
+                  let contactKey = order.gatewayId
+                  if (contactKey !== '' && !this.gatewayContacts[contactKey]) {
+                    this.gatewayContacts[contactKey] = true
+                    getGatewayContact(element.url, {ceGatewayId: order.gatewayId}).then(res1 => {
+                      this.gatewayContacts[contactKey] = res1.contacts
+                    })
+                  }
+                  this.recordList.push(order)
+                }
+                loadCount++
+                if (loadCount === gatewayOrders.length) {
+                  this.recordLoading = false
+                  this.recordList.sort(function (a, b) {
+                    let m = new Date(a.time).getTime()
+                    let n = new Date(b.time).getTime()
+                    return n - m
+                  })
+                  this.total = this.recordList.length
+                  this.getRecordList(1)
+                  if (saveO) this.saveOrders(gatewayOrders)
+                }
+              }).catch(err => {
+                console.log(err)
+                loadCount++
+                if (loadCount === gatewayOrders.length) {
+                  this.recordLoading = false
+                  this.recordList.sort(function (a, b) {
+                    let m = new Date(a.time).getTime()
+                    let n = new Date(b.time).getTime()
+                    return n - m
+                  })
+                  this.total = this.recordList.length
+                  this.getRecordList(1)
+                }
               })
-              loadCount++
-              if (loadCount === gatewayOrders.length) {
-                this.recordLoading = false
-                this.recordList.sort(function (a, b) {
-                  let m = new Date(a.time).getTime()
-                  let n = new Date(b.time).getTime()
-                  return n - m
-                })
-                this.total = this.recordList.length
-                this.getRecordList(1)
-              }
-            })
+            }
           })
         } else {
           this.recordLoading = false
@@ -464,12 +518,15 @@
       handleClick (row, event, column) {
         if (row.orderType === 'TOPUP' && row.status === '1') {
           this.getwayId = row.gatewayId
-          this.withdrawAssetId = row.coinId
+          this.withdrawAssetId = row.assetId
           this.gatewayWebDialogType = 'deposit'
+          this.recordOrder = true
+          this.exchangeGateway = undefined
           this.gatewayWebDialog = true
         }
       },
       handleGatewayContacts (row) {
+        event.cancelBubble = true
         if (this.gatewayContacts[row.gatewayId] !== true) {
           this.gatewayContactsShowKey = row.gatewayId
           this.gatewayContactsDialog = true
@@ -490,12 +547,12 @@
         this.allLenderSelect = this.allLenderList
         ChainStore.getLoginAccountBalanceChange(2)
         this.removeAsset(this.allLenderSelect, '1.3.0')
-        ZOSInstance.get_account_allbalances(this.$store.state.userDataSid).then(res => {
+        ZOSInstance.get_account_allbalances(this.$store.state.userDataSid, 0xFFFF).then(res => {
+          this.coupon = res.coupon
           for (var index = 0; index < res.balances.length; index++) {
             let element = res.balances[index]
-            let data = {}
+            let data = element
             data['amount'] = element.amount
-            data['lock_amount'] = element.lock_amount
             data['isShow'] = true
             data['symbol'] = element.symbol
             data['precision'] = element.precision
@@ -521,6 +578,60 @@
           this.loading = false
         })
       },
+      doExchange () {
+        if (this.gatewayWebDialog) return
+        if (this.gatewayDoing) return
+        if (this.$store.state.exchangegateway === undefined) return
+        this.gatewayDoing = true
+        this.exchangeGateway = undefined
+        Apis.instance().db_api().exec('get_objects', [[this.$store.state.exchangegateway]]).then(res => {
+          if (res && res.length > 0) {
+            this.exchangeGateway = {
+              accountId: res[0].gateway_account,
+              assetId: res[0].allowed_assets[0],
+              assetProperty: 86,
+              authorId: res[0].def_auth,
+              authourAccount: undefined,
+              authourName: undefined,
+              authourUrl: undefined,
+              depositAmount: 0,
+              enable: true,
+              gatewayid: res[0].id,
+              name: '',
+              precision: 8,
+              realSymbol: 'USDT',
+              symbol: 'USDT',
+              url: res[0].url,
+              withdrawAmount: 0
+            }
+            this.withdrawAssetId = this.exchangeGateway.assetId
+            this.getwayId = this.exchangeGateway.gatewayid
+            this.recordOrder = false
+            Apis.instance().db_api().exec('get_objects', [[res[0].gateway_account]]).then(res => {
+              if (res && res.length > 0) {
+                this.exchangeGateway.name = res[0].name
+                this.gatewayWebDialog = true
+                this.gatewayWebDialogType = 'deposit'
+                this.gatewayDoing = false
+              }
+            }).catch(err => {
+              console.log(err)
+              this.gatewayDoing = false
+              this.$message({
+                message: err,
+                type: 'error'
+              })
+            })
+          }
+        }).catch(err => {
+          console.log(err)
+          this.gatewayDoing = false
+          this.$message({
+            message: err,
+            type: 'error'
+          })
+        })
+      },
       updateBalance () {
         if (this.$store.state.userDataSid && ChainStore.getLoginAccountBalanceChange(2)) {
           this.loadBalanceInfo()
@@ -534,6 +645,7 @@
           this.loadRecordList()
           this.loadBalanceInfo()
           this.loadAllRecodeUrl()
+          if (this.$route.query.type !== undefined && this.$route.query.type === 'exchange') this.doExchange()
         }).catch(err => {
           console.log(err)
           this.$message({
@@ -553,12 +665,12 @@
           let saveO = false
           kycStatus.forEach(element => {
             getkycStatusList(element.url, {chainid: userid}).then(res => {
-              console.log('getkycStatusList', res)
               if (res.ret_code === '1') {
                 let array = res.list
-                if (array.length <= 0) {
+                if (array.length <= 0 || this.isSameKyc(res.list)) {
                   element.url = ''
                   saveO = true
+                  array = []
                 }
                 this.kycStatusList = this.kycStatusList.concat(array)
               }
@@ -567,17 +679,13 @@
                 this.kycRecordLoading = false
                 if (saveO) {
                   for (let index = 0; index < kycStatus.length; index++) {
-                    if (kycStatus[index].url === '') kycStatus.splice(index, 1)
+                    if (kycStatus[index].url === '') kycStatus.splice(index--, 1)
                   }
                   setLocalStore(this.$store.state.userName + 'kycStatus', kycStatus)
                 }
               }
             }).catch(err => {
               console.log(err)
-              this.$message({
-                message: this.$t('m.httpUtils.warning') + element,
-                type: 'error'
-              })
               loadCount++
               if (loadCount === kycStatus.length) {
                 this.kycRecordLoading = false
@@ -640,10 +748,10 @@
           this.loadkycStatusList()
         }
         assetsIdArray.forEach(assetsId => {
-          Apis.instance().admin_api().exec('get_gateway', [this.$store.state.admin_id, assetsId]).then(res => {
+          ZOSInstance.get_gateway(this.$store.state.admin_id, assetsId).then(res => {
             loadCount++
             let gateNum = res.length
-            console.log('assetsIdArray', this.$store.state.admin_id, assetsId, gateNum)
+            // console.log('assetsIdArray', this.$store.state.admin_id, assetsId, gateNum)
             if (gateNum > 0) {
               for (var index = 0; index < res.length; index++) {
                 var element = res[index]
@@ -687,6 +795,7 @@
     },
     destroyed () {
       ChainStore.unsubscribe(this.updateBalance)
+      this.$root.eventHub.$off('exchange')
     },
     mounted () {
       this.loading = true
@@ -698,6 +807,9 @@
         })
       }
       ChainStore.subscribe(this.updateBalance)
+      this.$root.eventHub.$on('exchange', _ => {
+        this.doExchange()
+      })
     }
   }
 </script>
@@ -734,14 +846,6 @@
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
-  }
-  .fAptwk {
-    padding: 7px;
-    display: flex;
-    flex-direction: row;
-    flex: 1 1 auto;
-    position: relative;
-    height: 100px
   }
   .fAptwkW {
     display: flex;
@@ -868,11 +972,76 @@
     font-size: 16px;
     color: rgb(78, 92, 110);
   }
-  .hgJtCZ {
-    min-width: 360px;
-    border: 1px solid rgb(218, 225, 233);
-    border-radius: 5px;
+  .hgJtCZ1{
     margin-top: 10px;
+    padding: 16px;
+    min-width: 360px;
+    border-radius:4px;
+    border:1px solid #B7BEC6;
+    .item_top{
+      // display:flex;
+      // margin: 16px 0;
+      // height:35px;
+      // line-height:35px;
+      .icon_info{
+        // flex: 1;
+        display: inline-block;
+        min-width: calc(50% - 16px);
+        height: 35px;
+        line-height: 35px;
+        img{
+          margin-top: -8px;
+        }
+        span{
+          font-size:18px;
+          color:#191A5E;
+          font-weight:500;
+          font-family:PingFangSC-Medium,PingFangSC;
+        }
+      }
+      .operation_info{
+        // flex: 1;
+        display: inline-block;
+        min-width: calc(50% - 16px);
+        height: 35px;
+        line-height: 35px;
+      }
+    }
+    .item_middle{
+      // display:flex;
+      .item_middle_block{
+        // flex: 1;
+        display: inline-block;
+        min-width: calc(50% - 16px);
+        height: 35px;
+        line-height: 35px;
+        .item_title{
+          font-size:14px;
+          color:#191A5E;
+          font-weight:500;
+          font-family:PingFangSC-Medium,PingFangSC;
+          
+        }
+        .item_number{
+          font-size:22px;
+          color:#31364F;
+          font-weight:400;
+          font-family:Bebas-Regular,Bebas;
+        }
+      }
+    }
+    .item_info{
+      span{
+        display: inline-block;
+        margin-right: 10px;
+        height: 17px;
+        line-height: 17px;
+        font-size: 12px;
+        color:#797C89;
+        font-weight:400;
+        font-family:PingFangSC-Regular,PingFangSC;
+      }
+    }
   }
   .hgjLjo {
     -webkit-box-pack: justify;
@@ -887,6 +1056,7 @@
     color: rgb(78, 92, 110);
   }
   .bugpkJ {
+    padding: 16px;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
     background-color: rgb(255, 255, 255);
     height: 100%;
@@ -925,6 +1095,14 @@
     margin-bottom: 18px;
   }
 
+  .clearfix{
+    span{
+      font-size:14px;
+      color: #191A5E;
+      font-weight:500;
+      font-family:PingFangSC-Medium,PingFangSC;
+    }
+  }
   .clearfix:before,
   .clearfix:after {
     display: table;
@@ -936,17 +1114,25 @@
 
   .box-card {
     width: 49.5%;
+    .feel{
+      margin-top: 16px;
+      .feel_btn{
+        flex: 1;
+        margin-left: 16px;
+        .el-button{
+          color:#fff;
+          background-color:#5D5DFF;
+          border-radius:4px;
+        }
+      }
+    }
   }
-
   .lenderlistTop {
     background-color: #516AF6
   }
 
   .addAsset{
     border-top: 1px solid rgb(218, 225, 233);
-  }
-  .btn-group-account{
-    position: absolute; bottom: 10px; right:20px
   }
   #dialog-account .el-dialog__body{
     overflow: auto !important;

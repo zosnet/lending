@@ -79,8 +79,8 @@
               <p> {{$t('m.borrow.total')}}: {{nplData.capital + nplData.penaltyInterest | formatLegalCurrency(selectData.asset_to_loan.symbol, selectData.asset_to_loan.precision)}}</p>
               <br/>
               <p>{{$t('m.borrow.pawnNum')}}: {{nplData.collRecycle | formatLegalCurrency(selectData.asset_to_collateralize.symbol, selectData.asset_to_collateralize.precision)}}</p>
-              <p>{{ selectData.asset_to_collateralize.symbol + $t('m.investDetails.exchange') + selectData.asset_to_loan.symbol + $t('m.investDetails.proportion')}}: {{feedPrice}}</p>
-              <p>{{$t('m.borrow.pawnValue')}}: {{(nplData.collRecycle) * feedPrice| formatLegalCurrency(selectData.asset_to_loan.symbol)}}</p>
+              <p>{{ selectData.asset_to_loan.symbol + $t('m.investDetails.exchange') + selectData.asset_to_collateralize.symbol + $t('m.investDetails.proportion')}}: {{feedPrice}}</p>
+              <p>{{$t('m.borrow.pawnValue')}}: {{(nplData.collRecycle) / feedPrice | formatLegalCurrency(selectData.asset_to_loan.symbol)}}</p>
               <!--投资者保本率-->
               <p>{{$t('m.borrow.principalGuaranteeRate')}}: {{recycleInvesterLoseRate}}%</p>
               <!--偿还金额-->
@@ -200,7 +200,7 @@
           return 0
         } else if (assetsArr.length > 0) {
           this.zosprecision = assetsArr[0].precision
-          return (assetsArr[0].amount / Math.pow(10, assetsArr[0].precision))
+          return assetsArr[0].amount
         }
       }
     },
@@ -238,7 +238,7 @@
         if (!assetsArr || assetsArr.length === 0) {
           balanAmount = 0
         } else if (assetsArr.length > 0) {
-          balanAmount = assetsArr[0].amount / Math.pow(10, assetsArr[0].precision)
+          balanAmount = assetsArr[0].amount
         }
         return balanAmount
       },
@@ -346,13 +346,6 @@
           console.log(err)
         })
       },
-      getBitlenderOption (loanid) {
-        ZOSInstance.getBitlenderOption(loanid).then(res => {
-          this.recycleInvesterLoseRate = res.options.principal_guarantee_rate
-        }).catch(err => {
-          console.log(err)
-        })
-      },
       handleCurrentChange (val) {
         if (this.listQuery.page === val) return
         this.listQuery.page = val
@@ -388,8 +381,9 @@
       },
       bitlenderUpdate () {
         ZOSInstance.get_asset_exchange_feed(this.selectData.asset_to_loan.id, this.selectData.asset_to_collateralize.id, 1).then(res => {
-          this.feedPrice = LendInstance.calcFeedPrice(res.current_feed.settlement_price, this.selectData.asset_to_loan.id, this.selectData.asset_to_loan.precision, this.selectData.asset_to_collateralize.id, this.selectData.asset_to_collateralize.precision)
-          ZOSInstance.getBitlenderOption(this.selectData.asset_to_loan.id).then(res => {
+          this.feedPrice = LendInstance.calcFeedPriceView(res.current_feed.settlement_price, this.selectData.asset_to_loan.id, this.selectData.asset_to_loan.precision, this.selectData.asset_to_collateralize.id, this.selectData.asset_to_collateralize.precision)
+          let type = ZOSInstance.getOptionKeyToValue(this.selectData.repayment_type)
+          ZOSInstance.getBitlenderOption(this.selectData.asset_to_loan.id, type).then(res => {
             this.recycleInvesterLoseRate = res.options.principal_guarantee_rate
             this.conformDialog = true
           }).catch(err => {
@@ -419,7 +413,7 @@
               message: this.$t('m.badloans.subSucc'),
               type: 'success'
             })
-            this.getCarrierOrderList()
+            setTimeout(this.getCarrierOrderList(), 6000)
           }).catch(err => {
             console.log(err)
             this.conformLoading = false

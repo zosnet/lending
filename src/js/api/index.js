@@ -38,7 +38,10 @@ export const getUserPhone = (url, params) => {
 }
 // 获取验证码
 export const getSmsCode = (url, params) => {
-  return http.fetchPost(url, params)
+  return http.fetchPost(url + '/zos-kyc/sms/captcha', params)
+}
+export const checkSmsCode = (url, params) => {
+  return http.fetchPost(url + '/zos-kyc/sms/checkcaptcha', params)
 }
 // 绑定手机号
 export const bindPhone = (url, params) => {

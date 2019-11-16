@@ -24,13 +24,11 @@
                   </el-select>
               </el-form-item>
               <el-form-item :label="$t('m.transfer.ZHM')" prop="accountTo">
-                  <el-input v-model="ruleForm.accountTo" @keyup.native="ruleForm.accountTo=ruleForm.accountTo.toLocaleLowerCase()"></el-input>
+                  <el-input v-model="ruleForm.accountTo" @keyup.native="ruleForm.accountTo=ruleForm.accountTo.toLocaleLowerCase()" @blur="checkEncMsg()"></el-input>
               </el-form-item>
               <el-form-item :label="$t('m.transfer.ZZSL')" prop="depositAmount">
-                  <!-- <span>{{$t('m.transfer.accountNum')}}: {{ruleForm.depositAmount}}</span> -->
                   <el-input v-model="ruleForm.depositAmount" @keyup.native="depoValid"></el-input>
-                  <span>{{$t('m.transfer.KY')}}: {{balances.amount / Math.pow(10, balances.precision)}} {{balances.symbol}}</span>
-                  <!-- <span>{{$t('m.transfer.KY')}}: {{balances.amount === 0 ? 0 : (balances.amount / Math.pow(10, balances.precision) | formatLegalCurrency(balances.symbol, balances.precision))}}</span> -->
+                  <span>{{$t('m.transfer.KY')}}: {{balances.amount | formatLegalCurrencys('',balances.precision)}} {{balances.symbol}}</span>
               </el-form-item>
               <!--到账数量-->
               <!-- <el-form-item :label="$t('m.transfer.accountNum')"  style="width: 300px">
@@ -38,6 +36,7 @@
               </el-form-item> -->
               <el-form-item :label="$t('m.transfer.BZ')" prop="mome">
                   <el-input type="textarea" v-model="ruleForm.mome"></el-input>
+                  <span class="warn_block" v-if="isEncMsg == false">{{$t('m.transfer.warn_lock')}}</span>
               </el-form-item>
 
               <p class="feel margin-l20">
@@ -130,7 +129,6 @@
 </template>
 <script>
 import { MessageBox } from 'element-ui'
-import { checkUsernameLength } from '/js-utils/validate'
 import getzosdialog from '/path-components/Chain/getzosDialog'
 import couponDialog from '/path-components/Chain/couponDialog'
 import {ZOSInstance} from 'zos-wallet-js'
@@ -157,7 +155,7 @@ export default {
       if (!value) {
         // '请输入转账数量'
         callback(new Error(this.$t('m.transfer.inputNum')))
-      } else if (v > this.balances.amount / Math.pow(10, this.balances.precision)) {
+      } else if (v > this.balances.amount) {
         // 可用, '数量不足，请充币'
         callback(new Error(this.$t('m.transfer.KY') + this.balances.symbol + this.$t('m.transfer.nullNum')))
       } else {
@@ -179,9 +177,6 @@ export default {
       if (value === '' || value === undefined) {
         // '请输入账户名'
         callback(new Error(this.$t('m.transfer.inputName')))
-      } else if (checkUsernameLength(value)) {
-        // '请输入正确的账户名'
-        callback(new Error(this.$t('m.transfer.inputRight')))
       } else if (value === this.$store.state.userName) {
         // '不能转账至自己的账户'
         callback(new Error(this.$t('m.transfer.transferOwner')))
@@ -235,6 +230,7 @@ export default {
       zosPrecision: 2,
       zosAmount: 0,
       feel: 0,
+      isEncMsg: true,
       couponVisible: false,
       zosDialog: false,
       allBalances: {
@@ -280,11 +276,11 @@ export default {
           return item.asset_id === '1.3.0'
         })
         this.zosPrecision = arr.length < 1 ? 2 : arr[0].precision
-        this.zosAmount = arr.length < 1 ? 0 : arr[0].amount / Math.pow(10, arr[0].precision)
+        this.zosAmount = arr.length < 1 ? 0 : arr[0].amount
       }
     },
     getAccBalance () {
-      ZOSInstance.get_account_allbalances(this.$store.state.userDataSid).then(res => {
+      ZOSInstance.get_account_allbalances(this.$store.state.userDataSid, 0).then(res => {
         this.allBalances = res
         if (this.transferId !== null) this._getBalances()
         this._zosAmount(this.allBalances.balances)
@@ -330,11 +326,11 @@ export default {
           newstr = this.ruleForm.depositAmount.substring(pos + 1) // 小数点后面的值
           var yong = this.ruleForm.depositAmount.substring(0, pos + 1)
           newstr = newstr.replace(/[^0-9]/ig, '')
-          if (typeof (this.transferData.precision) === 'undefined') {
-            this.transferData.precision = 2
+          if (typeof (this.balances.precision) === 'undefined') {
+            this.balances.precision = 2
           }
-          if (newstr.length >= this.transferData.precision + 1) {
-            newstr = newstr.substring(0, this.transferData.precision)
+          if (newstr.length >= this.balances.precision + 1) {
+            newstr = newstr.substring(0, this.balances.precision)
           }
           this.ruleForm.depositAmount = yong + newstr
         }
@@ -353,6 +349,7 @@ export default {
       })
     },
     submitForm (formName) {
+      this.checkEncMsg()
       this.userName = this.$store.state.userName
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -360,6 +357,11 @@ export default {
         } else {
           return false
         }
+      })
+    },
+    checkEncMsg () {
+      ZOSInstance.is_enc_memo(this.$store.state.userDataSid, this.ruleForm.accountTo).then(res => {
+        this.isEncMsg = res
       })
     },
     transferConfrom (formName) {
@@ -410,7 +412,7 @@ export default {
         console.log(err)
         this.loadings = false
         this.$message({
-          message: err,
+          message: err.Error,
           type: 'error'
         })
       })
@@ -428,6 +430,9 @@ export default {
   }
 }
 </script>
-<style>
-
+<style scopd>
+.warn_block{
+  color: #f56c6c;
+  font-size: 12px;
+}
 </style>

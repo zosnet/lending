@@ -11,19 +11,19 @@
           <li><span>{{$t('m.information.username')}}:</span> {{userName}}</li>
           <li>
             <span>{{$t('m.information.phone')}}:</span>
-            <span v-if="phone">
-              {{phone | desensitization}}
+            <span v-if="infos.phone">
+              {{infos.phone | desensitization}}
             </span>
             <!--<span v-else>{{$t('m.information.noBind')}}</span>-->
             <a @click="$store.state.userDataSid ? popupOpen=true : userPassword = true" :style="phone?{'margin-left': '50px'}: ''">{{phone ? $t('m.information.updatePhone') : $t('m.information.bind')}}</a>
           </li>
           <li>
             <span>{{$t('m.information.mail')}}:</span>
-            <span v-if="mail">
-              {{mail | desensitization}}
+            <span v-if="infos.mail">
+              {{infos.mail | desensitizationm}}
             </span>
             <!--<span v-else>{{$t('m.information.noBind')}}</span>-->
-            <a @click="popupsOpen = true" :style="mail?{'margin-left': '50px'}: ''">{{mail ? $t('m.information.reBindEmail') : $t('m.information.bindEmail')}}</a>
+            <a @click="popupsOpen = true" :style="infos.mail?{'margin-left': '50px'}: ''">{{infos.mail ? $t('m.information.reBindEmail') : $t('m.information.bindEmail')}}</a>
           </li>
           <!--注册人-->
           <li><span>{{$t('m.information.regName')}}:</span> {{registrant}}</li>
@@ -152,7 +152,7 @@
       >
         <el-form :model="mForm" status-icon :rules="mRules" ref="mForm" label-width="100px" class="demo-ruleForm"
                  v-loading="loadingPhone"
-                 :element-loading-text="$t('m.loading')">
+                 :element-loading-text="$t('m.borrow.submiting')">
           <!--手机号-->
           <el-form-item :label="$t('m.information.phone')" prop="phone">
             <el-input :placeholder="$t('m.information.inputPhone')" v-model="mForm.phone" class="input-with-select">
@@ -172,12 +172,12 @@
           <!--验证码-->
           <el-form-item :label="$t('m.register.vaCode')" prop="keyCode">
             <el-input type="text" v-model="mForm.keyCode" style="width: 50%" auto-complete="off" class="fl"></el-input>
-            <y-button :text="labelText"
+            <y-button v-if="this.$store.state.ucurl !== undefined" :text="labelText"
                       class="fr"
+                      :disabled="!isShowSms"
                       :classStyle="'main-btn'"
                       @btnClick="getCode"
             ></y-button>
-            <!--:classStyle="validDis && isShowSms ? 'main-btn' : 'disabled-btn'"-->
           </el-form-item>
           <el-form-item>
             <p class="text-right margin-t10">
@@ -275,7 +275,7 @@
   // import loginUserCenter from '@/components/LoginUserCenter'
   import loginUser from '/path-components/Login/passwordLogin'
   import YButton from '/path-components/element/YButton'
-  import { getSmsCode } from '/js-api/index'
+  import { getSmsCode, checkSmsCode } from '/js-api/index'
   import YShelf from '/path-components/element/shelf'
   import vueCropper from 'vue-cropper'
   import YPopup from '/path-components/element/popup'
@@ -283,7 +283,7 @@
   import couponDialog from '/path-components/Chain/couponDialog'
   import passwordDialog from '/path-components/Login/passwordDialog'
   import getzosdialog from '/path-components/Chain/getzosDialog'
-  import { ChainStore } from 'zosjs/es'
+  import { ChainStore, ChainValidation } from 'zosjs/es'
   export default {
     components: {
       couponDialog,
@@ -309,6 +309,8 @@
         if (value === '') {
           // '请输入密码'
           callback(new Error(this.$t('m.inputPassword')))
+        } else if (this.validatePassword(value) !== null) {
+          callback(new Error(this.passerror))
         } else {
           if (this.passwordForm.checkPass !== '') {
             this.$refs.passwordForm.validateField('checkPass')
@@ -332,8 +334,12 @@
         if (value === '') {
           // '请输入手机号'
           callback(new Error(this.$t('m.information.inputPhone')))
-        } else if (!/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/.test(value)) {
-          callback(this.$t('m.bankcard.idNumFormat'))
+        } else if (this.mForm.phoneCode === '') {
+          callback(new Error(this.$t('m.information.selcode')))
+        } else if (this.infos.phoneCode === this.mForm.phoneCode && this.infos.phone === value) {
+          callback(new Error(this.$t('m.information.sameInput')))
+        } else if (!this.checkPhone(value)) {
+          callback(this.$t('m.bankcard.phoneFormat'))
         } else {
           callback()
         }
@@ -384,6 +390,7 @@
         // '修改资金密码
         popupTitle: this.$t('m.information.updateAsset'),
         labelPosition: 'top',
+        passerror: null,
         passwordForm: {
           passOld: '',
           pass: '',
@@ -407,15 +414,16 @@
         mForm: {
           phone: '',
           keyCode: '',
-          phoneCode: '',
-          mail: ''
+          phoneCode: '0086'
         },
         mForms: {
           mail: ''
         },
         code: [
           {name: this.$t('m.information.china'), code: '0086'},
-          {name: this.$t('m.information.cad'), code: '001'}
+          {name: this.$t('m.information.cad'), code: '001'},
+          {name: this.$t('m.information.ph'), code: '0063'},
+          {name: this.$t('m.information.sg'), code: '0065'}
         ],
         mRules: {
           phone: [
@@ -451,9 +459,8 @@
         registrant: '',
         referees: '',
         userInfo: {},
-        phone: '',
+        infos: {},
         loadingMail: false,
-        mail: '',
         loginUserVis: false,
         operation: 0
       }
@@ -484,7 +491,7 @@
       },
       'mForm.phone': {
         handler: function () {
-          if (this.mForm.phone && (/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/.test(this.mForm.phone))) {
+          if (this.mForm.phone && this.checkPhone(this.mForm.phone)) {
             this.validDis = true
           } else {
             this.validDis = false
@@ -496,11 +503,50 @@
     filters: {
       // 手机号脱敏
       desensitization: val => {
-        const phoneNum = val.replace(/^(\d{3})\d+(\d{4})$/, '$1****$2')
+        if (val === undefined || val.length < 4) return val
+        const phoneNum = val.replace(/^(\d{3})\d+(\d{5})$/, '$1****$2')
         return phoneNum
+      },
+      // 邮箱脱敏
+      desensitizationm: val => {
+        if (val === undefined || val.length < 4) return val
+        let vals = val.toString()
+        let ruten = vals.substring(2, 7)
+        return vals.replace(ruten, '*****')
       }
     },
     methods: {
+      checkPhone (value) {
+        if (this.mForm.phoneCode === '0086') {
+          return (/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/.test(value))
+        } else if (this.mForm.phoneCode === '001') {
+          return (/^([2-9]\d{2}[2-9](?!11))\d{6}$/.test(value))
+        } else if (this.mForm.phoneCode === '0063') {
+          return (/^(90[0,5-9]|91[0-9]|92[0-9]|93[0-9]|94[0-9]|95[0156]|96[56]|97[0,3-9]|98[19]|99[2,4-9])\d{7}$/.test(value))
+        } else if (this.mForm.phoneCode === '0065') {
+          return (/^([89])\d{7}$/.test(value))
+        }
+      },
+      validatePassword (value) {
+        let errorstr = null
+        if (value === '') {
+          errorstr = this.$t('m.register.name_input.empty')
+        } else {
+          let localePaths = ChainValidation.is_password_error(value)
+          if (localePaths) {
+            // console.log('error name', localePaths)
+            let localePath = localePaths.split('.')
+            if (localePath.length === 2) {
+              errorstr = this.$t('m.register.name_input.' + localePath[0])
+              errorstr += this.$t('m.register.name_input.' + localePath[1])
+            } else {
+              errorstr = localePaths
+            }
+          }
+        }
+        this.passerror = errorstr
+        return errorstr
+      },
       handleClosePhone () {
         this.popupOpen = false
       },
@@ -563,10 +609,6 @@
       },
       //  获得用户的密码
       updatePassWord () {
-        // name,
-        //   old_password,
-        //   new_password,
-        //   fee_asset_id = "1.3.0" //手续费资产ID
         let isTrue = ZOSInstance.accountLogin(this.$store.state.userName, this.passwordForm.passOld)
         if (!isTrue) {
           this.$message({
@@ -578,6 +620,7 @@
         }
         ZOSInstance.set_chain_password(this.$store.state.userName, this.passwordForm.passOld, this.passwordForm.pass)
           .then(res => {
+            console.log(res)
             return ZOSInstance.broadcastTransaction(res.tr)
           })
           .then(_ => {
@@ -606,8 +649,12 @@
             this.userPassword = true
           } else {
             let infos = JSON.parse(info)
-            this.mail = this.mForms.mail = infos.mail
-            this.$store.state.userInfo.phone = this.phone = infos.mobile
+            this.infos.phone = infos.mobile
+            this.infos.phoneCode = infos.zone
+            this.infos.mail = infos.mail
+            this.mForms.mail = infos.mail
+            this.mForm.phoneCode = infos.zone
+            this.$store.state.userInfo.phone = infos.mobile
           }
         })
       },
@@ -645,11 +692,6 @@
         document.execCommand('Copy')// 复制必须放在点击函数里面的外层
         this.copyDialog = true
       },
-      userCenter () {
-        this.userPassword = false
-        // this.getPhone()
-        this.decodeUserInfo()
-      },
       // 短信验证码 倒计时开始
       timing () {
         this.isShowSms = false
@@ -670,9 +712,12 @@
       submitFormPhone (formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            this.operation = 0
-            // this.loadingPhone = true
-            this.comfirmPassword = true
+            this.checkCode().then((data) => {
+              if (data) {
+                this.operation = 0
+                this.comfirmPassword = true
+              }
+            })
           } else {
             console.log('error submit!!')
             return false
@@ -689,6 +734,13 @@
       submitFormMail (formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
+            if (this.infos.mail === this.mForms.mail) {
+              this.$message({
+                type: 'warning',
+                message: this.$t('m.information.sameInput')
+              })
+              return false
+            }
             this.operation = 1
             this.loadingMail = true
             this.comfirmPassword = true
@@ -705,35 +757,79 @@
           this.updateMail()
         }
       },
-      // 发验证码
-      getCode () {
-        console.log(this.$store.state.settingsAPIs, 'this.$store.state.settingsAPIs.sms_send')
-        // 到计时
-        this.timing()
-        const strParams = `${this.mForm.phoneCode},5`
-        getSmsCode(this.$store.state.settingsAPIs, {
-          parameter: strParams,
+      // 检查证码
+      checkCode () {
+        this.loadingPhone = true
+        let ucUrl = ZOSInstance.ReplaceAddress(this.$store.state.ucurl)
+        return checkSmsCode(ucUrl, {
+          captcha: this.mForm.keyCode,
           type: '0003',
-          phoneNo: this.mForm.phone,
-          nationCode: this.mForm.phoneCode})
+          phoneNo: this.mForm.phone})
           .then(res => {
-            if (res.result === 0) {
-              this.$message({
-                type: 'success',
-                message: this.$t('m.information.sendSucc')
-              })
+            this.loadingPhone = false
+            if (Number(res.ret_code) === 1) {
+              return true
             } else {
               this.$message({
                 type: 'warning',
-                message: this.$t('m.information.sendErr')
+                message: this.$t('m.information.codeErr') + res.ret_msg
               })
+              return false
             }
+          }).catch(err => {
+            this.loadingPhone = false
+            console.log(err)
+            this.$message({
+              type: 'warning',
+              message: err
+            })
+            return false
           })
+      },
+      // 发验证码
+      getCode () {
+        this.$refs['mForm'].validateField('phoneCode')
+        this.$refs['mForm'].validateField('phone', (valid) => {
+          if (!valid && this.mForm.phoneCode) {
+            let ucUrl = ZOSInstance.ReplaceAddress(this.$store.state.ucurl)
+            console.log(ucUrl, 'this.$store.state.settingsAPIs.sms_send')
+            // 到计时
+            this.timing()
+            const strParams = `${this.mForm.phoneCode},5`
+            this.loadingPhone = true
+            getSmsCode(ucUrl, {
+              data: strParams,
+              type: '0003',
+              phoneNo: this.mForm.phone,
+              nationCode: this.mForm.phoneCode})
+              .then(res => {
+                if (Number(res.ret_code) === 1) {
+                  this.$message({
+                    type: 'success',
+                    message: this.$t('m.information.sendSucc')
+                  })
+                } else {
+                  this.$message({
+                    type: 'warning',
+                    message: this.$t('m.information.sendErr') + res.ret_msg
+                  })
+                }
+                this.loadingPhone = false
+              }).catch(err => {
+                this.loadingPhone = false
+                console.log(err)
+                this.$message({
+                  type: 'warning',
+                  message: err
+                })
+              })
+          }
+        })
       },
       // 绑定邮箱操作
       updateMail () {
-        let param = {mobile: this.mForm.phone, zone: this.mForm.phoneCode, mail: this.mForms.mail}
-        ZOSInstance.get_encode_memo(this.$store.state.userDataSid, this.$store.state.adminNotifyId, JSON.stringify(param)).then(res => {
+        let param = {mobile: this.infos.phone, zone: this.infos.phoneCode, mail: this.mForms.mail}
+        ZOSInstance.get_encode_memo(this.$store.state.userDataSid, this.$store.state.adminNotifyId, JSON.stringify(param), 1).then(res => {
           let authorData = {
             from: res.from,
             to: res.to,
@@ -752,7 +848,7 @@
                 if (res) {
                   this.loadingMail = false
                   this.popupsOpen = false
-                  this.mail = this.mForms.mail
+                  this.infos.mail = this.mForms.mail
                   this.$message({
                     type: 'success',
                     // '提交成功'
@@ -765,19 +861,24 @@
                 console.log(err)
                 this.$message({
                   type: 'warning',
-                  message: err
+                  message: err.toString()
                 })
               })
           })
           .catch(err => {
             this.loadingMail = false
             console.log(err)
+            this.$message({
+              type: 'warning',
+              message: err.toString()
+            })
           })
       },
       // 绑定手机号操作
       updatePhone () {
-        let param = {mobile: this.mForm.phone, zone: this.mForm.phoneCode, mail: this.mForms.mail}
-        ZOSInstance.get_encode_memo(this.$store.state.userDataSid, this.$store.state.adminNotifyId, JSON.stringify(param)).then(res => {
+        let param = {mobile: this.mForm.phone, zone: this.mForm.phoneCode, mail: this.infos.mail}
+        this.loadingPhone = true
+        ZOSInstance.get_encode_memo(this.$store.state.userDataSid, this.$store.state.adminNotifyId, JSON.stringify(param), 1).then(res => {
           let authorData = {
             from: res.from,
             to: res.to,
@@ -796,26 +897,29 @@
                 if (res) {
                   this.loadingPhone = false
                   this.popupOpen = false
-                  this.$store.state.userInfo.phone = this.phone = this.mForm.phone
+                  this.$store.state.userInfo.phone = this.infos.phone = this.mForm.phone
+                  this.infos.phoneCode = this.mForm.phoneCode
                   this.$message({
                     type: 'success',
                     // '提交成功'
                     message: this.$t('m.badloans.subSucc')
                   })
                 }
-              })
-              .catch(err => {
+              }).catch(err => {
                 this.loadingPhone = false
                 console.log(err)
                 this.$message({
                   type: 'warning',
-                  message: err
+                  message: err.toString()
                 })
               })
-          })
-          .catch(err => {
+          }).catch(err => {
             this.loadingPhone = false
             console.log(err)
+            this.$message({
+              type: 'warning',
+              message: err.toString()
+            })
           })
       },
       editAvatar () {
@@ -833,7 +937,6 @@
         } else if (this.operation === 1) {
           this.updateMailCall(data)
         } else if (this.operation === 2) {
-          console.log(1111)
           this.couponCallback(data)
         }
       },
@@ -844,7 +947,6 @@
           // 领取优惠；不广播，返回Transaction
           ZOSInstance.account_coupon(this.$store.state.userDataSid)
             .then(res => {
-              console.log('res:...', res)
               return ZOSInstance.broadcastTransaction(res.tr)
             })
             .then(result => {
@@ -853,6 +955,7 @@
                 // 本月成功领取个
                 this.couponStatus = `${this.$t('m.information.getSucc') + zosnum}ZOS,${this.$t('m.information.couponsTotal')}10.00000 ZOS!`
                 this.couponVisible = true
+                this.$store.state.coupon.canReceiveCoupon = false
                 ChainStore.setLoginAccount(this.$store.state.userDataSid)
                 ChainStore.notifySubscribers()
               }

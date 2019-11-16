@@ -6,7 +6,7 @@ export const setDomain = (name) => {
   domainName = name
 }
 export const setStore = (name, content) => {
-  if (!name) return
+  if (!name || content === undefined) return
   if (typeof content !== 'string') {
     content = JSON.stringify(content)
   }
@@ -28,9 +28,8 @@ export const removeStore = name => {
   if (!name) return
   window.sessionStorage.removeItem(domainName + name)
 }
-
 export const setLocalStore = (name, content) => {
-  if (!name) return
+  if (!name || content === undefined) return
   if (typeof content !== 'string') {
     content = JSON.stringify(content)
   }
@@ -53,13 +52,13 @@ export const removeLocalStore = name => {
   window.localStorage.removeItem(domainName + name)
 }
 
-var _traceTimer = Date.now()
+// var _traceTimer = Date.now()
 export const traceTimer = name => {
-  if (name === '0') {
-    _traceTimer = Date.now()
-  } else {
-    console.log(name, Date.now() - _traceTimer)
-  }
+  // if (name === '0') {
+  //   _traceTimer = Date.now()
+  // } else {
+  //   console.log(name, Date.now() - _traceTimer)
+  // }
 }
 export const isTheme = configTheme => {
   if (configTheme === '1a1d5c' || configTheme === '95262b' || configTheme === '1a2d5c') return true

@@ -18,7 +18,7 @@
             </template>
           </el-table-column>
           <!--已投金额-->
-          <el-table-column width="180" :label="$t('m.investList.invested')">
+          <el-table-column width="160" :label="$t('m.investList.invested')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.current_invest.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
@@ -42,7 +42,7 @@
             </template>
           </el-table-column>
           <!--借款金额-->
-          <el-table-column width="180" :label="$t('m.investList.allInvestSum')">
+          <el-table-column width="160" :label="$t('m.investList.allInvestSum')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.amount_to_loan.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
@@ -52,15 +52,15 @@
           <el-table-column width="150" :label="$t('m.investList.timeRate')">
             <template slot-scope="scope">
               <span>
-                {{scope.row.loan_period}}{{$t('m.month')}}
+                {{scope.row.loan_period}}({{showPeriodUint(scope.row.repayment_type)}})
               </span><br>
               <span>
-                {{scope.row.interest_rate.interest_rate | converPercentage(100)}}/{{$t('m.year')}}
+                {{scope.row.interest_rate.interest_rate | converPercentage(100)}}/{{showPeriodUint(scope.row.repayment_type)}}
               </span>
             </template>
           </el-table-column>
           <!--抵押物数量/价值-->
-          <el-table-column width="200" :label="$t('m.borrowing.quantity')">
+          <el-table-column width="190" :label="$t('m.borrowing.quantity')">
             <template slot-scope="scope">
               {{scope.row.amount_to_collateralize.amount / Math.pow(10, scope.row.asset_to_collateralize.precision) | formatLegalCurrency(scope.row.asset_to_collateralize.symbol, scope.row.asset_to_collateralize.precision)}}
               <div class="secondaryInfo"><span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
@@ -78,7 +78,7 @@
           </div>
         </el-table>
         <div style="text-align: right">
-          <el-pagination background @current-change="handleCurrentChange" :current-page="listQuery.page" :page-size="pageSize" layout="total, prev, pager, next, jumper" :total="total">
+          <el-pagination background @current-change="handleCurrentChange" :current-page="listQuery.page" :page-size="listQuery.limit" layout="total, prev, pager, next, jumper" :total="total">
           </el-pagination>
         </div>
       </div>
@@ -101,7 +101,6 @@
     data () {
       return {
         errorImg01: 'this.src="' + require('/path-static/images/no-img.png') + '"',
-        pageSize: 10,
         appointtemI: {},
         borrowListShow: 0,
         total: null,
@@ -171,6 +170,9 @@
           }
         })
       },
+      showPeriodUint (x) {
+        return this.$t('m.invest.perioduint' + x.repayment_period_uint)
+      },
       addDYW (item) {
         let itemObj = {}
         itemObj = item
@@ -186,9 +188,9 @@
           if (v === 1) {
             this.start = 0
           } else {
-            this.start = (this.listQuery.page - 1) * this.pageSize
+            this.start = (this.listQuery.page - 1) * this.listQuery.limt
           }
-          ZOSInstance.get_loan_orders([this.userId], [], statusArry, this.start, this.pageSize).then(res => {
+          ZOSInstance.get_loan_orders([this.userId], [], statusArry, this.start, this.listQuery.limit).then(res => {
             this.borrowList = res
             this.total = listNum
             if (this.borrowList.length === 0) {

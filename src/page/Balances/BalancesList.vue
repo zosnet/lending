@@ -1,27 +1,27 @@
   <template>
     <div v-loading="loading" :element-loading-text="$t('m.loading')" style="min-height: 10vw;" class="jyNVPQ">
       <div v-if="!loading">
-        <div>          
+        <div>
           <el-table
             :data="refunding"
             class="curp"
             style="width: 100%"
             @row-click="handleClick"
             stripe>
-            <!--标题--> 
+            <!--标题-->
              <el-table-column width="100" :label="$t('m.balance.index')">
-              <template slot-scope="scope">                
+              <template slot-scope="scope">
                 {{scope.row.index}}
               </template>
             </el-table-column>
             <el-table-column width="180" :label="$t('m.balance.optype')">
-              <template slot-scope="scope">                
+              <template slot-scope="scope">
                 {{$t('m.balance_utypes.' + scope.row.utype)}}
               </template>
             </el-table-column>
             <el-table-column width="180" :label="$t('m.balance.opinfo')">
               <template slot-scope="scope">
-                <span class="currency">{{scope.row.info}}</span>                
+                <span>{{scope.row.info}}</span>
               </template>
             </el-table-column>
             <el-table-column width="180" :label="$t('m.balance.opbalance')">

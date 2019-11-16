@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="w margin-b10 secondary">
+    <div class="wn margin-b10 secondary">
       <div class="nav-secondary">
         <router-link to="/borrow/borrows" class="dHMsll gTHKWe">
           <a @click="changePage(1)" class="dHMsll gTHKWe" >

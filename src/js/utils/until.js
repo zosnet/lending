@@ -46,15 +46,48 @@ export const loginToPath = (ZOSIn, thisVm, loginPath) => {
   thisVm.$store.state.loginPath = undefined
   thisVm.$router.push(loginPath)
 }
-export const getTimezoneDate = (dateString) => {
+
+export const formatProposalTime1 = (str) => {
+  function add (m) { return m < 10 ? '0' + m : m }
+  let time = new Date(str)
+  let y = time.getFullYear()
+  let m = time.getMonth() + 1
+  let d = time.getDate()
+  let h = time.getHours()
+  let mm = time.getMinutes()
+  let s = time.getSeconds()
+  return y + '-' + add(m) + '-' + add(d) + ' ' + add(h) + ':' + add(mm) + ':' + add(s)
+}
+
+export const getTimezoneDate = (dateString, offset = 0) => {
   if (dateString === undefined || dateString === null || dateString.length <= 0) return 'N/A'
   if (dateString[dateString.length - 1] !== 'Z') dateString = dateString + 'Z'
   let dateObj = new Date(dateString)
   if (dateObj.getTime() <= 0) {
     return 'N/A'
   }
+  if (offset > 0) {
+    let east9time = dateObj.getTime() - offset * 60 * 60 * 1000
+    dateObj = new Date(east9time)
+  }
   return formatDate(dateObj)
 }
+export const getTimezoneDateNum = (str, offset = 0) => {
+  let dateString = formatProposalTime1(str)
+  if (dateString === undefined || dateString === null || dateString.length <= 0) return 'N/A'
+  if (dateString[dateString.length - 1] !== 'Z') dateString = dateString + 'Z'
+  dateString = dateString.toString().replace(/-/g, '/')
+  let dateObj = new Date(dateString)
+  if (dateObj.getTime() <= 0) {
+    return 'N/A'
+  }
+  if (offset > 0) {
+    let east9time = dateObj.getTime() - offset * 60 * 60 * 1000
+    dateObj = new Date(east9time)
+  }
+  return formatDate(dateObj)
+}
+
 export const formatDate = (date, fmt = 'yyyy-MM-ddThh:mm:ss') => {
   var o = {
     'M+': date.getMonth() + 1, // 月份

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="w margin-b10 secondary">
+    <div class="wn margin-b10 secondary">
       <div class="nav-secondary">
         <router-link to="/admin/params" class="dHMsll gTHKWe">
           <a @click="changePage(1)" class="dHMsll gTHKWe" >
@@ -31,6 +31,22 @@
             <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===4}">
               <!--不良资产(平仓)-->
               <div class="bgdPDV">{{$t('m.badloan_selling')}}</div>
+            </div>
+          </a>
+        </router-link>
+        <router-link :to="{path:'/admin/carriers',query: {type: 15}}" class="dHMsll gTHKWe">
+          <a @click="changePage(5)" class="dHMsll gTHKWe">
+            <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===5}">
+              <!--运营商参数-->
+              <div class="bgdPDV">{{$t('m.carrerset')}}</div>
+            </div>
+          </a>
+        </router-link>
+         <router-link  v-if="(this.$store.state.loanMode & 0x04) > 0"  :to="{path:'/admin/locktoken',query: {type: 15}}" class="dHMsll gTHKWe">
+          <a @click="changePage(6)" class="dHMsll gTHKWe">
+            <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===6}">
+              <!--运营商参数-->
+              <div class="bgdPDV">{{$t('m.params.locktitle')}}</div>
             </div>
           </a>
         </router-link>
@@ -94,6 +110,10 @@
           this.changePage(3)
         } else if ((this.$route.path === '/admin/processBadLoanList' && (this.$route.query.type === 15 || this.$route.query.type === '15')) || (this.$route.path === '/admin/adminBadLoanDetail' && (this.$route.query.type === 15 || this.$route.query.type === '15'))) {
           this.changePage(4)
+        } else if (this.$route.path === '/admin/carriers') {
+          this.changePage(5)
+        } else if (this.$route.path === '/admin/locktoken') {
+          this.changePage(6)
         }
       }
     },

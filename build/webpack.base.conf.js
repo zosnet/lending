@@ -2,6 +2,7 @@ var path = require('path')
 var utils = require('./utils')
 var config = require('../config')
 var vueLoaderConfig = require('./vue-loader.conf')
+var Version = new Date().getTime()
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -19,7 +20,7 @@ module.exports = {
   },
   output: {
     path: config.build.assetsRoot,
-    filename: '[name].js',
+    filename: '[name].' + Version + '.js',
     publicPath: process.env.NODE_ENV === 'production'
       ? config.build.assetsPublicPath
       : config.dev.assetsPublicPath
@@ -34,7 +35,8 @@ module.exports = {
       '/path-assets': resolve('src/theme/assets'),
       '/path-theme': resolve('src/theme'),
       '/path-store': resolve('src/store'),
-      '/js-api': resolve('src/js/api'),      
+      '/js-api': resolve('src/js/api'),
+      '/js-filters': resolve('src/js/filters'),
       '/js-utils': resolve('src/js/utils')
     }
   },
@@ -70,7 +72,7 @@ module.exports = {
         loader: 'url-loader',
         options: {
           limit: 10000,
-          name: utils.assetsPath('img/[name].[hash:7].[ext]')
+          name: utils.assetsPath('img/[name].' + Version + '.[hash:7].[ext]')
         }
       },
       {
@@ -78,7 +80,7 @@ module.exports = {
         loader: 'url-loader',
         options: {
           limit: 10000,
-          name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
+          name: utils.assetsPath('fonts/[name].' + Version + '.[hash:7].[ext]')
         }
       }
     ]

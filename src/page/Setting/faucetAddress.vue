@@ -31,10 +31,7 @@
           return
         }
         this.errUrl = false
-        let setSucc = ZOSInstance.setFaucetAddress(this.faucetAddress)
-        if (setSucc) {
-          this.$store.state.settingsAPIs.DEFAULT_FAUCET = this.faucetAddress
-        }
+        ZOSInstance.setFaucetAddress(this.faucetAddress)
       }
     },
     mounted () {

@@ -7,12 +7,16 @@ export default {
     toInvest: '投资',
     zhang: '资产',
     zhanglist: '资产明细',
+    lockasset: '资产锁仓',
+    withdrawlock: '锁定资产提取',
+    operlist: '操作记录',
     setting: '设置',
     blockBrowser: '区块浏览器',
     proposal: '提案',
     badloan: '不良资产',
     badloan_overdue: '不良资产(逾期)',
     badloan_selling: '不良资产(平仓)',
+    carrerset: '借贷运营商设置',
     placeholder: '请输入商品信息',
     Home: '首页',
     pChose: '请选择',
@@ -40,15 +44,19 @@ export default {
     loading: '加载中...',
     applyWaiting: '申请提交中',
     inputPassword: '请输入密码',
+    pass_length: '密码必须包含至少 40 位字符。理想的密码应为 40 位或更长，并且为数字、字母和特殊符号的组合。',
     userInfo: '用户信息',
     noData: '暂无数据',
     fuelCost: '燃料费',
-    year: '月',
+    trNotify: '转账通知',
+    trNotify1: '您有一笔资金到账了!',
+    lendingnotify: '投资通知',
+    lendingnotify1: '您收到一笔投资!',
+    year: '年',
     day: '天',
     days: '天',
     month: '个月',
     ge: '个',
-    monthss: '月',
     months: '月',
     hours: '时',
     minute: '分',
@@ -89,12 +97,13 @@ export default {
       isRead: '我已阅读并同意遵守',
       policyTitle: '隐私条款',
       policy: '本网站将不会严格遵守有关法律法规和本隐私政策所载明的内容收集、使用您的信息',
-      agreement: '用户协议',
+      agreement: '隐私协议',
+      terms: '法律条款',
       success: '恭喜您，注册成功！赶紧登录体验吧',
       proposalSuccess: '高级账户名申请成功！请等待付费账户付费',
       unNull: '账号密码不能为空!',
       correctCode: '请输入正确的验证码!',
-      characters: '账户只能输入1-63位字符!',
+      characters: '账户只能输入9-63位字符!',
       letterBegin: '账号名必须以字母开头!',
       combination: '用户名为字母、数字和小横线的组合!',
       notEnd: '用户名不能以-结尾!',
@@ -109,19 +118,137 @@ export default {
       loginSuc: '登录成功!',
       nameNull: '账号或者密码不能为空!',
       nameErr: '账号或者密码错误!',
-      unReg: '暂不开放注册名字含有zos的账号'
+      name_input: {
+        advanced_name: '3-8位包含aeiouy的纯字母账户为靓号. 您需要指定已存在账号为高级账号名付费.',
+        contain: '暂不开放注册含有zos字母的账户',
+        empty: '不能为空',
+        end: '只能以数字和字母结尾',
+        inValid: '请输入用户名',
+        longer: '不能小于9位',
+        begin: '首位必须为字母',
+        rule: '只能是字母，数字或 -',
+        name_is_taken: '账户名已经被使用',
+        name_not_payfor_premium: '该账户不是靓号付费账户',
+        not_found: '账户未找到',
+        oneDash: '只能一个中划线相连',
+        only: '只能含有字母、数字、中划线',
+        premium_name_faucet: '你使用的是高级账户名。高级账户名的注册手续费更高，因此无法通过该免费水龙头服务进行注册。请选择其他名字，其中包含至少一个横杠、数字或者不含元音字母',
+        premium_name_warning: '这是高级账户名。高级账户名的注册手续费更高。普通账户名要求包含至少一个横杠、数字或者不含元音字母',
+        segment: '每个分段中',
+        shorter: '不能大于63位',
+        start: '只以字母开头',
+        suffix: '用户名',
+        password: '密码',
+        rule1: '必须包含数字',
+        rule2: '必须包含小写字母',
+        rule3: '必须包含大写字母',
+        less: '不少于 40 个字符'
+      }
+    },
+    member: {
+      accountName: '账户名称',
+      account_type: '账户类型',
+      annual: '年度会员',
+      basic: '普通会员',
+      expires: '过期时间',
+      lifetime: '终身会员',
+      no: '无此会员'
     },
     simulated: '模拟数据',
+    lockasseted: {
+      total: '锁仓总额',
+      curlock: '当前锁仓',
+      nooption: '无对应参数',
+      change1: '转为',
+      changenotifu: '注意：转仓后利息重新计算',
+      allinterest: '锁仓总收益',
+      exceptinterest: '预期收益',
+      exceptime: '到期时间',
+      allcount: '总单数',
+      perinterest: '活期每月总量',
+      monthinterest: '月化利率',
+      yearinterest: '年化利率',
+      maxlock: '最大数量',
+      minlock: '最小数量',
+      interestmode: '利率币种',
+      interestmode_info: '如果利息币种与存入币种不同，实际利息以发放当天的喂价计算',
+      addlock: '补仓',
+      dellock: '减仓',
+      bitType: '币种',
+      lockamount: '金额',
+      minamount: '最小锁仓',
+      interestcoin: '利息币种',
+      maxamount: '最大锁仓',
+      lockperiod: '期限',
+      nodetype: '节点类型',
+      nodetype0: '普通节点',
+      nodetype1: '白银节点',
+      nodetype2: '黄金节点',
+      nodetype3: '钻石节点',
+      lockmode: '模式',
+      type: '类型',
+      creattime: '创建时间',
+      lasttime: '最后一次收益时间',
+      coinDay: '本月收益',
+      interesttime: '收益时间',
+      interestrate: '收益比例',
+      removetime: '撤仓时间',
+      lockmode1: '自动转定期',
+      lockmode2: '自动转活期',
+      lockmode3: '自动取消',
+      rate: '预计收益率',
+      ratestr: '预计收益',
+      feed: '当前价格',
+      detail: '明细',
+      change: '转仓',
+      modify: '修改',
+      balance: '待提取金额',
+      canwithdray: '可提取金额',
+      withdray: '提取',
+      symbol: '币种',
+      removelock: '撤仓'
+    },
+    locktoken: {
+      title: '锁仓',
+      locktokendy: '活期',
+      locktokenfixed: '定期',
+      locktokennode: '节点',
+      locktokendyoption: '活期参数',
+      locktokenfixedoption: '定期参数',
+      interest: '利息',
+      nodeinterest: '节点奖励'
+    },
     orderList: {
       cash: '现金资产',
       numberZC: '数字资产',
       statutory: '法定资产',
+      DQ: '定期',
+      HQ: '活期',
+      NODE: '节点',
+      DQJL: '定期记录',
+      HQJL: '活期记录',
+      JDJL: '节点记录',
+      LSJL: '历史记录',
       bitType: '币种',
       useNum: '可用数量',
       dJNum: '冻结数量',
       freeze: '冻结',
+      invest: '投资',
+      lending: '抵押',
+      vesting: '冻结',
+      identify: '压金',
+      dylock: '活期',
+      fixedlock: '定期',
+      nodelock: '节点',
+      totalamount: '总量',
+      coupon: '优惠卷',
+      unused: '锁定',
+      lockasset: '压币',
+      locktoken: '锁仓',
       operation: '操作',
       depositMoney: '充币',
+      mapMoney: '映射',
+      exchange: '兑换',
       WithdrawMoney: '提币',
       transferMo: '转币',
       topup: '充值',
@@ -151,9 +278,16 @@ export default {
       topup_1: '未付款',
       topup_2: '付款待确认',
       topup_3: '充值成功',
+      topup_5: '充值中',
+      topup_6: '付款中',
       topup_9: '充值取消',
+      topup_11: '系统取消',
+      topup_12: '系统失败',
+      topup_13: '已兑换',
       chargeMoney_1: '充币成功',
       chargeMoney_2: '充币中',
+      chargeMoney_20: '兑换成功',
+      chargeMoney_13: '已兑换',
       withdraw_1: '提现中',
       withdraw_2: '提现成功',
       withdraw_3: '提现失败',
@@ -172,6 +306,7 @@ export default {
       WXTS: '请认真核实标的和账户信息,一旦点击投资,表示您确认投资金额, 不得撤销。',
       WXTSNEXT: '平台会实时监控抵押物价格,以保证贷款价值。币价急剧波动引起的损失,平台和投资者共担。',
       JKYH: '借款用户',
+      KYC: '认证账户',
       DQJD: '当前进度',
       SYKTJE: '剩余可投金额',
       sYTBSJ: '剩余投资时间',
@@ -208,6 +343,36 @@ export default {
       contractDetail: '合同详情',
       lookInvest: '查看投资详情'
     },
+    sell: {
+      sell: '交易',
+      pirce: '价格',
+      percent: '成交率',
+      sell1: '卖出',
+      buy1: '买入',
+      price: '单价',
+      amount: '数量',
+      destamount: '成交金额',
+      myamount: '账户余额',
+      fee: '手续费',
+      maxprice: '最高价',
+      minprice: '最低价',
+      lastprice: '最近价',
+      avgprice: '平均成交价',
+      expricetime: '过期时间',
+      mode: '模式',
+      mode3: '买卖',
+      modetype: '类型',
+      mode1: '扫价',
+      custime: '自定义',
+      mode2: '扫单',
+      selllist: '我的委单',
+      sellhistort: '我的委单历史',
+      sellfill: '撮合记录',
+      alllist: '最新委单',
+      sellamount: '成交量',
+      changepercent: '变化比例',
+      summary: '行情'
+    },
     borrow: {
       title: '我要借款',
       published: '已发布的借款',
@@ -220,6 +385,7 @@ export default {
       borrowRate: '借款利率',
       borrowRates: '借款利率/期限',
       pawnNum: '抵押物数量',
+      pawnNum1: '抵押物数量',
       pawnNumState: '抵押物数量/状态',
       pawnValue: '抵押物价值',
       JZRQ: '截止日期',
@@ -235,6 +401,7 @@ export default {
       collateral: '抵押物',
       collateralVal: '抵押物价值',
       addCollateral: '增加抵押',
+      removeOrder: '撤单',
       collateralState: '抵押物状态',
       frozen: '已冻结',
       borrowRecord: '借款记录信息',
@@ -289,6 +456,7 @@ export default {
       inputMortgage: '请输入抵押物数量',
       mortgageWrong: '抵押物数量格式错误',
       unNum: '抵押物数量不足，请充币',
+      unRish: '保证金&平台费用不足，请充币',
       mortgageLess: '抵押物数量小于最小值',
       numLess: 'ZOS数量不足',
       useLess: '可用数量不足，请充币',
@@ -334,14 +502,20 @@ export default {
       deled: '已删除',
       toMethod: '到手金额=借款金额-运营商服务费',
       radio: '最小抵押倍数',
-      payments: '每月还款利息',
-      reimbursement: '先息后本还款方式，你需要在每月还款日之前还款；每月利息=',
-      principal: '本金在最后一期利息到期日还',
+      addrato: '增加比例',
+      addrate: '利率调整',
+      payments1: '每月还款利息',
+      reimbursement1: '先息后本还款方式，你需要在每月还款日之前还款；每月利息=',
+      principal1: '本金在最后一期利息到期日还',
+      payments3: '每天还款利息',
+      reimbursement3: '到期日一次归还本息。利息合计=',
+      principal3: '',
       cost: '费用总计',
       marginLine: '补仓线',
       openLine: '平仓线',
       when: '当',
       down: '价格降低至',
+      up: '价格提高至',
       additional: '时，你需要增加额外的',
       liquidated: '以避免被平仓；',
       will: '时，你的借款将会被平仓',
@@ -367,6 +541,7 @@ export default {
       JLJBSJ: '距离截标时间',
       JKXX: '借款信息',
       jieKR: '借款人',
+      jieCarrier: '借款运营商',
       JKSC: '借款期限',
       FBSJ: '发布时间',
       DYXX: '抵押信息',
@@ -382,9 +557,11 @@ export default {
       yield: '预计收益率 = 预计利息 / 借款金额'
     },
     transfer: {
+      warn_lock: '采用强制明文加密',
       title: '转账',
       loading: '加载中...',
       XZBZ: '选择币种',
+      XZMS: '借款模式',
       QXZ: '请选择',
       KY: '可用',
       ZHM: '转账账户',
@@ -456,9 +633,11 @@ export default {
     balance: {
       index: '序号',
       curbalance: '当前剩余资产',
+      trxid: '交易 ID',
       opbalance: '操作资产',
       optype: '操作类型',
-      opinfo: '操作说明'
+      opinfo: '操作说明',
+      bitType: '币种'
     },
     invest: {
       query_type_all: '全部',
@@ -474,6 +653,16 @@ export default {
       sort_type_progress: '投资进度',
       profit_after: '先息后本',
       firstRate: '先本后息',
+      repayment1: '先息后本',
+      repayment2: '一次性本息',
+      repayment3: '等额本息',
+      repayment4: '等额本金',
+      perioduint1: '月',
+      perioduint2: '年',
+      perioduint3: '天',
+      periodmode1: '月贷 ',
+      periodmode2: '年贷 ',
+      periodmode3: '日贷 ',
       endDate: '投资截止时间',
       title: '我要投资',
       investSucc: '投资成功',
@@ -486,6 +675,7 @@ export default {
       investFormat: '投资金额格式错误',
       investNull: '投资金额不足，请充值',
       investGreater: '投资金额不能大于剩余可投金额',
+      investOne: '必须一次性投满标',
       investLess: '投资金额不能少于最小投资金额',
       investIncrease: '投资金额不满足递增条件',
       notInvest: '不可以投资自己的借款订单',
@@ -556,6 +746,14 @@ export default {
       out: '逾',
       alsoInterest: '还息',
       principal: '本金',
+      repayment1: '还本',
+      prepayment1: '提前还款',
+      early1: '提前还本',
+      overdueRepay1: '逾期还本',
+      repayment2: '还本',
+      prepayment2: '提前还款',
+      early2: '提前还本',
+      overdueRepay2: '逾期还本',
       repayment: '还本',
       prepayment: '提前还款',
       information: '借款信息',
@@ -563,6 +761,8 @@ export default {
       numNper: '借款金额/期限',
       hasDel: '已核销',
       repayed: '已还',
+      repayedN: '正常还息',
+      repayedO: '逾期还息',
       confiscated: '已没收',
       thawed: '已解冻',
       early: '提前还本',
@@ -595,6 +795,8 @@ export default {
       addInvest: '增加投资',
       earnedIncome: '已获收益',
       realIncome: '实际收益',
+      fromAccount: '来自',
+      interestType: '类型',
       realIncomeRate: '实际收益率',
       remainingTime: '距截标剩余时间',
       investLimitTime: '投资期限',
@@ -665,9 +867,15 @@ export default {
           to: '发往',
           fee: '手续费'
         },
-        'limit_order_create': '限价单',
-        'limit_order_cancel': '取消限价单',
-        'call_order_update': '更新订单',
+        'limit_order_create': {
+          name: '限价单'
+        },
+        'limit_order_cancel': {
+          name: '取消限价单'
+        },
+        'call_order_update': {
+          name: '更新订单'
+        },
         'account_create': {
           name: '创建账户',
           fee: '手续费',
@@ -716,9 +924,15 @@ export default {
           market_fee: '市场手续费',
           maximum_market_fee: '最大市场手续费'
         },
-        'asset_update': '更新资产',
-        'asset_update_bitasset': '更新智能币',
-        'asset_update_feed_producers': '更新资产喂价者',
+        'asset_update': {
+          name: '更新资产'
+        },
+        'asset_update_bitasset': {
+          name: '更新智能币'
+        },
+        'asset_update_feed_producers': {
+          name: '更新资产喂价者'
+        },
         'asset_issue': {
           name: '资产发行',
           fee: '手续费',
@@ -726,14 +940,30 @@ export default {
           asset_to_issue: '发行数量',
           issue_to_account: '发往'
         },
-        'asset_reserve': '销毁资产',
-        'asset_fund_fee_pool': '积存资产费用池',
-        'asset_settle': '资产结算',
-        'asset_global_settle': '全局资产清算',
-        'asset_publish_feed': '发布资产喂价',
-        'committee_member_create': '创建理事会成员',
-        'witness_create': '创建见证人',
-        'witness_withdraw_pay': '见证人取回报酬',
+        'asset_reserve': {
+          name: '销毁资产'
+        },
+        'asset_fund_fee_pool': {
+          name: '积存资产费用池'
+        },
+        'asset_settle': {
+          name: '资产结算'
+        },
+        'asset_global_settle': {
+          name: '全局资产清算'
+        },
+        'asset_publish_feed': {
+          name: '发布资产喂价'
+        },
+        'committee_member_create': {
+          name: '创建理事会成员'
+        },
+        'witness_create': {
+          name: '创建见证人'
+        },
+        'witness_withdraw_pay': {
+          name: '见证人取回报酬'
+        },
         'proposal': {
           proposal_create: '创建提案',
           proposal_update: '更新提案',
@@ -752,23 +982,45 @@ export default {
             key_approvals_to_remove: '要移除的公钥许可'
           }
         },
-        'withdraw_permission_create': '创建提取权限',
-        'withdraw_permission_update': '更新提取权限',
-        'withdraw_permission_claim': '主张提取权限',
-        'withdraw_permission_delete': '删除提取权限',
-        'fill_order': '订单撮合',
-        'delegate_update_global_parameters': '全局参数更新',
-        'vesting_balance_create': '创建冻结账目余额',
+        'withdraw_permission_create': {
+          name: '创建提取权限'
+        },
+        'withdraw_permission_update': {
+          name: '更新提取权限'
+        },
+        'withdraw_permission_claim': {
+          name: '主张提取权限'
+        },
+        'withdraw_permission_delete': {
+          name: '删除提取权限'
+        },
+        'fill_order': {
+          name: '订单撮合'
+        },
+        'delegate_update_global_parameters': {
+          name: '全局参数更新'
+        },
+        'vesting_balance_create': {
+          name: '创建冻结账目余额'
+        },
         'vesting_balance_withdraw': {
           name: '提取解冻账户余额',
           owner: '发往',
           amount: '金额',
           fee: '手续费'
         },
-        'worker_create': '创建雇员',
-        'custom': '自定义',
-        'assert': '断言操作',
-        'balance_claim': '领取余额',
+        'worker_create': {
+          name: '创建雇员'
+        },
+        'custom': {
+          name: '自定义'
+        },
+        'assert': {
+          name: '断言操作'
+        },
+        'balance_claim': {
+          name: '领取余额'
+        },
         'override_transfer': {
           name: '优先覆盖转账',
           fee: '手续费',
@@ -777,13 +1029,27 @@ export default {
           to: '发往',
           amount: '金额'
         },
-        'witness_update': '更新见证人',
-        'committee_member_update_global_parameters': '全局参数更新',
-        'transfer_to_blind': '向隐私账户转账',
-        'blind_transfer': '隐私转账',
-        'transfer_from_blind': '从隐私账户转出',
-        'committee_member_update': '更新理事会成员账户',
-        'asset_claim_fees': '领取资产手续费',
+        'witness_update': {
+          name: '更新见证人'
+        },
+        'committee_member_update_global_parameters': {
+          name: '全局参数更新'
+        },
+        'transfer_to_blind': {
+          name: '向隐私账户转账'
+        },
+        'blind_transfer': {
+          name: '隐私转账'
+        },
+        'transfer_from_blind': {
+          name: '从隐私账户转出'
+        },
+        'committee_member_update': {
+          name: '更新理事会成员账户'
+        },
+        'asset_claim_fees': {
+          name: '领取资产手续费'
+        },
         'account_upgrade_merchant': {
           name: '商户认证',
           account_to_upgrade: '升级账户',
@@ -919,39 +1185,123 @@ export default {
           proxy_account: '代理记账人',
           fee: '手续费'
         },
-        'account_property': '身份赋权',
-        'gateway_withdraw': '提现',
-        'gateway_deposit': '充值',
-        'gateway_issue_currency': '给网关发行货币',
-        'bitlender_option_create': '创建法币参数',
-        'bitlender_option_author': '创建法币董事会',
-        'bitlender_option_update': '修改法币参数',
-        'bitlender_rate_update': '修改法币率利',
-        'asset_property': '赋权资产为法币或可抵押数字货币',
-        'bitlender_lend_order': '创建借款订单',
-        'bitlender_invest': '投资订单',
-        'bitlender_repay_interest': '还息',
-        'bitlender_overdue_interest': '逾期还息',
-        'bitlender_repay_principal': '还本',
-        'bitlender_prepayment': '提前还本',
-        'bitlender_overdue_repay': '逾期还本',
-        'bitlender_add_collateral': '添加抵押',
-        'bitlender_recycle': '处理不良资产',
-        'bitlender_setautorepayer_operation': '自动还款账户',
-        'finance_option_create_operation': '创建筹资参数',
-        'finance_option_update_operation': '修改筹资参数',
-        'finance_create_operation': '发布筹资',
-        'finance_enable_operation': '筹资有效',
-        'account_coupon_operation': '领取优惠卷',
-        'change_identity_operation': '激活见证人',
-        'bitlender_autorepayment_operation': '发布自动还款',
-        'account_withdraw_fee_operation': '提取费用',
-        'gateway_create_operation': '创建网关',
-        'gateway_update_operation': '更新网关',
-        'carrier_create_operation': '创建运营商',
-        'carrier_update_operation': '更新运营商',
-        'budget_member_create_operation': '新增预算委员',
-        'budget_member_update_operation': '更新预算委员',
+        'account_property': {
+          name: '身份赋权'
+        },
+        'gateway_withdraw': {
+          name: '提现'
+        },
+        'gateway_deposit': {
+          name: '充值'
+        },
+        'gateway_issue_currency': {
+          name: '给网关发行货币'
+        },
+        'bitlender_option_create': {
+          name: '创建法币参数'
+        },
+        'bitlender_option_author': {
+          name: '创建法币董事会'
+        },
+        'bitlender_option_update': {
+          name: '修改法币参数'
+        },
+        'bitlender_rate_update': {
+          name: '修改法币率利'
+        },
+        'asset_property': {
+          name: '赋权资产为法币或可抵押数字货币'
+        },
+        'bitlender_lend_order': {
+          name: '创建借款订单'
+        },
+        'bitlender_invest': {
+          name: '投资订单'
+        },
+        'bitlender_repay_interest': {
+          name: '还息'
+        },
+        'bitlender_overdue_interest': {
+          name: '逾期还息'
+        },
+        'bitlender_repay_principal': {
+          name: '还本'
+        },
+        'bitlender_prepayment': {
+          name: '提前还本'
+        },
+        'bitlender_overdue_repay': {
+          name: '逾期还本'
+        },
+        'bitlender_add_collateral': {
+          name: '添加抵押'
+        },
+        'bitlender_recycle': {
+          name: '处理不良资产'
+        },
+        'bitlender_remove_operation': {
+          name: '撤单'
+        },
+        'bitlender_setautorepayer_operation': {
+          name: '自动还款账户'
+        },
+        'finance_option_create_operation': {
+          name: '创建筹资参数'
+        },
+        'finance_option_update_operation': {
+          name: '修改筹资参数'
+        },
+        'finance_create_operation': {
+          name: '发布筹资'
+        },
+        'finance_enable_operation': {
+          name: '筹资有效'
+        },
+        'account_coupon_operation': {
+          name: '领取优惠卷'
+        },
+        'change_identity_operation': {
+          name: '激活见证人'
+        },
+        'bitlender_autorepayment_operation': {
+          name: '发布自动还款'
+        },
+        'account_withdraw_fee_operation': {
+          name: '提取费用'
+        },
+        'gateway_create_operation': {
+          name: '创建网关'
+        },
+        'gateway_update_operation': {
+          name: '更新网关'
+        },
+        'carrier_create_operation': {
+          name: '创建运营商'
+        },
+        'carrier_update_operation': {
+          name: '更新运营商'
+        },
+        'budget_member_create_operation': {
+          name: '新增预算委员'
+        },
+        'budget_member_update_operation': {
+          name: '更新预算委员'
+        },
+        'account_coupon': {
+          name: '领取优惠卷'
+        },
+        'locktoken_create': {
+          name: '创建理财'
+        },
+        'locktoken_update': {
+          name: '更新理财'
+        },
+        'locktoken_remove': {
+          name: '撤销理财'
+        },
+        'locktoken_node': {
+          name: '节点奖励'
+        },
         'status_states': {
           0: '未发布',
           1: '已发布',
@@ -1017,6 +1367,7 @@ export default {
         'proxy_transfer': '{account} 发起了一笔代理记账交易: {from} 发送 {amount} 到 {to}',
         'account_property': '{issuer} 赋权网关或者运营商',
         'gateway_withdraw': '{issuer} 提现 {amount}',
+        'vest_withdraw': '{issuer} 解冻 {amount} id {id}',
         'gateway_deposit': '{issuer} 充值 {amount}',
         'gateway_issue_currency': '{issuer} 给网关发行货币',
         'bitlender_option_create': '{issuer} 创建法币参数',
@@ -1024,7 +1375,7 @@ export default {
         'bitlender_option_update': '{issuer} 修改法币参数',
         'bitlender_rate_update': '{issuer} 修改法币率利',
         'asset_property': '{issuer} 赋权资产为法币或可抵押数字货币',
-        'bitlender_lend_order': '{issuer}创建借款订单',
+        'bitlender_lend_order': '{issuer}创建借款订单  {id}',
         'bitlender_invest': '{issuer}投资订单{id}',
         'bitlender_repay_interest': '{issuer}正常还息{id}第{n}期',
         'bitlender_overdue_interest': '{issuer}逾期还息{id}第{n}期',
@@ -1032,9 +1383,14 @@ export default {
         'bitlender_prepayment': '{issuer} 提前还本 {id}',
         'bitlender_overdue_repay': '{issuer} 逾期还本 {id}',
         'bitlender_add_collateral': '{issuer} 给借款订单 {id} 添加抵押 {amount}',
-        'bitlender_recycle': '{issuer}处理了不良资产{id}',
+        'bitlender_recycle': '{issuer} 处理不良资产 {id}',
+        'bitlender_remove_operation': '{issuer} 撤单 {id}',
         'bitlender_setautorepayer_operation': '自动还款账户',
-        'account_coupon_operation': '{issuer} 领取了优惠券'
+        'account_coupon_operation': '{issuer} 领取了优惠券',
+        'locktoken_create_operation': '{issuer} 创建理财',
+        'locktoken_update_operation': '{issuer} 更新理财  {id}',
+        'locktoken_remove_operation': '{issuer} 撤销理财  {id}',
+        'locktoken_node_operation': '{issuer} 节点奖励  {id}'
       }
     },
     // account
@@ -1089,13 +1445,22 @@ export default {
       subtitle: '提供区块、交易、账户等查询功能'
     },
     params: {
-      title: '参数',
+      title: '借贷参数',
+      locktitle: '存款参数',
       update: '修改',
+      assignpayer: '付款授权',
+      cancelassignpayer: '取消付款授权',
+      hasassig: '已授权',
+      noassig: '未授权',
+      nocarrier: '不是运营商',
+      err_pay_asset: '利息币种不存在',
+      errcarrier: '运营商不存在',
+      errasset: '利息资产不存在',
+      errpayer: '付款人不存在',
       submit: '提交',
       name: '参数名称',
       nper: '',
       cnper: '期',
-      paramVal: '参数值(月化)',
       updateAfter: '修改后',
       restore: '恢复',
       del: '删除',
@@ -1110,15 +1475,37 @@ export default {
       payAccount: '付款账户',
       poundage: '手续费',
       create: '创建',
+      create_dy: '创建活期',
+      create_fixed: '创建定期',
+      create_node: '节点申请',
       updateRate: '修改利率确认',
       updateContent: '修改内容',
       updateUser: '修改人',
       updateTime: '修改时间',
       operator: '运营商',
+      loperator: '借贷运营商',
+      sellpair: '交易对',
+      operatorset: '运营设置',
       gateway: '网关',
+      same: '重复',
+      stop: '停止服务',
       rateUser: '修改利率人',
       platform: '平台',
       minBorrow: '最小借款金额',
+      minSave: '最小存款金额',
+      maxSave: '最大存款金额',
+      lockTime: '锁定时间',
+      rateCollat: '利率币种',
+      payer: '支付人',
+      present: '当前币种',
+      thanZeroDec: '大于零且最多包含两位小数的数',
+      thanOne: '不小于1的整数',
+      thanNum: '小于(60*60*24*360)的正整数',
+      lessMillion: '且小于10 0000 0000',
+      errMessage: '输入不复合规则',
+      errMessage2: '最大存款金额最须小于最大供给量',
+      errMessage3: '最大供给量须小于等于总发行量',
+
       minBorrowIn: '最小借款增加额',
       minInvest: '最小投资金额',
       minInvestIn: '最小投资增加额',
@@ -1126,7 +1513,8 @@ export default {
       timeUnit: '借款期限单位',
       maxInvest: '最大投资期限',
       maxRate: '最大借款利率',
-      rateVal: '每月利息最大值',
+      rateVal1: '每月利息最大值',
+      rateVal3: '利息最大值',
       repayNote: '还款提醒时间(距还款日)',
       riskRate: '风险准备金费率',
       serviceRate: '服务费费率',
@@ -1180,6 +1568,7 @@ export default {
       chooseMore: '可多选',
       nopermission: '你没有权限修改参数',
       addParams: '请增加参数',
+      confirmPayer: '确认支付人',
       isUserEdit: '用户不能成为修改利率人',
       noUser: '用户不存在',
       greaterThan: '不能大于',
@@ -1231,9 +1620,11 @@ export default {
       noNull: '运营商不能为空',
       addFeeder: '增加',
       isFeeder: '此用户已经是喂价人',
+      invert: '翻转喂价',
       feederFlag: '喂价模式',
       feederProposal: '创建喂价人提案',
       management: '参数管理',
+      nooptions: '该币种暂无参数',
       index: '序号',
       account: '账号',
       enter: '请输入账号',
@@ -1258,6 +1649,7 @@ export default {
       waring: '请谨慎操作，它将清掉所有的配置',
       inUsername: '请输入',
       inCarrier: '运营商名称',
+      inPayAsset: '利息资产名称',
       admin: '管理员',
       loanCarrier: '借方运营商',
       investCarrier: '投资方运营商',
@@ -1276,7 +1668,7 @@ export default {
       chooseAuthor: '请选择认证人',
       theme: '风格',
       chooseTheme: '选择风格',
-      carrierCount: '运营商统计',
+      carrierCount: '借贷运营商统计',
       author: '认证人',
       valiRatio: '请输入0到100之间的数字',
       noGateway: '网关不存在',
@@ -1315,6 +1707,9 @@ export default {
       copyUrl: '复制链接',
       copySucc: '地址已经复制到你的剪贴板！',
       inviteFriends: '邀请好友注册，轻松获得交易收益',
+      activity1: '活动奖励',
+      inviteAct1: '前10万名实名认证的用户，每人获得100ZOS奖励.',
+      inviteAct2: '邀请好友注册并实名认证成功，额外获得20ZOS.',
       activity: '活动细则',
       inviteContent: '好友接受邀请并注册成功后，每完成一笔借款或投资，你会得到相应比例的收益',
       inviteContent1: '收益币种取决于借贷的抵押物币种，在借款被投满之后立即发放',
@@ -1381,6 +1776,7 @@ export default {
       inputName: '请输入开户姓名',
       formatErr: '开户姓名格式不正确',
       idNumber: '请输入证件号码',
+      phNumber: '请输入手机号码',
       idNumFormat: '证件号格式不对',
       phoneFormat: '手机号格式不正确',
       ICBC: '中国工商银行',
@@ -1415,12 +1811,14 @@ export default {
       againInput: '请再次输入密码',
       notMatch: '两次输入密码不一致!',
       inputPhone: '请输入手机号',
+      selcode: '请选择国家',
       inputCode: '请输入短信验证码',
       resend: '重新发验证码',
       resendTime: '重新发送',
       send: '短信验证码',
       sendSucc: '短信验证码已发送成功，请查看手机',
       sendErr: '短信验证码发送失败，请稍后重试！',
+      codeErr: '短信验证码错误！',
       updatePw: '修改密码',
       updateAsset: '修改资金密码',
       updateSucc: '修改成功',
@@ -1434,7 +1832,9 @@ export default {
       KYC: '实名认证',
       nationality: '国籍',
       noBind: '未绑定手机',
+      noBind1: '未绑定手机,绑定手机后，您将收到相关通知短信',
       bind: '绑定手机',
+      bindMail: '绑定邮箱',
       nokyc: '未认证',
       review: '审核中',
       through: '已通过',
@@ -1444,21 +1844,27 @@ export default {
       uploadPhoto: '上传图片',
       errorPwd: '你的旧密码错误，请重新输入!',
       cad: '加拿大',
+      ph: '菲利宾',
+      sg: '新加坡',
       mail: '邮箱',
       bindEmail: '绑定邮箱',
+      sameInput: '输入未变',
       reBindEmail: '重新绑定邮箱'
     },
     permission: {
       masterKey: '主控密钥',
       ownerKey: 'Owner Key，设定谁可以控制本账户。控制人（账户名或公钥）可修改账户相关的各种设置，包括权限设置。',
       publicKey: '公钥',
+      noEncKey: '特殊明文公钥',
       privateKeyShow: '查看私钥',
       privateKeyHidden: '隐藏私钥',
       privateKey: '私钥',
       assetKey: '资金密钥',
       activeKey: 'Active Key，用来设定拥有花费本账户资金权限的账户名或公钥。',
       momeKey: '备注密钥',
-      memoKey: '交易附带的备注信息是使用备注公钥加密后传输的。为了解密备注信息，需要拥有备注公钥对应的私钥。'
+      memoKey: '交易附带的备注信息是使用备注公钥加密后传输的。为了解密备注信息，需要拥有备注公钥对应的私钥。',
+      authKey: '信息密钥',
+      authorKey: '用户部分信息上链是加密的。为了解密用户信息，需要拥有信息公钥对应的私钥。'
     },
     page: {
       platform: '智能金融开放平台',
@@ -1539,6 +1945,7 @@ export default {
       search: '查询',
       loanInfo: '借款信息',
       investInfo: '投资信息',
+      lockInfo: '锁仓信息',
       noAccount: '此账号不存在',
       noEmpty: '账号不能为空',
       gotoInvest: '去投资'
@@ -1553,6 +1960,7 @@ export default {
       cumulative: '累计',
       trading: '交易对',
       amount: '借款金额',
+      amount1: '借款金额',
       borrowAmount: '借款笔数',
       pen: '',
       obtained: '投资人已获收益',
@@ -1576,14 +1984,14 @@ export default {
       total: '总量',
       toBorrow: '立即借款',
       business: '业务优势',
-      threshold: '借款门槛低',
-      anyTime: '押币就能借，随时可还',
-      welfare: '福利多样',
-      activity: '邀请好友，交易挖矿 月月精彩活动不断',
-      diversity: '种类多样',
-      financing: '都支持持币用户短期融资新选择',
-      income: '借款收益高',
-      investment: '100元起投，收益高',
+      threshold: '商业模式',
+      anyTime: 'ZOS采用“运营商放贷模式”经营，而非“自营模式”，任何金融机构都可以自由接入该网络，进行投资和借款。',
+      welfare: '借贷模式',
+      activity: 'ZOS借款支持绝大多数主流数字资产作为抵押品，在ZOS上，借款客户可根据自身需求，自由选择增信措施，大大降低借款人准入门槛。',
+      diversity: '法务合规',
+      financing: 'ZOS合规通过持牌的合规运营商运营，数字资产的违约资产由合规法币交易所处理。',
+      income: '区块链',
+      investment: '采用石墨烯技术和Dpos共识机制，制定了标准化借贷协议，运营商可以开放式加入ZOS借贷网络。',
       globalization: '业务全球化',
       enjoy: '轻松享受来自世界各地的金融资源和服务',
       process: '使用流程',
@@ -1616,8 +2024,17 @@ export default {
     proposalList: {
       Bill: '提案号',
       originator: '发起人',
-      edit: '借贷参数修改',
+      edit: '参数修改',
+      add: '创建参数',
+      feederoption: '喂价人修改',
+      lending: '节点',
+      dyoption: '活期',
+      fixedoption: '定期',
+      nodeoption: '节点',
+      payeroption: '付款人授权',
+      payeroption1: '付款人取消授权',
       expiration: '过期时间',
+      create: '创建时间',
       agreed: '已同意列表',
       agree: '同意',
       undo: '撤销',
@@ -1802,6 +2219,7 @@ export default {
       47: '使用平台费',
       52: '流标退投资币',
       53: '流标退抵押币',
+      59: '交易收款',
       60: '燃烧币',
       61: '众筹有效',
       62: '众筹取消',
@@ -1818,8 +2236,28 @@ export default {
       84: '借方扣出手续费',
       85: '借方运营商服务费',
       86: '投资方运营商服务费',
+      87: '撤标返回抵押币',
       88: '撤销网关额度',
       90: '取消身份到账',
+      97: '认证人压币',
+      101: '交易发单扣款',
+      103: '交易撤单回款',
+      104: '交易返回费用',
+      106: '锁仓',
+      107: '解仓',
+      108: '锁仓利息',
+      109: '认证扣款',
+      110: '认证奖励',
+      111: '认证奖励推荐人',
+      112: '锁节点扣款',
+      113: '节点利息扣款',
+      114: '节点利息收入',
+      115: '节点推荐扣款',
+      116: '节点推荐收入',
+      117: '定期期利息扣款',
+      118: '活期利息扣款',
+      119: '奖励节点扣款',
+      120: '购买节点',
       2147483647: '全部'
     },
     selectGateway: {

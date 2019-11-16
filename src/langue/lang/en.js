@@ -7,12 +7,16 @@ export default {
     toInvest: 'Invest',
     zhang: 'Balances',
     zhanglist: 'Balances List',
+    lockasset: 'lock asset',
+    withdrawlock: 'withdraw lock asset',
+    operlist: 'Operations',
     setting: 'Settings',
     blockBrowser: 'Blockchain Browser',
     proposal: 'Proposal',
     badloan: 'NPL',
     badloan_overdue: 'NPL(Overdue)',
     badloan_selling: 'NPL(Close position)',
+    carrerset: 'Lending carrier setting',
     placeholder: 'Please enter product information',
     Home: 'Home',
     pChose: 'Please choose',
@@ -40,10 +44,15 @@ export default {
     loading: 'Loading...',
     applyWaiting: 'Submitting...',
     inputPassword: 'Please enter the password.',
+    pass_length: 'The password must contain at least 40 characters. Ideally you should use 40 or more, and a combination of numbers, special characters and letters.',
     userInfo: 'User\'s profile',
     noData: 'No Data',
     fuelCost: 'Gas Fee',
-    year: 'month(s)',
+    trNotify: 'tr notify',
+    trNotify1: 'tranfer notify!',
+    lendingnotify: 'invest notify',
+    lendingnotify1: 'invest notify!',
+    year: 'year(s)',
     day: 'Day(s)',
     ays: 'days',
     month: 'month',
@@ -87,12 +96,13 @@ export default {
       isRead: 'I have read and agreed to',
       policyTitle: 'Privacy Policy',
       policy: 'The website will be strictly compliant with related laws and contents listed in the privacy policy to collect and use your information.',
-      agreement: 'Terms of Use',
+      agreement: 'Privacy',
+      terms: 'Terms',
       success: 'Congratulations，you have signed up successfully! Now, you can log in with your account.',
       proposalSuccess: 'Application for premium account approved! Please wait for the payment account to pay',
       unNull: 'Password cannot be empty!',
       correctCode: 'Please enter the correct captcha code!',
-      characters: 'Account name must be 1-63 characters long!',
+      characters: 'Account name must be 9-63 characters long!',
       letterBegin: 'Account name must begin with a letter!',
       combination: 'Account name must be a combination of alphabets, numbers and dashes!',
       notEnd: 'Account name can not end with - ',
@@ -105,19 +115,138 @@ export default {
       loginSuc: 'You have logged in!',
       nameNull: 'Account name and password can not be empty!',
       nameErr: 'Account name or password is incorrect!',
-      unReg: 'The account name containing zos is not supported.'
+      name_input: {
+        advanced_name: '3-8 digits containing aeiouy pure letter account are nicknames. You need to specify an existing account to pay for the premium account name.',
+        contain: 'not contain with zos letters.',
+        empty: 'not be empty.',
+        end: 'end with a letter or digit.',
+        inValid: 'Please enter valid account name',
+        longer: 'be longer than 8.',
+        begin: 'first char must be Char',
+        rule: 'only input char, number or -',
+        name_is_taken: 'Account name is already taken.',
+        name_not_payfor_premium: 'Account name can not pay for premium_name.',
+        not_found: 'Account not found.',
+        oneDash: 'have only one dash in a row.',
+        only: 'have only letters, digits, or dashes.',
+        premium_name_faucet: 'This is a premium name which is not supported by this faucet. Please enter a regular name containing least one dash, a number or no vowels.',
+        premium_name_warning: 'This is a premium name which is more expensive than a name containing a dash (-) or a number.',
+        segment: 'Each account segment should',
+        shorter: 'be shorter.',
+        start: 'start with a letter.',
+        suffix: 'Account name should ',
+        password: 'Pass Word',
+        rule1: 'include digit',
+        rule2: 'include low letter',
+        rule3: 'include upper letter',
+        less: 'be longer than 40.'
+      }
+    },
+    member: {
+      accountName: 'Account name',
+      account_type: 'Account Type',
+      annual: 'Annual subscriber',
+      basic: 'Basic member',
+      expires: 'expires',
+      extractable_time: 'Extractable time',
+      lifetime: 'Lifetime member',
+      no: 'Unknow member'
     },
     simulated: 'Simulated data',
+    lockasseted: {
+      total: 'Locked Amount',
+      curlock: 'Current Lock',
+      change1: 'Change Type',
+      nooption: 'No corresponding parameter',
+      minlock: 'Minimum Locked Amount',
+      maxlock: 'Largest Number',
+      interestmode: 'Interest rate currencies',
+      interestmode_info: 'If the interest is denominated in a different currency than the currency in which it is deposited, the actual interest is calculated at the feed rate on the date of issue',
+      changenotifu: 'Important:  The Profits will be wiped out if you change Mining Type.',
+      allinterest: 'Total Profits',
+      exceptinterest: 'Expected Profits',
+      exceptime: 'Due to the Date',
+      allcount: 'Total',
+      perinterest: 'Profits for this Month',
+      monthinterest: ' Monthly rate',
+      yearinterest: 'Annualized rate',
+      addlock: 'Deposit in ',
+      dellock: 'Lighten up',
+      bitType: 'Token',
+      lockamount: 'Locked Amount',
+      interestcoin: 'interest coin',
+      minamount: ' Minimum Locked Amount',
+      maxamount: ' Maximum Locked Amount',
+      lockperiod: 'Service Period',
+      nodetype: 'Node types',
+      nodetype0: 'Foundation node',
+      nodetype1: 'VIP-1',
+      nodetype2: 'VIP-2',
+      nodetype3: 'VIP-3',
+      lockmode: 'Mode',
+      type: 'Type',
+      creattime: 'Start Date',
+      lasttime: 'Last Date of earn profits',
+      coinDay: 'This Month Interest',
+      interesttime: 'Earn Profits Date',
+      interestrate: 'Ratio',
+      removetime: 'Date of Quit',
+      lockmode1: ' Fixed term Mining-Automatic renewal time',
+      lockmode2: 'Current Mining-Automatic renewal time',
+      lockmode3: 'Due to cancel',
+      rate: 'Expected Profits',
+      ratestr: 'Expected earnings',
+      feed: 'current price',
+      detail: ' Detail',
+      change: 'Change',
+      modify: 'Modify',
+      balance: 'Amount to be withdrawn',
+      canwithdray: 'Drawable Amount',
+      withdray: 'Withdraw',
+      symbol: 'Token',
+      removelock: ' Quit'
+    },
+    locktoken: {
+      title: 'Lock Token',
+      locktokendy: 'Current',
+      locktokenfixed: 'Fixed',
+      locktokennode: 'Node',
+      locktokendyoption: 'Current Parameter',
+      locktokenfixedoption: 'Fixed Parameter',
+      interest: 'Interest',
+      nodeinterest: 'Node Reward'
+    },
     orderList: {
       cash: 'Cash asset',
       numberZC: 'Crypto Assets',
       statutory: 'Fiat assets',
+      DQ: 'Fixed period',
+      HQ: 'miner',
+      NODE: 'Node',
+      DQJL: 'Fixed List',
+      HQJL: 'dymaic List',
+      JDJL: 'node List',
+      LSJL: 'history list',
       bitType: 'Coin',
       useNum: 'Available',
       dJNum: 'Frozen amount',
       freeze: 'Frozen',
+      invest: 'Invest',
+      lending: 'Mortgage',
+      vesting: 'Vesting',
+      identify: 'Deposit',
+      coupon: 'Coupons',
+      dylock: 'Current Financial',
+      fixedlock: 'Fixed Financial',
+      nodelock: 'Node Financial',
+      totalamount: 'Total',
+      unused: 'locked',
+      lockasset: 'lock asset',
+      locktoken: 'lock token',
       operation: 'Action',
       depositMoney: 'Deposit Coins',
+      mapMoney: 'Map coins',
+      exchange: 'exchange',
       WithdrawMoney: 'Withdraw coins',
       transferMo: 'Transfer coins',
       topup: 'Deposit',
@@ -147,9 +276,16 @@ export default {
       topup_1: 'Unpaid',
       topup_2: 'Pending',
       topup_3: 'Completed',
+      topup_5: 'Pending',
+      topup_6: 'Pay Waiting',
       topup_9: 'Deposit has been cancelled.',
+      topup_11: 'cancelled',
+      topup_12: 'failed',
+      topup_13: 'exchanged',
       chargeMoney_1: 'Deposited coins successfully！',
       chargeMoney_2: 'Under depositing',
+      chargeMoney_20: 'exchange successfully',
+      chargeMoney_13: 'exchanged',
       withdraw_1: 'Under Withdrawing',
       withdraw_2: 'Withdrawed successfully',
       withdraw_3: 'Failed to withdraw',
@@ -168,6 +304,7 @@ export default {
       WXTS: 'Please check the loan information carefully. Click "Invest" means you confirmed the investment amount, and it\'s not possible to withdraw the investment.',
       WXTSNEXT: 'The price of collateral will be monitored by the platform all the time. The loss caused by the fluctuation of cryptocurrency will be shared by both platform and investors.',
       JKYH: 'Borrower',
+      KYC: 'Authors',
       DQJD: 'Progress',
       SYKTJE: 'Available Balance',
       sYTBSJ: 'Remaining Time',
@@ -203,6 +340,36 @@ export default {
       contractDetail: 'Contract details',
       lookInvest: 'View Detail'
     },
+    sell: {
+      sell: 'Transaction',
+      pirce: 'Price',
+      percent: 'Turnover rate',
+      sell1: 'Sell',
+      buy1: 'Buy',
+      price: 'Price',
+      amount: 'Amount',
+      destamount: 'Turnover',
+      myamount: 'Account balance',
+      fee: 'Handling fee',
+      maxprice: 'Maximum price',
+      minprice: 'Minimum price',
+      lastprice: 'Last price',
+      avgprice: 'Average price',
+      expricetime: 'Expiration date',
+      mode: 'Mode',
+      mode3: 'Transaction',
+      modetype: 'Types',
+      mode1: 'Sweep price',
+      custime: 'Customize',
+      mode2: 'Sweep single',
+      selllist: 'My order',
+      sellhistort: 'My delegated history order',
+      sellfill: 'Match record',
+      alllist: 'Latest orders',
+      sellamount: 'Volume',
+      changepercent: 'Change ratio',
+      summary: 'Summary'
+    },
     borrow: {
       title: 'Borrow',
       published: 'Published',
@@ -215,6 +382,7 @@ export default {
       borrowRate: 'Loan Rate',
       borrowRates: 'Loan Rate',
       pawnNum: 'Collateral Amount',
+      pawnNum1: 'Collateral Amount',
       pawnNumState: 'Collateral Amount/Status',
       pawnValue: 'Collateral Value',
       JZRQ: 'Due date',
@@ -230,6 +398,7 @@ export default {
       collateral: 'Collateral',
       collateralVal: 'Collateral Value',
       addCollateral: 'Add Collateral',
+      removeOrder: 'Delete Order',
       collateralState: 'Collateral Status',
       frozen: 'Frozen',
       borrowRecord: 'Loan Record',
@@ -278,7 +447,8 @@ export default {
       lessThan: 'Collateral ratio can not be less than',
       inputMortgage: 'Please enter collateral amount',
       mortgageWrong: 'Format error',
-      unNum: 'Insufficient collateral，please deposit coins.',
+      unNum: 'Insufficient collateral，please deposit coins ',
+      unRish: 'Insufficient Risk fee，please deposit coins ',
       mortgageLess: 'Collateral amount is less than the minimum value ',
       numLess: 'Insufficient ZOS',
       useLess: 'Insufficient，please deposit',
@@ -325,20 +495,26 @@ export default {
       deled: 'Deleted',
       toMethod: 'Net Amount = Loan Amount - Operator Service Fee',
       radio: 'Min mortgage times',
-      payments: 'Monthly Interest',
-      reimbursement: 'Payment method is the monthly payments of interests with one large balloon payment at maturity. You need to make the payment before or on the due date. Monthly interest =',
-      principal: 'Repay the principal at the last due date.',
+      addrato: 'Add Ratio',
+      addrate: 'add Rate',
+      payments1: 'Monthly Interest',
+      reimbursement1: 'Payment method is the monthly payments of interests with one large balloon payment at maturity. You need to make the payment before or on the due date. Monthly interest =',
+      principal1: 'Repay the principal at the last due date.',
+      payments3: 'Daily Repayment',
+      reimbursement3: 'You should pay the total amount payable on the due day. Total repayments =',
+      principal3: '',
       cost: 'Total Fees',
       marginLine: 'Call margin line',
       openLine: 'Close position line',
       when: 'When ',
       down: 'price drops to',
+      up: 'price increase to',
       additional: 'you need to add the extra',
       liquidated: 'to avoid the position to be closed. When ',
       will: 'your loan will be closed.',
       loanStatus: 'Loan Status',
       tohandMethod: 'Net Amount = Loan Amount - Risk Reserve - Platform Service Fee',
-      maxSupplyColl: '抵押币超过最大值e'
+      maxSupplyColl: 'Mortgaged currency has surpassed maximum'
     },
     investingList: {
       toubiaojine: 'Investment amount',
@@ -358,6 +534,7 @@ export default {
       JLJBSJ: '',
       JKXX: 'Loan Info',
       jieKR: 'Borrower',
+      jieCarrier: 'Carrier',
       JKSC: 'Loan Period',
       FBSJ: 'Publishing Date',
       DYXX: 'Collateral Info',
@@ -375,14 +552,18 @@ export default {
     balance: {
       index: 'Index',
       curbalance: 'Current Balances',
+      trxid: 'trx ID',
       opbalance: 'Operate Balance',
       optype: 'Type',
-      opinfo: 'Info'
+      opinfo: 'Info',
+      bitType: 'Token'
     },
     transfer: {
+      warn_lock: 'Use forced plaintext encryption',
       title: 'Transfer',
       loading: 'Loading...',
       XZBZ: 'Choose Currency',
+      XZMS: 'Lending Mode',
       QXZ: 'Please choose',
       KY: 'Available',
       ZHM: 'To（Please check account name carefully）',
@@ -460,6 +641,16 @@ export default {
       sort_type_progress: 'Investment Progress',
       profit_after: 'Balloon Payment',
       firstRate: 'Balloon Payment',
+      repayment1: 'First Interest',
+      repayment2: 'One-time',
+      repayment3: 'fixed-payment',
+      repayment4: 'average capital',
+      perioduint1: 'Months',
+      perioduint2: 'Years',
+      perioduint3: 'Days',
+      periodmode1: 'Months ',
+      periodmode2: 'Years ',
+      periodmode3: 'Days ',
       endDate: 'Closing Time',
       title: 'Invest',
       investSucc: 'Invested',
@@ -472,6 +663,7 @@ export default {
       investFormat: 'Format error',
       investNull: 'Insufficient amount, please make the deposit first.',
       investGreater: 'The investment amount shall be no more than the available balance',
+      investOne: 'Must one invest all',
       investLess: 'The investment amount shall be no less than minimum investment.',
       investIncrease: 'Investment amount does not meet increment condition.',
       notInvest: 'It\'s not allowed to invest in the loan published by yourself.',
@@ -508,7 +700,7 @@ export default {
       currentVal: 'Current Value'
     },
     borrowsuccess: {
-      title: '借款成功(没用到）',
+      title: 'Loan successful',
       tab_title_repayments: 'Repaying',
       tab_title_completed: 'Completed loan',
       borrow_view_details: 'View details',
@@ -542,6 +734,14 @@ export default {
       out: 'Overdue',
       alsoInterest: 'Pay Interest',
       principal: 'Principal',
+      repayment1: 'Pay Principal',
+      prepayment1: 'Prepayment',
+      early1: 'Repay the principal in advance',
+      overdueRepay1: 'Principal overdue',
+      repayment2: 'Pay Principal',
+      prepayment2: 'Prepayment',
+      early2: 'Repay the principal in advance',
+      overdueRepay2: 'Principal overdue',
       repayment: 'Pay Principal',
       prepayment: 'Prepayment',
       information: 'Loan Info',
@@ -549,6 +749,8 @@ export default {
       numNper: 'Loan Amount/Term',
       hasDel: 'Default',
       repayed: 'Paid',
+      repayedN: 'Paid',
+      repayedO: 'Overdue Paid',
       confiscated: 'Confiscated',
       thawed: 'Frozen',
       early: 'Repay the principal in advance',
@@ -581,6 +783,8 @@ export default {
       addInvest: 'Add Investment',
       earnedIncome: 'Profit Earned',
       realIncome: 'Actual Profit',
+      fromAccount: 'From',
+      interestType: 'Type',
       realIncomeRate: 'ROI',
       remainingTime: 'Remaining Time',
       investLimitTime: 'Tender Period',
@@ -651,9 +855,15 @@ export default {
           to: 'To',
           fee: 'Fee'
         },
-        'limit_order_create': 'Place order',
-        'limit_order_cancel': 'Cancel order',
-        'call_order_update': 'Update margin',
+        'limit_order_create': {
+          name: 'Place order'
+        },
+        'limit_order_cancel': {
+          name: 'Cancel order'
+        },
+        'call_order_update': {
+          name: 'Update margin'
+        },
         'account_create': {
           name: 'Open an account',
           fee: 'Fee',
@@ -702,9 +912,15 @@ export default {
           market_fee: 'Market fee',
           maximum_market_fee: 'Maximum market fee'
         },
-        'asset_update': 'Update asset',
-        'asset_update_bitasset': 'Update coins',
-        'asset_update_feed_producers': 'Update assets feed price producer',
+        'asset_update': {
+          name: 'Update asset'
+        },
+        'asset_update_bitasset': {
+          name: 'Update coins'
+        },
+        'asset_update_feed_producers': {
+          name: 'Update assets feed price producer'
+        },
         'asset_issue': {
           name: 'Asset issuer',
           fee: 'Fee',
@@ -712,14 +928,30 @@ export default {
           asset_to_issue: 'Amount',
           issue_to_account: 'To'
         },
-        'asset_reserve': 'Reserve assets',
-        'asset_fund_fee_pool': 'Fund asset fee pool',
-        'asset_settle': 'Asset settlement',
-        'asset_global_settle': 'Global asset settlement',
-        'asset_publish_feed': 'Publish feed price',
-        'committee_member_create': 'Create committee member',
-        'witness_create': 'Create witness',
-        'witness_withdraw_pay': 'Witness rewards withdraw ',
+        'asset_reserve': {
+          name: 'Reserve assets'
+        },
+        'asset_fund_fee_pool': {
+          name: 'Fund asset fee pool'
+        },
+        'asset_settle': {
+          name: 'Asset settlement'
+        },
+        'asset_global_settle': {
+          name: 'Global asset settlement'
+        },
+        'asset_publish_feed': {
+          name: 'Publish feed price'
+        },
+        'committee_member_create': {
+          name: 'Create committee member'
+        },
+        'witness_create': {
+          name: 'Create witness'
+        },
+        'witness_withdraw_pay': {
+          name: 'Witness rewards withdraw '
+        },
         'proposal': {
           proposal_create: 'Create proposal',
           proposal_update: 'Update proposal',
@@ -738,23 +970,45 @@ export default {
             key_approvals_to_remove: 'Key approvals to remove'
           }
         },
-        'withdraw_permission_create': 'Create withdrawal permission',
-        'withdraw_permission_update': 'Update withdrawal permission',
-        'withdraw_permission_claim': 'Claim withdrawal permission',
-        'withdraw_permission_delete': 'Delete withdrawal permission',
-        'fill_order': 'Fill order',
-        'delegate_update_global_parameters': 'Global parameter update',
-        'vesting_balance_create': 'Create frozen balance',
+        'withdraw_permission_create': {
+          name: 'Create withdrawal permission'
+        },
+        'withdraw_permission_update': {
+          name: 'Update withdrawal permission'
+        },
+        'withdraw_permission_claim': {
+          name: 'Claim withdrawal permission'
+        },
+        'withdraw_permission_delete': {
+          name: 'Delete withdrawal permission'
+        },
+        'fill_order': {
+          name: 'Fill order'
+        },
+        'delegate_update_global_parameters': {
+          name: 'Global parameter update'
+        },
+        'vesting_balance_create': {
+          name: 'Create frozen balance'
+        },
         'vesting_balance_withdraw': {
           name: 'Withdraw unfrozen balance',
           owner: 'To',
           amount: 'Amount',
           fee: 'Fee'
         },
-        'worker_create': 'Create worker',
-        'custom': 'Custom',
-        'assert': 'Assert operation',
-        'balance_claim': 'Claim balance',
+        'worker_create': {
+          name: 'Create worker'
+        },
+        'custom': {
+          name: 'Custom'
+        },
+        'assert': {
+          name: 'Assert operation'
+        },
+        'balance_claim': {
+          name: 'Claim balance'
+        },
         'override_transfer': {
           name: 'Override transfer',
           fee: 'Fee',
@@ -763,13 +1017,27 @@ export default {
           to: 'To',
           amount: 'Amount'
         },
-        'witness_update': 'Update witness',
-        'committee_member_update_global_parameters': 'Global parameter update',
-        'transfer_to_blind': 'Transfer to private account',
-        'blind_transfer': 'Blind transfer',
-        'transfer_from_blind': 'Transfer from private account',
-        'committee_member_update': 'Update committee member account',
-        'asset_claim_fees': 'Claim asset fee ',
+        'witness_update': {
+          name: 'Update witness'
+        },
+        'committee_member_update_global_parameters': {
+          name: 'Global parameter update'
+        },
+        'transfer_to_blind': {
+          name: 'Transfer to private account'
+        },
+        'blind_transfer': {
+          name: 'Blind transfer'
+        },
+        'transfer_from_blind': {
+          name: 'Transfer from private account'
+        },
+        'committee_member_update': {
+          name: 'Update committee member account'
+        },
+        'asset_claim_fees': {
+          name: 'Claim asset fee '
+        },
         'account_upgrade_merchant': {
           name: 'Merchant authentication',
           account_to_upgrade: 'Update account',
@@ -905,24 +1173,78 @@ export default {
           proxy_account: 'Proxy Account',
           fee: 'Fee'
         },
-        'account_property': 'Authorized gateway or operator',
-        'gateway_withdraw': 'Withdraw coins',
-        'gateway_deposit': 'Deposit',
-        'gateway_issue_currency': 'Issue coins for gateway',
-        'bitlender_option_create': 'Create fiat currency parameters',
-        'bitlender_option_author': 'Create fiat currency committee',
-        'bitlender_option_update': 'Update fiat currency parameters',
-        'bitlender_rate_update': 'Update fiat currency interest rate',
-        'asset_property': 'Authorized assets are fiat currency or collateral crypto currency',
-        'bitlender_lend_order': 'Create loan order',
-        'bitlender_invest': 'Investment order',
-        'bitlender_repay_interest': 'Interest repayment',
-        'bitlender_overdue_interest': 'Overdue interest repayment',
-        'bitlender_repay_principal': 'Principal repayment',
-        'bitlender_prepayment': 'Early principal repayment',
-        'bitlender_overdue_repay': 'Overdue principal repayment',
-        'bitlender_add_collateral': 'Add collateral',
-        'bitlender_recycle': 'Process defaulted loan',
+        'account_property': {
+          name: 'Authorized gateway or operator'
+        },
+        'gateway_withdraw': {
+          name: 'Withdraw coins'
+        },
+        'gateway_deposit': {
+          name: 'Deposit'
+        },
+        'gateway_issue_currency': {
+          name: 'Issue coins for gateway'
+        },
+        'bitlender_option_create': {
+          name: 'Create fiat currency parameters'
+        },
+        'bitlender_option_author': {
+          name: 'Create fiat currency committee'
+        },
+        'bitlender_option_update': {
+          name: 'Update fiat currency parameters'
+        },
+        'bitlender_rate_update': {
+          name: 'Update fiat currency interest rate'
+        },
+        'asset_property': {
+          name: 'Authorized assets are fiat currency or collateral crypto currency'
+        },
+        'bitlender_lend_order': {
+          name: 'Create loan order'
+        },
+        'bitlender_invest': {
+          name: 'Investment order'
+        },
+        'bitlender_repay_interest': {
+          name: 'Interest repayment'
+        },
+        'bitlender_overdue_interest': {
+          name: 'Overdue interest repayment'
+        },
+        'bitlender_repay_principal': {
+          name: 'Principal repayment'
+        },
+        'bitlender_prepayment': {
+          name: 'Early principal repayment'
+        },
+        'bitlender_overdue_repay': {
+          name: 'Overdue principal repayment'
+        },
+        'bitlender_add_collateral': {
+          name: 'Add collateral'
+        },
+        'bitlender_recycle': {
+          name: 'Handling Bad Assets'
+        },
+        'bitlender_remove_operation': {
+          name: 'Remove Order'
+        },
+        'account_coupon': {
+          name: 'Gas Coupon'
+        },
+        'locktoken_create': {
+          name: 'create locktoken'
+        },
+        'locktoken_update': {
+          name: 'update locktoken'
+        },
+        'locktoken_remove': {
+          name: 'remove locktoken'
+        },
+        'locktoken_node': {
+          name: 'node award'
+        },
         'status_states': {
           0: 'Unpublished',
           1: 'Published',
@@ -994,6 +1316,7 @@ export default {
         'proxy_transfer': '{from} sent {amount} to {to} delegated by {account}',
         'account_property': '{issuer} authorized gateway or operator',
         'gateway_withdraw': '{issuer} withdrew {amount}{currency}',
+        'vest_withdraw': '{issuer} unlock {amount} id {id}',
         'gateway_deposit': '{issuer} deposited {amount}{currency}',
         'gateway_issue_currency': '{issuer} issued coins to gateway',
         'bitlender_option_create': '{issuer} created fiat currency parameters',
@@ -1009,8 +1332,13 @@ export default {
         'bitlender_prepayment': '{issuer} repaid {id} in advance',
         'bitlender_overdue_repay': '{issuer} added {n} {currency} to loan order',
         'bitlender_add_collateral': '{issuer} added collateral',
-        'bitlender_recycle': '{issuer} processed the defaulted loan {id} ',
-        'bitlender_setautorepayer_operation': 'automatic repayment account'
+        'bitlender_recycle': '{issuer} Handling Bad Assets {id} ',
+        'bitlender_remove_operation': '{issuer} remove loan {id} ',
+        'bitlender_setautorepayer_operation': 'automatic repayment account',
+        'locktoken_create_operation': '{issuer} create locktoken',
+        'locktoken_update_operation': '{issuer} update locktoken  {id}',
+        'locktoken_remove_operation': '{issuer} remove locktoken  {id}',
+        'locktoken_node_operation': '{issuer} node award  {id}'
       }
     },
     // account
@@ -1065,13 +1393,22 @@ export default {
       subtitle: 'We provide query service for block, transaction, account and etc. '
     },
     params: {
-      title: 'Parameter',
+      title: 'Lending Option',
+      locktitle: 'Locktoken Option',
       update: 'Modify',
+      assignpayer: 'Payment authorization',
+      cancelassignpayer: 'Cancel payment authorization',
+      hasassig: 'Have authorized',
+      noassig: 'Unauthorized',
+      nocarrier: 'Not the carrier',
+      errcarrier: 'Carrier is no',
+      err_pay_asset: 'Interest rate currencies are no',
+      errasset: 'Interest assets is no',
+      errpayer: 'The payer does not exist',
       submit: 'Submit',
       name: '',
       nper: 'Period',
       cnper: '',
-      paramVal: '',
       updateAfter: 'Modified ',
       restore: 'Restore',
       del: 'Delete',
@@ -1086,15 +1423,37 @@ export default {
       payAccount: 'Payment account',
       poundage: 'Fee',
       create: 'Create',
+      create_dy: 'Create current',
+      create_fixed: 'Create fixed',
+      create_node: 'Node application',
       updateRate: 'Confirmation',
       updateContent: 'Modified content',
       updateUser: 'Modifier',
       updateTime: 'Time',
       operator: 'Operator',
+      loperator: 'Lending Carriers',
+      sellpair: 'Transaction pair',
+      operatorset: 'Operator Setting',
       gateway: 'Gateway',
+      same: 'duplicate',
+      stop: 'Stop service',
       rateUser: 'Interest-rate modifier',
       platform: 'Platform',
       minBorrow: 'Min loan',
+      minSave: 'Min Save',
+      maxSave: 'Max Save',
+      lockTime: 'Lock Time',
+      rateCollat: 'Rate Collat',
+      payer: 'Payer',
+      present: 'At Present',
+      thanZeroDec: 'a number greater than zero that contains at most two decimal places',
+      thanOne: 'An integer not less than one',
+      thanNum: 'A positive integer less than 60*60*24*360',
+      lessMillion: 'and less than 10 0000 0000',
+      errMessage: 'Enter no compound rule',
+      errMessage2: 'The maximum deposit must be less than the maximum supply',
+      errMessage3: 'Maximum supply must be less than or equal to total circulation',
+
       minBorrowIn: 'Min loan increment',
       minInvest: 'Min investment',
       minInvestIn: 'Min investment increment',
@@ -1102,7 +1461,8 @@ export default {
       timeUnit: 'Loan term unit',
       maxInvest: 'Max tender period',
       maxRate: 'Max loan rate',
-      rateVal: 'Max monthly interest',
+      rateVal1: 'Max monthly interest',
+      rateVal2: 'Max monthly interest',
       repayNote: 'Payment time reminder (from the due date)',
       riskRate: 'Risk reserve rate',
       serviceRate: 'Service fee rate',
@@ -1156,6 +1516,7 @@ export default {
       chooseMore: 'Multiple choice',
       nopermission: 'You have no authority to modify the parameter.',
       addParams: 'Add parameter',
+      confirmPayer: 'Confirm Payer',
       greaterThan: 'Cannot be greater than',
       lessThan: 'Cannot be less than',
       year: 'Year',
@@ -1188,13 +1549,13 @@ export default {
       sumOf: '100.',
       proportionAs: 'The allocation percentage for investors\' operator shall be a whole number greater than or eqnual to zero, and the sum of the allocation percentages for investor\'s operator and  borrower\'s operator is 100.',
       debitOperator: 'The allocation proportion for borrower\'s operator shall be a whole number greater than zero,and the sum of the allocation proportions for borrower\'s operator and  platform is 100.',
-      investorsOperator: '投资方运营商分配比例应为大于等于0的整数, 且平台服务费分配比例之和为100',
-      debitRatio: '借方推荐人分配比例应为大于0的整数, 且平台服务费分配比例之和为100',
-      investorReference: '投资方推荐人分配比例应为大于0的整数, 且平台服务费分配比例之和为100',
-      serviceAllocation: '的整数, 且平台服务费分配比例之和为100',
+      investorsOperator: 'The proportion of the investor\'s operator allocation shall be greater or equal to 0, and the sum of the platform service fee allocation ratios is 100',
+      debitRatio: 'the borrower\'s recommender allocation ratio shall be greater than 0, and the sum of the platform service fee allocation ratios is 100',
+      investorReference: 'the investor recommendation ratio should be an integer greater than 0, and the sum of the platform service fee allocation ratio is 100',
+      serviceAllocation: ' and the sum of the service fee distribution proportion of the platform is 100',
       moreThan: 'greater than',
       dinteger: 'whole number',
-      fiatGateways: '法币网关分配比例应为大于0的整数, 且平台服务费分配比例之和为100',
+      fiatGateways: ' the fiat currency gateway allocation ratio should be greater than 0, and the sum of the platform service fee allocation ratio is 100',
       principalOverdue: 'The time of NPL from principal overdue shall be a whole number greater than zero.',
       overdueFines: 'The penalty ratio of overdue interest shall be a whole number greater than zeor.',
       thePrincipal: 'The penalty ratio of overdue principal shall be a whole number greater than zeor.',
@@ -1205,9 +1566,11 @@ export default {
       noNull: 'Operator cannot be empty.',
       addFeeder: 'Add',
       isFeeder: 'The user is already the feed price producer.',
+      invert: 'inver feed',
       feederFlag: 'Feed Price Mode',
       feederProposal: 'Create a proposal for feed price producer.',
       management: 'Parameter management',
+      nooptions: 'This asset do not create option',
       index: 'No.',
       account: 'Account name',
       enter: 'Please enter the account name.',
@@ -1230,6 +1593,7 @@ export default {
       waring: 'This operation will clear all configurations, please be carefull.',
       inUsername: 'Please enter ',
       inCarrier: 'the name of operator',
+      inPayAsset: 'Name of interest asset',
       admin: 'Administration',
       loanCarrier: 'Borrower Operator',
       investCarrier: 'Investor\'s Operator',
@@ -1243,13 +1607,14 @@ export default {
       credibility: 'Credibility',
       recovery: 'Collateral recovery',
       taste: 'Compensation fiat',
-      noAllowed: '没有设置可抵押币e',
-      chooseGateway: '请选择网关e',
-      chooseAuthor: '请选择认证人e',
+      noAllowed: 'No mortgagable coin is set',
+      chooseGateway: 'Please select gateway',
+      chooseAuthor: 'Please select the certifier',
       theme: 'Theme',
       chooseTheme: 'Select Theme',
+      carrierCount: 'Lending Carrier Statistics',
       author: 'Author',
-      valiRatio: '请输入0到100之间的数字',
+      valiRatio: 'Please enter a number between 0 and 100',
       noGateway: 'No gateway',
       noAuthor: 'No author'
     },
@@ -1281,8 +1646,11 @@ export default {
       copyUrl: 'Copy link',
       copySucc: 'The address has been pasted in your clipboard!',
       inviteFriends: 'Invite friends to register ZOS and earn transaction benefits easily.',
+      activity1: 'Rewards',
+      inviteAct1: 'The first 100,000 verified users will each receive 100ZOS. ',
+      inviteAct2: 'Invite friends to register and verify their account successfully, and get an additional 20 ZOS.',
       activity: 'Activity details',
-      inviteContent: 'After your friend accepts the invitation and completes the signing-up,  you will get the reward in proportion for each of his/her loan or investment.',
+      inviteContent: 'After your friend accepts the invitation and completes the signing-up,you will get the reward in proportion for each of his/her loan or investment.',
       inviteContent1: 'The reward will be released in the collateral currency as soon as the loan is 100% invested.',
       inviteContent2: 'The release and rate of reward are excecuted automatically by smart contracts, which can be modified by community through voting.',
       inviteContent3: 'The more Referral, the more rewards you can get.',
@@ -1347,6 +1715,7 @@ export default {
       inputName: 'Please enter the account holder name.',
       formatErr: 'Holder name format incorrect',
       idNumber: 'Please enter ID number',
+      phNumber: 'Please enter Phone number',
       idNumFormat: 'Format error',
       phoneFormat: 'Format error',
       ICBC: 'ICBC',
@@ -1359,7 +1728,7 @@ export default {
       branchBankFormat: 'Format error',
       cardNumberPay: 'Account number cannot be empty.',
       selectBank: 'Select BankCard',
-      selectBankFormat: '银行卡格式不对',
+      selectBankFormat: 'The bank card format is wrong',
       noBank: 'You haven\'t added a bank card yet.'
     },
     information: {
@@ -1381,12 +1750,14 @@ export default {
       againInput: 'Re-enter the password',
       notMatch: 'Passwords do not match!',
       inputPhone: 'Please enter phone number',
+      selcode: 'Please select country',
       inputCode: 'Please enter the massage verification code',
-      resend: 'Resend the verification code',
+      resend: 'Resend verification code',
       resendTime: 'Resend',
       send: 'Authentication code',
       sendSucc: 'Sent authentication code successfully, please check on your mobile.',
       sendErr: 'Failed to send the authentication code, please try again later.',
+      codeErr: 'phone code error！',
       updatePw: 'Change password',
       updateAsset: 'Change asset password',
       updateSucc: 'Change successfully',
@@ -1400,7 +1771,9 @@ export default {
       KYC: 'Real name authentication',
       nationality: 'Nationality',
       noBind: 'Mobile phone not bound',
+      noBind1: 'if you bind phone ,you will receive message about order state',
       bind: 'Bind phone number',
+      bindMail: 'Bind Mail',
       nokyc: 'Unverified',
       review: 'Under review',
       through: 'Already passed',
@@ -1410,21 +1783,27 @@ export default {
       uploadPhoto: 'Upload Photo',
       errorPwd: 'Old passward error, please re-enter it.',
       cad: 'Canada',
+      ph: 'Philippines',
+      sg: 'Singapore',
       mail: 'Email',
       bindEmail: 'Bind Mail',
+      sameInput: 'same input',
       reBindEmail: 'reBind Mail'
     },
     permission: {
       masterKey: 'Owner Key',
       ownerKey: 'Owner Key is the highest permission of account, it\'s used to overwrite other permissions. ',
       publicKey: 'Public key',
+      noEncKey: 'Special plaintext public key',
       privateKeyShow: 'Check',
       privateKeyHidden: 'Hide private key',
       privateKey: 'Private Key',
       assetKey: 'Active Key',
       activeKey: 'Active Key can control transfer and manage memo permissions.',
       momeKey: 'Memo Key',
-      memoKey: 'The memo information attached to the transaction is transmitted after encrypted by public memo key, and only a corresponding private key of the public key can decrypt it. '
+      memoKey: 'The memo information attached to the transaction is transmitted after encrypted by public memo key, and only a corresponding private key of the public key can decrypt it. ',
+      authKey: 'Info Key',
+      authorKey: 'The user information encrypted by public info key, and only a corresponding private key of the public key can decrypt it. '
     },
     page: {
       platform: 'An open platform for smart finance',
@@ -1505,6 +1884,7 @@ export default {
       search: 'Search',
       loanInfo: 'Loan info',
       investInfo: 'Investment info',
+      lockInfo: 'lock Token Info',
       noAccount: 'The account name does not exist.',
       noEmpty: 'The account name cannot be empty.',
       gotoInvest: 'To Invest'
@@ -1519,6 +1899,7 @@ export default {
       cumulative: 'All Orders',
       trading: 'Trading Pair',
       amount: 'Loan Amount',
+      amount1: 'Loan Amount',
       borrowAmount: 'Number of Loans',
       pen: '',
       obtained: 'Net Profit',
@@ -1530,7 +1911,7 @@ export default {
       borrow: 'Borrowed',
       loan: 'Invested',
       investOrders: 'Number of Investments',
-      average: 'Avg principal guaranteed rate',
+      average: 'Avg principal </b><br/>guaranteed rate',
       day: 'Day',
       week: 'Week',
       loanAmount: 'Number of loans',
@@ -1542,14 +1923,14 @@ export default {
       total: 'Total',
       toBorrow: 'Borrow',
       business: 'Business Advantage',
-      threshold: 'Low Borrowing Threshold',
-      anyTime: 'Mortgage cryptocurrency to borrow fiat, and repay it whenever you want within the loan term.',
-      welfare: 'Plenty of Rewards',
-      activity: 'Invite your friends to join us to make mining and trading. The wondeful activities wait for you every month.',
-      diversity: 'Various Currencies',
-      financing: 'are supported in the short-term financing for crypto holders.',
-      income: 'High-return Lending',
-      investment: ' The investment amount starts from 100 USD.',
+      threshold: 'Business Model',
+      anyTime: 'ZOS operates under the operator lending model rather than self-operated model, and any financial institution can freely access the network for investment and loan.',
+      welfare: 'Loan Mode',
+      activity: 'ZOS Lending supports most mainstream cryptocurrencies as collateral. Borrowers are free to choose credit enhancement measures according to their own demands, greatly reducing borrowers’ entry threshold.',
+      diversity: 'Compliance',
+      financing: 'ZOS meets the compliance requirements through the licensed compliant operators on ZOSNet, and the NPL is disposed by the compliant fiat exchanges.',
+      income: 'Blockchain',
+      investment: ' ZOS makes the standardized lending protocols by using graphene technology and DPOS consensus. Operators can freely join the ZOS lending network.',
       globalization: 'Business Globalization',
       enjoy: 'Access the financial resources and services from all aruond the world.',
       process: 'Operation Flow',
@@ -1582,8 +1963,17 @@ export default {
     proposalList: {
       Bill: 'Proposal No.',
       originator: 'Originator',
-      edit: 'Loan parameter modification',
+      edit: 'Parameters change',
+      add: 'Create parameter',
+      feederoption: 'Price feeder modification',
+      lending: 'node',
+      dyoption: 'current',
+      fixedoption: 'fixed',
+      nodeoption: 'node',
+      payeroption: 'Payer authorization',
+      payeroption1: 'Payer disauthorizes',
       expiration: 'Expiry time',
+      create: 'Create time',
       agreed: 'Agreed list',
       agree: 'Agree',
       undo: 'Cancel',
@@ -1766,6 +2156,7 @@ export default {
       47: 'Platform service fee',
       52: 'Return investment fund for failed loan',
       53: 'Return collateral for failed loan',
+      59: '交易收款',
       60: 'Burn coins',
       61: 'Enable financing',
       62: 'Cancel financing',
@@ -1782,8 +2173,28 @@ export default {
       84: 'Deduct service fee of borrower',
       85: 'Service fee of borrower"s operator',
       86: 'Service fee of investor"s operator',
+      87: 'Remove return collateral',
       88: 'Cancel the authorized credit of gateway',
       90: 'Refund for canceling account upgrade',
+      97: 'Author lock asset',
+      101: 'Trade a bill to deduct money',
+      103: 'Transaction withdrawal receipt',
+      104: 'Transaction return fee',
+      106: 'lock token',
+      107: 'unlock token',
+      108: 'locktoken interest',
+      109: 'Certification of deductions',
+      110: 'Certification of reward',
+      111: 'Certification reward referees',
+      112: 'Lock node deduction',
+      113: 'Node interest deduction',
+      114: 'Node interest income',
+      115: 'Node recommended deduction',
+      116: 'Node recommendation income',
+      117: 'Periodic interest deduction',
+      118: 'Current interest deduction',
+      119: 'Reward node deduction',
+      120: 'Buy node',
       2147483647: 'All'
     },
     selectGateway: {

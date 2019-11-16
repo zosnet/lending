@@ -1,6 +1,6 @@
 import axios from 'axios'
 import store from '/path-store'
-axios.defaults.timeout = 10000
+axios.defaults.timeout = 20000
 axios.defaults.headers.post['Content-Type'] = 'application/x-www=form-urlencoded'
 axios.interceptors.request.use(function (config) {
   // Do something before request is sent

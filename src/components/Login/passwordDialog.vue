@@ -4,9 +4,11 @@
     :visible.sync="visible"
     width="30%"
     @close="close"
+    :close-on-press-escape="false"
+    :close-on-click-modal="false"
     :append-to-body="isAppend"
   >
-    <div v-loading="loading" :element-loading-text="$t('m.transfer.being')" style="min-height: 10vw;">
+    <div v-loading="loading" :element-loading-text="$t('m.transfer.being')">
       <div v-show="!loading">
         <!--为了确保资金安全，请输入密码-->
         <span>{{$t('m.investDetails.inputPass')}}</span>

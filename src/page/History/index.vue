@@ -31,6 +31,16 @@
               </div>
             </a>
           </router-link>
+
+          <router-link :to="{path:'/history/lockHis',query: {accID: $store.state.accountId, accName: $store.state.accountName}}" class="dHMsll gTHKWe">
+            <a @click="changePage(3)" class="dHMsll gTHKWe">
+              <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===3}">
+                <!--锁仓信息-->
+                <div class="bgdPDV">{{$t('m.historyinfo.lockInfo')}}</div>
+              </div>
+            </a>
+          </router-link>
+
         </div>
 
         <div class="account-content">
@@ -176,6 +186,8 @@
           this.$route.path === '/history/investHis/badinvestdetail'
         ) {
           this.changePage(2)
+        } else if (this.$route.path === '/history/lockHis') {
+          this.changePage(3)
         }
       }
     },

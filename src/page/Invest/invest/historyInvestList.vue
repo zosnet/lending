@@ -31,23 +31,27 @@
               <span class="margin-l10">{{scope.row.id}}</span>
             </template>
           </el-table-column>
+          <!-- 投资金额 -->
           <el-table-column width="200" :label="$t('m.investList.investSum')">
             <template slot-scope="scope">
              <span class="currency">{{scope.row.asset_to_invest.symbol}}</span>
               {{scope.row.amount_to_invest.amount / Math.pow(10, scope.row.asset_to_invest.precision) | formatLegalCurrencys('', scope.row.asset_to_invest.precision)}}
             </template>
           </el-table-column>
+          <!-- 投资时间 -->
           <el-table-column width="160" :label="$t('m.investList.investTime')">
             <template slot-scope="scope">
               <span>{{scope.row.invest_time | formatDateStr}}</span>
             </template>
           </el-table-column>
+          <!-- 实际收益 -->
           <el-table-column width="200" :label="$t('m.investList.realIncome')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_invest.symbol}}</span>
               {{scope.row.repay_interest_sum / Math.pow(10, scope.row.asset_to_invest.precision) | formatLegalCurrencys('', scope.row.asset_to_invest.precision)}}
             </template>
           </el-table-column>
+          <!-- 实际收益率 -->
           <el-table-column width="160" :label="$t('m.investList.realIncomeRate')">
             <template slot-scope="scope">
               <span>{{parseFloat(scope.row.repay_interest_rate * 1000).toFixed(2)}}‰</span>
@@ -138,7 +142,7 @@
         this.firstDay = formatUnixTime(new Date(y, m, 1, 0, 0, 0))
         y = this.historyEndDate.getFullYear()
         m = this.historyEndDate.getMonth()
-        this.lastDay = formatUnixTime(new Date(y, m + 1, 0, 0, 0, 0))
+        this.lastDay = formatUnixTime(new Date(y, m + 1, 0, 24, 0, 0))
         this.getList(1)
       },
       init () {

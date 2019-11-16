@@ -11,42 +11,13 @@
         <!--还款金额-->
         <dt>1.{{$t('m.borrowsuccess.repayment_sum')}}</dt>
         <dd>
-          <div class="feel">
-            <span v-if="onceRepayOption === 1 && dataDialog.orderState !== 6">
+          <span  v-if="onceRepayOption === 1">
               <!--应还金额-->
               {{$t('m.borrowsuccess.should')}}
               :
              {{dataDialog.amount | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}
-            </span>
-            <span style="flex:1"></span>
-            <span>
-              <!--可用余额-->
-                {{$t('m.investDetails.KYYE')}}
-                : {{available | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}
-              <a v-if="toUp()" @click="toRecharge">
-                <!--去充值-->
-               {{$t('m.invest.topUp')}}
-              </a>
-            </span>
-          </div>
-
+           </span>
         </dd>
-        <!--应还日期-->
-        <dd v-if="onceRepayOption !== 2">{{$t('m.borrowsuccess.shouldDate')}}: {{dataDialog.expect_time | formatDateStrHour}}</dd>
-        <dd v-if="onceRepayOption !== 2">
-          <!--还款状态-->
-          {{$t('m.borrowsuccess.repayment_state')}}:
-          <span v-if="dataDialog.orderState === 6 || dataDialog.interestState === 1">{{$t('m.borrowsuccess.normal')}}({{$t('m.borrowsuccess.remaining')}}{{remaining}}{{$t('m.day')}})</span>
-          <span v-else-if="dataDialog.orderState === 11 || dataDialog.interestState === 3" style="color: #ff0000">{{$t('m.borrowsuccess.withOut')}}({{remaining}}{{$t('m.day')}})</span>
-        </dd>
-        <dd v-if="toUp()"
-            class="warning"
-        >
-          <!--余额不足-->
-          {{$t('m.borrowsuccess.balance')}}
-          <!--请充值-->
-          {{$t('m.borrowsuccess.topUp')}}<a @click="toRecharge"></a></dd>
-
 
         <dd v-if="dataDialog.interestState === 3 && onceRepayOption === 1">
           <dl>
@@ -54,25 +25,25 @@
             <dd>{{$t('m.borrowsuccess.payment')}}: {{dataDialog.withoutRemaining | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
           </dl>
         </dd>
-        <dd v-if="onceRepayOption === 2">
+
+
+         <!--提前还款-->
+        <dd v-if="dataDialog.principalState === 2">
           <dl>
-            <!--<dt>剩余期应还</dt>-->
-            <!--本金-->
             <dd>{{$t('m.borrowsuccess.principal')}}: {{dataDialog.remainingAmount | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
             <!--提前还款违约金-->
             <dd>{{$t('m.borrowsuccess.dueBreach')}}: {{dataDialog.interest | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
-            <!--<dd>{{$t('m.borrowsuccess.dueBreach')}}: {{dataDialog.breach | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>-->
-            <!--<dd>{{$t('m.borrowsuccess.penaltyInterest')}}: {{dataDialog.interest | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>-->
           </dl>
         </dd>
-        <!--是否是一次性还清,1是单期还,2是一次性还清,3还本-->
-        <!--order_state：订单状态（1:发标；2:订单逾期；3:正在应标；4:满标；5:开始付息；6:还息结束；7:还本结束；8:提前还本结束；9:逾期还本结束；10:利息逾期；11:本金逾期；12:不良资产；13:不良资产处理完成）-->
-        <dd v-if="onceRepayOption === 3 && dataDialog.orderState === 6">
+        <!--还本-->
+        <dd v-if="dataDialog.principalState === 3 || dataDialog.principalState === 4">
           <dl>
             <dd>{{$t('m.borrowsuccess.principal')}}: {{dataDialog.remainingAmount | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
+            <dd v-if="dataDialog.repaymentType.repayment_type==2">{{$t('m.borrowsuccess.interest')}}: {{dataDialog.interest | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
           </dl>
         </dd>
-        <dd v-if="dataDialog.orderState === 11 && (onceRepayOption === 3 || onceRepayOption === 2)">
+        <!--逾期还本-->
+        <dd v-if="dataDialog.orderState === 11 && (dataDialog.principalState > 0)">
           <dl>
             <dd>{{$t('m.borrowsuccess.principal')}}: {{dataDialog.remainingAmount | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
             <!--逾期违约金-->
@@ -81,9 +52,41 @@
             <dd>{{$t('m.borrowsuccess.payment')}}: {{dataDialog.interest | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
           </dl>
         </dd>
+
+         <dd>
+          <!--还款状态-->
+          {{$t('m.borrowsuccess.repayment_state')}}:
+          <span v-if="dataDialog.principalState > 0">
+          <i v-if="dataDialog.principalState === 1">{{$t('m.borrowsuccess.overdueRepay' + dataDialog.repaymentType.repayment_type)}}</i>
+          <i v-else-if="dataDialog.principalState === 2">{{$t('m.borrowsuccess.prepayment' + dataDialog.repaymentType.repayment_type)}}</i>
+          <i v-else-if="dataDialog.principalState === 3">{{$t('m.borrowsuccess.repayment' + dataDialog.repaymentType.repayment_type)}}</i>
+          <i v-else-if="dataDialog.principalState === 4">{{$t('m.borrowsuccess.early' + dataDialog.repaymentType.repayment_type)}}</i>
+          </span>
+           <span v-if="onceRepayOption === 1 && (dataDialog.orderState === 6 || dataDialog.interestState === 1)">{{$t('m.borrowsuccess.normal')}}({{$t('m.borrowsuccess.remaining')}}{{remaining}}{{$t('m.day')}})</span>
+           <span v-else-if="onceRepayOption === 1 && (dataDialog.orderState === 11 || dataDialog.interestState === 3)" style="color: #ff0000">{{$t('m.borrowsuccess.withOut')}}({{remaining}}{{$t('m.day')}})</span>
+        </dd>
+
+         <!--应还日期-->
+        <dd>{{$t('m.borrowsuccess.shouldDate')}}: {{dataDialog.expect_time | formatDateStrHour}}</dd>
+
         <!--总计应还-->
         <dd>{{$t('m.borrowsuccess.total')}}: {{dataDialog.total | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}</dd>
-
+        <dd></dd>
+         <!--可用余额-->
+        <dd>
+              {{$t('m.investDetails.KYYE')}}
+              : {{available | formatLegalCurrency(dataDialog.symbol, dataDialog.precision)}}
+            <a v-if="toUp()" @click="toRecharge">
+              <!--去充值-->
+               {{$t('m.invest.topUp')}}
+            </a>
+         </dd>
+          <dd v-if="toUp()" class="warning" >
+          <!--余额不足-->
+          {{$t('m.borrowsuccess.balance')}}
+          <!--请充值-->
+          {{$t('m.borrowsuccess.topUp')}}<a @click="toRecharge"></a>
+          </dd>
         <!--手续费-->
         <dt>2.{{$t('m.params.poundage')}}</dt>
         <dd>
@@ -297,7 +300,7 @@
         })
       },
       remaining () {
-        let d = Date.parse(this.dataDialog.expect_time.substr(0, this.dataDialog.expect_time.indexOf('T'))) - Date.parse(this.$store.state.curDate)
+        let d = Date.parse(this.dataDialog.expect_time.substr(0, this.dataDialog.expect_time.indexOf('T'))) - Date.parse(this.$store.state.curDate) - this.dataDialog.offsetTime * 1000
         return Math.abs(Math.ceil(d / (3600 * 24 * 1000)))
       },
       zosShow () {
@@ -309,7 +312,7 @@
           return 0
         } else if (this.dataDialog.symbol && assetsArr.length > 0) {
           this.assetId = assetsArr[0].asset_id
-          return (assetsArr[0].amount / Math.pow(10, assetsArr[0].precision))
+          return assetsArr[0].amount
         }
       }
     },

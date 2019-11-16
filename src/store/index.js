@@ -35,11 +35,18 @@ const state = {
   logo: '',
   logoen: '',
   copyRight: '',
+  loanMode: 3,
   link: '',
   configTheme: '1a1d5c',
   adminNotifyId: '',
   connectionStatus: '',
   curDate: new Date(),
+  exchangegateway: undefined,
+  authoradmin: undefined,
+  ucurl: undefined,
+  companyName: 'ZOS',
+  serveType: 1,
+  accountObj: undefined,
   loanAssetArr: []
 }
 

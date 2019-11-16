@@ -65,7 +65,7 @@
                   <div class="detail-item">
                     <!--借款时长-->
                     <span>{{$t('m.investingdetail.JKSC')}}:</span>
-                    <div>{{investData.order_info.loan_period}}{{$t('m.month')}}</div>
+                    <div>{{investData.order_info.loan_period}}{{$t('m.invest.perioduint' + investData.order_info.repayment_type.repayment_period_uint)}}</div>
                   </div>
                 </el-col>
               </el-row>
@@ -74,7 +74,7 @@
                   <div class="detail-item">
                     <!--借款利率-->
                     <span>{{$t('m.borrow.borrowRate')}}:</span>
-                    <div>{{investData.interest_rate.interest_rate | converPercentage}}{{$t('m.year')}}</div>
+                    <div>{{investData.interest_rate.interest_rate | converPercentage}}/{{$t('m.invest.perioduint' + investData.order_info.repayment_type.repayment_period_uint)}}</div>
                   </div>
                 </el-col>
               </el-row>

@@ -54,7 +54,7 @@
                      @change="DYBChange(value)"
           ></el-slider>
         </el-form-item>
-          {{$t('m.borrow.radio')}} : {{(this.datail.collateral_rate / 1000).toFixed(3)}}   {{$t('m.borrowing.currentMortgage')}}: {{cur_collateral_rate}}
+          {{$t('m.borrow.radio')}} : {{(this.minCollateralRate / 1000).toFixed(3)}}   {{$t('m.borrowing.currentMortgage')}}: {{cur_collateral_rate}}
       </div>
       <div>
         <h3>2.{{$t('m.fuelCost')}}</h3>
@@ -179,6 +179,7 @@
         comfirmPassword: false,
         conformfail: false,
         Passwordvalid: false,
+        minCollateralRate: 0,
         couponVisible: false
 
       }
@@ -190,7 +191,7 @@
         if (!assetsArr || assetsArr.length === 0) {
           return 0
         } else if (assetsArr.length > 0) {
-          return (assetsArr[0].amount / Math.pow(10, assetsArr[0].precision))
+          return assetsArr[0].amount
         }
       },
       // zos
@@ -200,7 +201,7 @@
           return 0
         } else if (assetsArr.length > 0) {
           this.zosprecision = assetsArr[0].precision
-          return (assetsArr[0].amount / Math.pow(10, assetsArr[0].precision))
+          return assetsArr[0].amount
         }
       }
     },
@@ -300,10 +301,10 @@
         // 借款金额 /
         let base = this.datail.amount_to_loan.amount
         let quote = input * Math.pow(10, this.datail.asset_to_collateralize.precision) + Number(this.datail.amount_to_collateralize.amount)
-        if (this.datail.amount_to_loan.asset_id === this.datail.current_feed.settlement_price.base.id) {
-          this.cur_collateral_rate = (quote * this.datail.current_feed.settlement_price.quote.amount) / (base * this.datail.current_feed.settlement_price.base.amount)
-        } else {
+        if (this.datail.amount_to_loan.asset_id === this.datail.current_feed.settlement_price.base.asset_id) {
           this.cur_collateral_rate = (quote * this.datail.current_feed.settlement_price.base.amount) / (base * this.datail.current_feed.settlement_price.quote.amount)
+        } else {
+          this.cur_collateral_rate = (quote * this.datail.current_feed.settlement_price.quote.amount) / (base * this.datail.current_feed.settlement_price.base.amount)
         }
         this.cur_collateral_rate = this.cur_collateral_rate.toFixed(3)
       },
@@ -311,8 +312,8 @@
         ZOSInstance.get_asset_exchange_feed(this.datail.amount_to_loan.asset_id, this.datail.amount_to_collateralize.asset_id).then(res => {
           if (res) {
             this.datail.current_feed = res.current_feed
-            this.datail.current_price = LendInstance.calcFeedPrice(res.current_feed.settlement_price, this.datail.asset_to_loan.id, this.datail.asset_to_loan.precision, this.datail.asset_to_collateralize.id, this.datail.asset_to_collateralize.precision)
-            this.datail.collateral_rate = res.current_feed.maintenance_collateral_ratio * (1 + this.datail.collateral_rate_carrier * 1.0 / 1000)
+            this.datail.current_price = LendInstance.calcFeedPriceView(res.current_feed.settlement_price, this.datail.asset_to_loan.id, this.datail.asset_to_loan.precision, this.datail.asset_to_collateralize.id, this.datail.asset_to_collateralize.precision)
+            this.minCollateralRate = res.current_feed.maintenance_collateral_ratio * (1 + this.datail.collateral_rate_carrier * 1.0 / 1000).toFixed(3)
           }
         })
       },
@@ -320,8 +321,8 @@
         await this.getCurFeed()
       },
       DYBChange () {
-        if (this.cur_collateral_rate < this.datail.collateral_rate / 1000) {
-          this.cur_collateral_rate = this.datail.collateral_rate / 1000
+        if (this.cur_collateral_rate < this.minCollateralRate / 1000) {
+          this.cur_collateral_rate = (this.minCollateralRate / 1000).toFixed(3)
         }
         // 通过借款数量、id和抵押物id,获取当前喂价下的抵押物（数量，id）
         let addNum = ((Number(this.oneRatioNum) * this.cur_collateral_rate).toFixed(0) - this.datail.amount_to_collateralize.amount) / Math.pow(10, this.datail.asset_to_collateralize.precision)
@@ -333,22 +334,20 @@
         this.doInputNumVerification()
       },
       init () {
+        console.log('init')
         this.num = 0
         this.warning = false
         this.zoswarningflag = false
         this.oneRatioNum = this.datail.amount_to_collateralize.amount
         // 根据当前喂价重新取得最小抵押倍数
         this.getInfoPromise()
-        // 当前抵押率
-        this.numberJT(0)
-
         this.symbol = this.datail.asset_to_collateralize.symbol
         // 获取增加抵押相关
         this.loading = true
         ChainStore.setLoginAccount(this.$store.state.userDataSid)
         ZOSInstance.get_loan_collateralize(this.datail.amount_to_loan.asset_id, this.datail.amount_to_loan.amount, this.datail.amount_to_collateralize.asset_id).then((resCollaterAsset) => {
           this.oneRatioNum = resCollaterAsset.amount
-          let minRatio = this.datail.collateral_rate / 1000
+          let minRatio = this.minCollateralRate / 1000
           this.ZDWJ = this.oneRatioNum * minRatio - this.datail.amount_to_collateralize.amount
           this.ZDWJ = Number(Number(this.ZDWJ / Math.pow(10, this.datail.asset_to_collateralize.precision)).toFixed(this.datail.asset_to_collateralize.precision))
           // 需要增加的币
@@ -359,6 +358,7 @@
           ZOSInstance.getAboutFee(this.$store.state.userName, '1.3.0', 'bitlender_add_collateral').then(resFee => {
             this.feelX = resFee.feeAmount.amount / Math.pow(10, resFee.precision)
             this.DYBChange()
+            this.numberJT(0)
             this.loading = false
           }).catch(err => {
             this.loading = false
@@ -382,7 +382,8 @@
             // '交易已确认'
             title: this.$t('m.borrowing.trade')
           })
-          location.reload()
+          this.$emit('closeMortage', true)
+          // location.reload()
         }).catch(err => {
           console.log(err)
           this.comfirmPassword = false
@@ -397,7 +398,7 @@
       },
       bitlenderLendOrder (data) {
         if (data) {
-          ZOSInstance.bitlender_add_collateral(this.$store.state.userDataSid, this.datail.id, this.collateralizeAmmount, this.datail.asset_to_collateralize.id, this.datail.asset_to_collateralize.precision, this.datail.collateral_rate / 1000)
+          ZOSInstance.bitlender_add_collateral(this.$store.state.userDataSid, this.datail.id, this.collateralizeAmmount, this.datail.asset_to_collateralize.id, this.datail.asset_to_collateralize.precision, this.cur_collateral_rate)
             .then(res => {
               this.comfirmPassword = false
               this.tr = res.tr
@@ -438,8 +439,9 @@
     created () {
     },
     watch: {
-      // 如果 `question` 发生改变，这个函数就会运行
-      ifShowDlg: function (newShowDlg, oldShowDlg) {
+    // 如果 `question` 发生改变，这个函数就会运行
+      ifShowDlg (newShowDlg, oldShowDlg) {
+        console.log(newShowDlg, oldShowDlg)
         if (newShowDlg) {
           this.init()
         }

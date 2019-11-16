@@ -105,7 +105,7 @@
         if (!assetsArr || assetsArr.length === 0) {
           return 0
         } else {
-          return assetsArr[0].amount / Math.pow(10, assetsArr[0].precision)
+          return assetsArr[0].amount
         }
       },
       // zos燃料费，够不够

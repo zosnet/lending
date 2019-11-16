@@ -15,19 +15,20 @@
             {{$t('m.orderList.operTime')}}: {{items.notify_time | formatLocalTime}}
           </dd>
         <!--利息-->
-          <repay-info :tableListData="tableListData"></repay-info>
+          <repay-info :tableListData="tableListData"  :isCurLoginUser="isCurLoginUser"></repay-info>
           <div class="line"></div>
           <dt>
             <!--借款信息-->
             {{$t('m.borrowsuccess.information')}}
           </dt>
+           <!--借款模式-->
+          <dd>{{$t('m.transfer.XZMS')}}: {{$t('m.invest.periodmode' + items.repayment_type.repayment_period_uint)}}{{$t('m.invest.repayment' + items.repayment_type.repayment_type)}}</dd>
+
           <dd>{{$t('m.borrow.loanAmount')}}:{{items.amount_to_loan.amount / Math.pow(10, items.asset_to_loan.precision) | formatLegalCurrency(items.asset_to_loan.symbol, items.asset_to_loan.precision)}}</dd>
-          <dd>
-            <!--借款时长-->
-            {{$t('m.investingdetail.JKSC')}}
-            : {{items.loan_period}}{{$t('m.month')}}</dd>
+          <!--借款时长-->
+          <dd>{{$t('m.investingdetail.JKSC')}}: {{items.loan_period}}{{$t('m.invest.perioduint' + items.repayment_type.repayment_period_uint)}}</dd>
           <!--借款利率 , 年-->
-          <dd>{{$t('m.borrow.borrowRate')}}: {{items.interest_rate | converPercentage}} /{{$t('m.year')}}</dd>
+          <dd>{{$t('m.borrow.borrowRate')}}: {{items.interest_rate | converPercentage}} /{{$t('m.invest.perioduint' + items.repayment_type.repayment_period_uint)}}</dd>
           <!--发布时间-->
           <dd>{{$t('m.investingdetail.FBSJ')}}: {{items.loan_time | formatDateStr}}</dd>
           <!--满标时间-->
@@ -106,6 +107,13 @@
     watch: {
     },
     computed: {
+      isCurLoginUser () {
+        if (this.$route.query.accName === this.$store.state.userName && this.$store.state.login) {
+          return true
+        } else {
+          return false
+        }
+      }
     },
     methods: {
       // 关闭增加抵押物

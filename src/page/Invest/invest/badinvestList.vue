@@ -14,12 +14,14 @@
               <span class="margin-l10">{{scope.row.id}}</span>
             </template>
           </el-table-column>
+          <!-- 投资金额 -->
           <el-table-column width="200" :label="$t('m.investList.investSum')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{(scope.row.amount_to_invest.amount / Math.pow(10, scope.row.asset_to_loan.precision))  | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
             </template>
           </el-table-column>
+          <!-- 运营商 -->
           <el-table-column :label="$t('m.params.operator')" width="200">
             <template slot-scope="scope">
               {{scope.row.order_info.carrier}}
@@ -27,6 +29,7 @@
                 <i class="el-icon-circle-close-outline active f20" v-else></i>
             </template>
           </el-table-column>
+          <!-- 不良资产原因 -->
           <el-table-column  width="150" :label="$t('m.borrow.reason')">
             <template slot-scope="scope">
               <!--不良资产-->
@@ -34,11 +37,13 @@
               <span v-else>{{$t('m.borrow.unwind')}}</span>
             </template>
           </el-table-column>
+          <!-- 不良资产时间 -->
           <el-table-column width="180" :label="$t('m.borrow.badTime')">
             <template slot-scope="scope">
               {{scope.row.order_info.notify_time | formatDateStr}}
             </template>
           </el-table-column>
+          <!-- 抵押物数量/价值 -->
           <el-table-column :label="$t('m.borrowing.quantity')">
             <template slot-scope="scope">
               {{(scope.row.amount_to_collateralize.amount / Math.pow(10, scope.row.collateralize_asset.precision)) | formatLegalCurrency(scope.row.collateralize_asset.symbol, scope.row.collateralize_asset.precision)}}

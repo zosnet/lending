@@ -1,205 +1,176 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-const Index = () => import('/path-page/Frame/index.vue')
-const Login = () => import('/path-page/Login/login.vue')
-const Register = () => import('/path-page/Login/register.vue')
-const Home = () => import('/path-page/Home/home.vue')
-const logo = () => import('/path-page/Home/help.vue')
-const invest = () => import('/path-page/Invest/invest.vue')
-const investList = () => import('/path-page/Invest/investList.vue')
-const investDetails = () => import('/path-page/Invest/investDetails.vue')
-// const user = () => import('/path-page/User/user.vue')
-// 设置
-const setting = () => import('/path-page/Setting/setting.vue')
-const information = () => import('/path-page/Setting/information.vue')
-const generalSetup = () => import('/path-page/Setting/generalSetup.vue')
-const accessSettings = () => import('/path-page/Setting/accessSettings.vue')
-const carrier = () => import('/path-page/Setting/carrierAdmin.vue')
-const faucetAddress = () => import('/path-page/Setting/faucetAddress.vue')
-const permission = () => import('/path-page/Setting/permission.vue')
-// const support = () => import('/path-page/Setting/support.vue')
-const invite = () => import('/path-page/Invite/index.vue')
-// 参数
-const admin = () => import('/path-page/Admin/index.vue')
-const params = () => import('/path-page/Admin/Params/index.vue')
-// const blockBrowser = () => import('/path-page/Browser/blockBrowser.vue')
-// const showTransaction = () => import('/path-page/Browser/Transaction.vue')
-// const showAccount = () => import('/path-page/Browser/Account.vue')
-// const showBlock = () => import('/path-page/Browser/Block.vue')
-const Balance = () => import('/path-page/Balances/index.vue')
-const Balances = () => import('/path-page/Balances/balances.vue')
-const BalancesList = () => import('/path-page/Balances/BalancesList.vue')
-// 我要借款
-const borrow = () => import('/path-page/Borrow/index.vue')
-const borrows = () => import('/path-page/Borrow/borrows.vue')
-// 借款页面
-const borrowingList = () => import('/path-page/Borrow/borrow/borrowingList.vue')
-// 借款管理
-const borrowingdetail = () => import('/path-page/Borrow/borrow/borrowingdetail.vue')
-const borrowsuccess = () => import('/path-page/Borrow/borrow/borrowsuccess.vue')
-// 正在还款中的借款详情
-const borrowsuccessdetail = () => import('/path-page/Borrow/borrow/borrowsuccessdetail.vue')
-const badloandetails = () => import('/path-page/Borrow/borrow/badloandetail.vue')
-const badloanList = () => import('/path-page/Borrow/borrow/badloanList.vue')
-// 还款历史
-const historyloanList = () => import('/path-page/Borrow/borrow/historyloanList.vue')
-const historyloandetail = () => import('/path-page/Borrow/borrow/historyloandetail.vue')
-const investingList = () => import('/path-page/Invest/invest/investingList.vue')
-const investingdetail = () => import('/path-page/Invest/invest/investingdetail.vue')
-const investsuccessList = () => import('/path-page/Invest/invest/investsuccessList.vue')
-const investsuccessdetail = () => import('/path-page/Invest/invest/investsuccessdetail.vue')
-const historyInvestList = () => import('/path-page/Invest/invest/historyInvestList.vue')
-const historyInvestdetail = () => import('/path-page/Invest/invest/historyinvestdetail.vue')
-const badinvestList = () => import('/path-page/Invest/invest/badinvestList.vue')
-const badinvestdetail = () => import('/path-page/Invest/invest/badinvestdetail.vue')
-// 提案
-const myProposalList = () => import('/path-page/Admin/Proposal/myProposalList.vue')
-const processBadLoanList = () => import('/path-page/Admin/Badloan/processBadLoanList.vue')
-const adminBadLoanDetail = () => import('/path-page/Admin/Badloan/adminBadLoanDetail.vue')
-const history = () => import('/path-page/History')
-const borrowHis = () => import('/path-page/History/borrowHis')
-const investHis = () => import('/path-page/History/investHis')
+
 Vue.use(Router)
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
-      component: Index,
+      component: resolve => require(['/path-page/Frame/index.vue'], resolve),
       name: 'index',
       redirect: localStorage.getItem('index') === null ? '/home' : localStorage.getItem('index'),
       children: [
-        {path: 'home', component: Home, needlogin: false},
-        {path: 'logo', name: 'logo', component: logo, needlogin: false},
+        {path: 'home', component: resolve => require(['/path-page/Home/home.vue'], resolve), needlogin: false},
+        {path: 'logo', name: 'logo', component: resolve => require(['/path-page/Home/help.vue'], resolve), needlogin: false},
         {
           path: 'invest',
-          component: invest,
+          component: resolve => require(['/path-page/Invest/invest.vue'], resolve),
           redirect: '/invest/investList',
           needlogin: false,
           children: [
-            {path: 'investList', name: 'investList', component: investList, needlogin: false},
-            {path: 'investingList', name: 'investingList', component: investingList, needlogin: true},
-            {path: 'investingdetail', name: 'investingdetail', component: investingdetail, needlogin: true},
-            {path: 'investsuccessList', name: 'investsuccessList', component: investsuccessList, needlogin: true},
-            {path: 'investsuccessdetail', name: 'investsuccessdetail', component: investsuccessdetail, needlogin: true},
-            {path: 'historyInvestList', name: 'historyInvestList', component: historyInvestList, needlogin: true},
-            {path: 'historyInvestdetail', name: 'historyInvestdetail', component: historyInvestdetail, needlogin: true},
-            {path: 'badinvestList', name: 'badinvestList', component: badinvestList, needlogin: true},
-            {path: 'badinvestdetail', name: 'badinvestdetail', component: badinvestdetail, needlogin: true}
+            {path: 'investList', name: 'investList', component: resolve => require(['/path-page/Invest/investList.vue'], resolve), needlogin: false},
+            {path: 'investingList', name: 'investingList', component: resolve => require(['/path-page/Invest/invest/investingList.vue'], resolve), needlogin: true},
+            {path: 'investingdetail', name: 'investingdetail', component: resolve => require(['/path-page/Invest/invest/investingdetail.vue'], resolve), needlogin: true},
+            {path: 'investsuccessList', name: 'investsuccessList', component: resolve => require(['/path-page/Invest/invest/investsuccessList.vue'], resolve), needlogin: true},
+            {path: 'investsuccessdetail', name: 'investsuccessdetail', component: resolve => require(['/path-page/Invest/invest/investsuccessdetail.vue'], resolve), needlogin: true},
+            {path: 'historyInvestList', name: 'historyInvestList', component: resolve => require(['/path-page/Invest/invest/historyInvestList.vue'], resolve), needlogin: true},
+            {path: 'historyInvestdetail', name: 'historyInvestdetail', component: resolve => require(['/path-page/Invest/invest/historyinvestdetail.vue'], resolve), needlogin: true},
+            {path: 'badinvestList', name: 'badinvestList', component: resolve => require(['/path-page/Invest/invest/badinvestList.vue'], resolve), needlogin: true},
+            {path: 'badinvestdetail', name: 'badinvestdetail', component: resolve => require(['/path-page/Invest/invest/badinvestdetail.vue'], resolve), needlogin: true}
           ]
         },
         {
           path: '/setting',
           name: 'setting',
-          component: setting,
+          component: resolve => require(['/path-page/Setting/setting.vue'], resolve),
           needlogin: false,
           redirect: '/setting/accessSettings',
           children: [
-            {path: 'accessSettings', name: 'accessSettings', component: accessSettings, needlogin: false},
-            {path: 'generalSetup', name: 'generalSetup', component: generalSetup, needlogin: false},
-            {path: 'faucetAddress', name: 'faucetAddress', component: faucetAddress, needlogin: false},
-            {path: 'carrier', name: 'carrier', component: carrier, needlogin: false},
-            {path: 'information', name: 'information', component: information, needlogin: true},
-            {path: 'permission', name: 'permission', component: permission, needlogin: true}
-            // {path: 'support', name: 'support', component: support, needlogin: false}
+            {path: 'accessSettings', name: 'accessSettings', component: resolve => require(['/path-page/Setting/accessSettings.vue'], resolve), needlogin: false},
+            {path: 'generalSetup', name: 'generalSetup', component: resolve => require(['/path-page/Setting/generalSetup.vue'], resolve), needlogin: false},
+            {path: 'faucetAddress', name: 'faucetAddress', component: resolve => require(['/path-page/Setting/faucetAddress.vue'], resolve), needlogin: false},
+            {path: 'carrier', name: 'carrier', component: resolve => require(['/path-page/Setting/carrierAdmin.vue'], resolve), needlogin: false},
+            {path: 'information', name: 'information', component: resolve => require(['/path-page/Setting/information.vue'], resolve), needlogin: true},
+            {path: 'permission', name: 'permission', component: resolve => require(['/path-page/Setting/permission.vue'], resolve), needlogin: true}
           ]
         },
         // {path: 'blockBrowser', name: 'blockBrowser', component: blockBrowser, needlogin: false},
         // {path: '/block/:block_height', name: 'Block', component: showBlock, needlogin: false},
         // {path: '/transaction/:tx_id', name: 'Transaction', component: showTransaction, needlogin: false},
         // {path: '/account/:id_or_name', name: 'Account', component: showAccount, needlogin: false},
-        {path: '/investDetails', name: 'investDetails', component: investDetails, needlogin: true},
+        {path: '/investDetails', name: 'investDetails', component: resolve => require(['/path-page/Invest/investDetails.vue'], resolve), needlogin: true},
         {
           path: '/borrow',
           name: 'borrow',
-          component: borrow,
+          component: resolve => require(['/path-page/Borrow/index.vue'], resolve),
           needlogin: true,
           redirect: '/borrow/borrows',
           children: [
-            {path: 'borrows', name: 'borrows', component: borrows, needlogin: true},
-            {path: 'borrowingList', name: 'borrowingList', component: borrowingList, needlogin: true},
-            {path: 'borrowsuccess', name: 'borrowsuccess', component: borrowsuccess, needlogin: true},
-            {path: 'borrowingdetail', name: 'borrowingdetail', component: borrowingdetail, needlogin: true},
-            {path: 'borrowsuccessdetail', name: 'borrowsuccessdetail', component: borrowsuccessdetail, needlogin: true},
-            {path: 'historyloanList', name: 'historyloanList', component: historyloanList, needlogin: true},
-            {path: 'historyloandetail', name: 'historyloandetail', component: historyloandetail, needlogin: true},
-            {path: 'badloandetails', name: 'badloandetails', component: badloandetails, needlogin: true},
-            {path: 'badloanList', name: 'badloanList', component: badloanList, needlogin: true}
+            {path: 'borrows', name: 'borrows', component: resolve => require(['/path-page/Borrow/borrows.vue'], resolve), needlogin: true},
+            {path: 'borrowingList', name: 'borrowingList', component: resolve => require(['/path-page/Borrow/borrow/borrowingList.vue'], resolve), needlogin: true},
+            {path: 'borrowsuccess', name: 'borrowsuccess', component: resolve => require(['/path-page/Borrow/borrow/borrowsuccess.vue'], resolve), needlogin: true},
+            {path: 'borrowingdetail', name: 'borrowingdetail', component: resolve => require(['/path-page/Borrow/borrow/borrowingdetail.vue'], resolve), needlogin: true},
+            {path: 'borrowsuccessdetail', name: 'borrowsuccessdetail', component: resolve => require(['/path-page/Borrow/borrow/borrowsuccessdetail.vue'], resolve), needlogin: true},
+            {path: 'historyloanList', name: 'historyloanList', component: resolve => require(['/path-page/Borrow/borrow/historyloanList.vue'], resolve), needlogin: true},
+            {path: 'historyloandetail', name: 'historyloandetail', component: resolve => require(['/path-page/Borrow/borrow/historyloandetail.vue'], resolve), needlogin: true},
+            {path: 'badloandetails', name: 'badloandetails', component: resolve => require(['/path-page/Borrow/borrow/badloandetail.vue'], resolve), needlogin: true},
+            {path: 'badloanList', name: 'badloanList', component: resolve => require(['/path-page/Borrow/borrow/badloanList.vue'], resolve), needlogin: true}
           ]
         },
         {
           path: 'balance',
           name: 'balance',
-          component: Balance,
+          component: resolve => require(['/path-page/Balances/index.vue'], resolve),
           needlogin: true,
           redirect: '/balance/balances',
           children: [
-            {path: 'balances', name: 'balances', component: Balances, needlogin: true},
-            {path: 'balanceslist', name: 'balanceslist', component: BalancesList, needlogin: true}
+            {path: 'balances', name: 'balances', component: resolve => require(['/path-page/Balances/balances.vue'], resolve), needlogin: true},
+            {path: 'balanceslist', name: 'balanceslist', component: resolve => require(['/path-page/Balances/BalancesList.vue'], resolve), needlogin: true},
+            {path: 'operationslist', name: 'operationslist', component: resolve => require(['/path-page/Balances/operationslist.vue'], resolve), needlogin: true},
+            {path: 'authors', name: 'authors', component: resolve => require(['/path-page/Balances/authors.vue'], resolve), needlogin: true},
+            {path: 'withdrawlock', name: 'withdrawlock', component: resolve => require(['/path-page/Balances/withdrawlock.vue'], resolve), needlogin: true}
           ]
         },
-        {path: '/invite', name: 'invite', component: invite, needlogin: true},
-        {path: '/params', name: 'params', component: params, needlogin: false},
+        {
+          path: 'locktoken',
+          name: 'locktoken',
+          component: resolve => require(['/path-page/locktoken/index.vue'], resolve),
+          needlogin: true,
+          redirect: '/locktoken/locktokendy',
+          children: [
+            {path: 'locktokendy', name: 'locktokendy', component: resolve => require(['/path-page/locktoken/lock-dy.vue'], resolve), needlogin: true},
+            {path: 'locktokenfixed', name: 'locktokenfixed', component: resolve => require(['/path-page/locktoken/lock-fixed.vue'], resolve), needlogin: true},
+            {path: 'locktokennode', name: 'locktokennode', component: resolve => require(['/path-page/locktoken/lock-node.vue'], resolve), needlogin: true}
+          ]
+        },
+        {
+          path: 'sell',
+          name: 'sell',
+          component: resolve => require(['/path-page/Sell/index.vue'], resolve),
+          needlogin: true
+          // redirect: '/sell'
+          // children: [
+          //   {path: 'summary', name: 'summary', component: resolve => require(['/path-page/Sell/summary.vue'], resolve), needlogin: false},
+          //   {path: 'sell', name: 'sell', component: resolve => require(['/path-page/Sell/sell.vue'], resolve), needlogin: true}
+          // ]
+        },
+        {path: '/invite', name: 'invite', component: resolve => require(['/path-page/Invite/index.vue'], resolve), needlogin: true},
+        // {path: '/params', name: 'params', component: params, needlogin: false},
         {
           path: '/admin',
           name: 'admin',
-          component: admin,
+          component: resolve => require(['/path-page/Admin/index.vue'], resolve),
           needlogin: false,
           redirect: '/admin/params',
           children: [
-            {path: 'params', name: 'params', component: params, needlogin: true},
-            {path: 'myProposalList', name: 'myProposalList', component: myProposalList, needlogin: true},
-            {path: 'processBadLoanList', name: 'processBadLoanList', component: processBadLoanList, needlogin: true},
-            {path: 'adminBadLoanDetail', name: 'adminBadLoanDetail', component: adminBadLoanDetail, needlogin: true}
+            {path: 'params', name: 'params', component: resolve => require(['/path-page/Admin/Params/index.vue'], resolve), needlogin: false},
+            {path: 'carriers', name: 'carriers', component: resolve => require(['/path-page/Admin/carriers/index.vue'], resolve), needlogin: false},
+            {path: 'myProposalList', name: 'myProposalList', component: resolve => require(['/path-page/Admin/Proposal/myProposalList.vue'], resolve), needlogin: true},
+            {path: 'processBadLoanList', name: 'processBadLoanList', component: resolve => require(['/path-page/Admin/Badloan/processBadLoanList.vue'], resolve), needlogin: true},
+            {path: 'adminBadLoanDetail', name: 'adminBadLoanDetail', component: resolve => require(['/path-page/Admin/Badloan/adminBadLoanDetail.vue'], resolve), needlogin: true},
+            {path: 'locktoken', name: 'locktoken', component: resolve => require(['/path-page/Admin/locktoken/index.vue'], resolve), needlogin: false}
           ]
         },
         {
           path: '/history',
           name: 'history',
-          component: history,
+          component: resolve => require(['/path-page/History'], resolve),
           needlogin: false,
           redirect: '/history/borrowHis',
           children: [
             {
               path: 'borrowHis',
               name: 'borrowHis',
-              component: borrowHis,
+              component: resolve => require(['/path-page/History/borrowHis'], resolve),
               needlogin: false,
               redirect: '/history/borrowHis/borrowingList',
               children: [
-                {path: 'borrowingList', name: 'borrowingList', component: borrowingList, needlogin: false},
-                {path: 'borrowsuccess', name: 'borrowsuccess', component: borrowsuccess, needlogin: false},
-                {path: 'borrowingdetail', name: 'borrowingdetail', component: borrowingdetail, needlogin: false},
-                {path: 'borrowsuccessdetail', name: 'borrowsuccessdetail', component: borrowsuccessdetail, needlogin: false},
-                {path: 'historyloanList', name: 'historyloanList', component: historyloanList, needlogin: false},
-                {path: 'historyloandetail', name: 'historyloandetail', component: historyloandetail, needlogin: false},
-                {path: 'badloandetails', name: 'badloandetails', component: badloandetails, needlogin: false},
-                {path: 'badloanList', name: 'badloanList', component: badloanList, needlogin: false}
+                {path: 'borrowingList', name: 'borrowingList', component: resolve => require(['/path-page/Borrow/borrow/borrowingList.vue'], resolve), needlogin: false},
+                {path: 'borrowsuccess', name: 'borrowsuccess', component: resolve => require(['/path-page/Borrow/borrow/borrowsuccess.vue'], resolve), needlogin: false},
+                {path: 'borrowingdetail', name: 'borrowingdetail', component: resolve => require(['/path-page/Borrow/borrow/borrowingdetail.vue'], resolve), needlogin: false},
+                {path: 'borrowsuccessdetail', name: 'borrowsuccessdetail', component: resolve => require(['/path-page/Borrow/borrow/borrowsuccessdetail.vue'], resolve), needlogin: false},
+                {path: 'historyloanList', name: 'historyloanList', component: resolve => require(['/path-page/Borrow/borrow/historyloanList.vue'], resolve), needlogin: false},
+                {path: 'historyloandetail', name: 'historyloandetail', component: resolve => require(['/path-page/Borrow/borrow/historyloandetail.vue'], resolve), needlogin: false},
+                {path: 'badloandetails', name: 'badloandetails', component: resolve => require(['/path-page/Borrow/borrow/badloandetail.vue'], resolve), needlogin: false},
+                {path: 'badloanList', name: 'badloanList', component: resolve => require(['/path-page/Borrow/borrow/badloanList.vue'], resolve), needlogin: false}
               ]
             },
             {
               path: 'investHis',
               name: 'investHis',
-              component: investHis,
+              component: resolve => require(['/path-page/History/investHis'], resolve),
               needlogin: false,
               redirect: '/history/investHis/investingList',
               children: [
-                {path: 'investingList', name: 'investingList', component: investingList, needlogin: false},
-                {path: 'investingdetail', name: 'investingdetail', component: investingdetail, needlogin: false},
-                {path: 'investsuccessList', name: 'investsuccessList', component: investsuccessList, needlogin: false},
-                {path: 'investsuccessdetail', name: 'investsuccessdetail', component: investsuccessdetail, needlogin: false},
-                {path: 'historyInvestList', name: 'historyInvestList', component: historyInvestList, needlogin: false},
-                {path: 'historyInvestdetail', name: 'historyInvestdetail', component: historyInvestdetail, needlogin: false},
-                {path: 'badinvestList', name: 'badinvestList', component: badinvestList, needlogin: false},
-                {path: 'badinvestdetail', name: 'badinvestdetail', component: badinvestdetail, needlogin: false}
+                {path: 'investingList', name: 'investingList', component: resolve => require(['/path-page/Invest/invest/investingList.vue'], resolve), needlogin: false},
+                {path: 'investingdetail', name: 'investingdetail', component: resolve => require(['/path-page/Invest/invest/investingdetail.vue'], resolve), needlogin: false},
+                {path: 'investsuccessList', name: 'investsuccessList', component: resolve => require(['/path-page/Invest/invest/investsuccessList.vue'], resolve), needlogin: false},
+                {path: 'investsuccessdetail', name: 'investsuccessdetail', component: resolve => require(['/path-page/Invest/invest/investsuccessdetail.vue'], resolve), needlogin: false},
+                {path: 'historyInvestList', name: 'historyInvestList', component: resolve => require(['/path-page/Invest/invest/historyInvestList.vue'], resolve), needlogin: false},
+                {path: 'historyInvestdetail', name: 'historyInvestdetail', component: resolve => require(['/path-page/Invest/invest/historyinvestdetail.vue'], resolve), needlogin: false},
+                {path: 'badinvestList', name: 'badinvestList', component: resolve => require(['/path-page/Invest/invest/badinvestList.vue'], resolve), needlogin: false},
+                {path: 'badinvestdetail', name: 'badinvestdetail', component: resolve => require(['/path-page/Invest/invest/badinvestdetail.vue'], resolve), needlogin: false}
               ]
-            }
+            },
+            {path: 'lockHis', name: 'lockHis', component: resolve => require(['/path-page/History/lockHis'], resolve), needlogin: false}
           ]
         },
-        {path: '/register', name: 'register', component: Register, needlogin: false},
-        {path: '/login', name: 'login', component: Login, needlogin: false}
+        {path: '/register', name: 'register', component: resolve => require(['/path-page/Login/register.vue'], resolve), needlogin: false},
+        {path: '/login', name: 'login', component: resolve => require(['/path-page/Login/login.vue'], resolve), needlogin: false}
       ]
     },
-    {path: '/register/:userid', name: 'register', component: Register, needlogin: false},
+    {path: '/register/:userid', name: 'register', component: resolve => require(['/path-page/Login/register.vue'], resolve), needlogin: false},
     {path: '*', redirect: '/home', needlogin: false}
   ],
   nextpath: undefined

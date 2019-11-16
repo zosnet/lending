@@ -18,7 +18,7 @@
         <div class="pr">
           <div v-if="investData.order_info.order_state !== 17 && investData.order_info.order_state !== 18 && investData.order_info.order_state !== 19">
             <!--利息-->
-            <repay-info :tableListData="tableListData" :isInvest="true"></repay-info>
+            <repay-info :tableListData="tableListData" :isInvest="true" :isCurLoginUser="isCurLoginUser"></repay-info>
           </div>
           <!--状态图标-->
           <img v-if="investData.order_info.order_state===13" src="/static/images/state_verification.png" class="recycle">
@@ -48,9 +48,10 @@
           <li style="line-height: 35px">{{$t('m.investingdetail.borrowOrder')}}:
             <a @click="borrowOrderId">{{investData.order_id}}</a>
           </li>
+          <li style="line-height: 35px">{{$t('m.transfer.XZMS')}}: {{$t('m.invest.periodmode' + investData.order_info.repayment_type.repayment_period_uint)}}  {{$t('m.invest.repayment' + investData.order_info.repayment_type.repayment_type)}}</li>
           <li style="line-height: 35px">{{$t('m.borrow.loanAmount')}}: {{investData.amount_to_loan.amount / Math.pow(10, investData.asset_to_loan.precision) | formatLegalCurrency(investData.asset_to_loan.symbol, investData.asset_to_loan.precision)}}</li>
           <!--借款时长-->
-          <li style="line-height: 35px">{{$t('m.investingdetail.JKSC')}}: {{investData.order_info.loan_period}}{{$t('m.month')}}</li>
+          <li style="line-height: 35px">{{$t('m.investingdetail.JKSC')}}: {{investData.order_info.loan_period}}{{$t('m.invest.perioduint' + investData.order_info.repayment_type.repayment_period_uint)}}</li>
           <!--借款利率-->
           <li style="line-height: 35px">{{$t('m.borrow.borrowRate')}}: {{investData.interest_rate.interest_rate | converPercentage}}</li>
           <!--发布时间-->
@@ -127,6 +128,13 @@
           return this.$t('m.borrowsuccess.confiscated')
         } else if (this.investData.order_info.order_state === 17 || this.investData.order_info.order_state === 18 || this.items.order_state === 19) {
           return this.$t('m.returned')
+        }
+      },
+      isCurLoginUser () {
+        if (this.$route.query.accName === this.$store.state.userName && this.$store.state.login) {
+          return true
+        } else {
+          return false
         }
       }
     },

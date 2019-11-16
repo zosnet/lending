@@ -3,6 +3,13 @@
     <div v-loading="loading" :element-loading-text="$t('m.loading')" style="min-height: 10vw;background: #fff">
       <div v-if="emptyListShow!==0">
         <div class="w-box1">
+        <div v-if="this.Type.length>1">
+          <span style="min-width: 60px">{{ $t('m.transfer.XZMS') }}</span>
+          <a style="min-width: 40px" href="javascript:;" @click="sortByPrice(5,'all')" :class="{active:sortType5==='all'}">{{ $t('m.invest.query_type_all') }}</a>
+          <div v-for="(item,index) in Type" :key="index">
+            <a href="javascript:;" @click="sortByPrice(5,item.id)" :class="{active:sortType5===item.id}">{{$t(item.label)}}</a>
+          </div>
+        </div>
         <div>
           <span style="min-width: 60px">{{ $t('m.invest.query_type_currency') }}</span>
           <a style="min-width: 40px" href="javascript:;" @click="sortByPrice(1,'all')" :class="{active:sortType1==='all'}">{{ $t('m.invest.query_type_all') }}</a>
@@ -17,7 +24,7 @@
             <a href="javascript:;" @click="sortByPrice(2,item.id)" :class="{active:sortType2===item.id}">{{item.symbol}}</a>
           </div>
         </div>
-        <div>
+        <div v-if="this.sortType5 === '33'">
           <span style="min-width: 60px">{{ $t('m.invest.query_type_term') }}</span>
           <a style="min-width: 40px" href="javascript:;" @click="sortByPrice(3,0)" :class="{active:sortType3===0}">{{ $t('m.invest.query_type_all') }}</a>
           <a href="javascript:;" @click="sortByPrice(3,1)" :class="{active:sortType3===1}">1{{$t('m.month')}}</a>
@@ -26,6 +33,18 @@
           <a href="javascript:;" @click="sortByPrice(3,4)" :class="{active:sortType3===4}">4{{$t('m.month')}}</a>
           <a href="javascript:;" @click="sortByPrice(3,5)" :class="{active:sortType3===5}">5{{$t('m.month')}}</a>
           <a href="javascript:;" @click="sortByPrice(3,6)" :class="{active:sortType3===6}">6{{$t('m.month')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,7)" :class="{active:sortType3===7}">{{$t('m.block.more')}}</a>
+        </div>
+        <div v-if="this.sortType5 === '67'">
+          <span style="min-width: 60px">{{ $t('m.invest.query_type_term') }}</span>
+          <a style="min-width: 40px" href="javascript:;" @click="sortByPrice(3,0)" :class="{active:sortType3===0}">{{ $t('m.invest.query_type_all') }}</a>
+          <a href="javascript:;" @click="sortByPrice(3,1)" :class="{active:sortType3===1}">1~7{{$t('m.day')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,2)" :class="{active:sortType3===2}">8~14{{$t('m.day')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,3)" :class="{active:sortType3===3}">15~21{{$t('m.day')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,4)" :class="{active:sortType3===4}">22~28{{$t('m.day')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,5)" :class="{active:sortType3===5}">29~35{{$t('m.day')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,6)" :class="{active:sortType3===6}">36~42{{$t('m.day')}}</a>
+          <a href="javascript:;" @click="sortByPrice(3,7)" :class="{active:sortType3===7}">{{$t('m.block.more')}}</a>
         </div>
         <div>
           <span style="min-width: 60px">{{ $t('m.invest.query_type_sort') }}</span>
@@ -33,6 +52,7 @@
           <a href="javascript:;" @click="sortByPrice(4,2)" :class="{active:sortType4===2}">{{ $t('m.invest.sort_type_sum') }}</a>
           <a href="javascript:;" @click="sortByPrice(4,3)" :class="{active:sortType4===3}">{{ $t('m.invest.sort_type_progress') }}</a>
           <a href="javascript:;" @click="sortByPrice(4,5)" :class="{active:sortType4===5}">{{ $t('m.investingdetail.yujiSYL') }}</a>
+          <a v-if="this.sortType5 !== 'all'" href="javascript:;" @click="sortByPrice(4,6)" :class="{active:sortType4===6}">{{ $t('m.invest.query_type_term') }}</a>
         </div>
         </div>
       </div>
@@ -56,9 +76,9 @@
             <el-table-column width="160" :label="$t('m.borrow.borrowRates')">
               <template slot-scope="scope">
                 <div class="fw">
-                  <span>{{scope.row.interest_rate.interest_rate / 10}}‰ /{{$t('m.year')}}</span>
+                  <span>{{scope.row.interest_rate.interest_rate / 10}}‰ /{{$t('m.invest.perioduint' + scope.row.repayment_type.repayment_period_uint)}}</span>
                 </div>
-                <span class="secondaryInfo">{{scope.row.loan_period}}{{$t('m.month')}}</span>
+                <span class="secondaryInfo">{{scope.row.loan_period}}{{$t('m.invest.perioduint' + scope.row.repayment_type.repayment_period_uint)}}</span>
               </template>
             </el-table-column>
             <!--抵押数量/抵押倍数-->
@@ -126,6 +146,7 @@
         allLenderList: [],
         allLenderListI: [],
         loading: true,
+        sortType5: 'all',
         sortType1: 'all',
         sortType2: 'all',
         sortType3: 0,
@@ -135,7 +156,9 @@
         sort: '',
         sortTypeA1: [],
         sortTypeA2: [],
+        sortTypeA5: [],
         ufiletermask: 0,
+        Type: [],
         emptyListShow: 0,
         getLendingAsset: []
       }
@@ -192,6 +215,7 @@
         let ufiletermask = 0
         let sortType1 = []
         let sortType2 = []
+        let sortType5 = []
         if (this.sortType1 !== 'all') {
           sortType1 = []
           this.allLenderList = []
@@ -250,11 +274,33 @@
             sortType2.push(key1.id)
           }
         }
+        if (this.Type.length === 1) this.sortType5 = this.Type[0].id
+
+        if (this.sortType5 !== 'all') {
+          sortType5 = []
+          let find1 = false
+          for (let key1 of this.Type) {
+            if (key1.id === this.sortType5) {
+              sortType5 = [Number(ZOSInstance.getOptionKey(key1.id).repayment_period_uint)]
+              ufiletermask = ufiletermask | 8
+              find1 = true
+              break
+            }
+          }
+          if (!find1) {
+            sortType5 = []
+            this.sortType5 = 'all'
+          }
+        } else {
+          sortType5 = []
+          this.sortType5 = 'all'
+        }
         if (this.sortType3 !== 0) {
           ufiletermask = ufiletermask | 4
         }
         this.sortTypeA1 = sortType1
         this.sortTypeA2 = sortType2
+        this.sortTypeA5 = sortType5
         this.ufiletermask = ufiletermask
       },
       init () {
@@ -262,7 +308,9 @@
         this.sortType2 = getStore('sortType2')
         this.sortType3 = getStore('sortType3')
         this.sortType4 = getStore('sortType4')
+        this.sortType5 = getStore('sortType5')
         this.sort = getStore('sort')
+        this.Type = ZOSInstance.getOptionSupport(this.$store.state.loanMode)
 
         if (this.sortType1 === null) {
           this.sortType1 = 'all'
@@ -279,6 +327,9 @@
           this.sortType4 = 4
         } else {
           this.sortType4 = parseInt(this.sortType4)
+        }
+        if (this.sortType5 === null) {
+          this.sortType5 = 'all'
         }
 
         if (this.sort === null) {
@@ -304,7 +355,7 @@
         this.loading = true
         this.listQuery.page = 1
         this.getSortType()
-        ZOSInstance.list_bitlender_order(this.sortTypeA1, this.sortTypeA2, this.sortType3, this.ufiletermask, this.sortType4).then(res => {
+        ZOSInstance.list_bitlender_order(this.$store.state.userDataSid, this.sortTypeA5, this.sortTypeA1, this.sortTypeA2, this.sortType3, this.ufiletermask, this.sortType4).then(res => {
           this.allLenderOrderIds = res
           this.getList()
           this.loading = false
@@ -361,7 +412,7 @@
           this.sortType4 = v
         } else if (flag === 5) {
           if (this.sortType5 === v) return
-          this.sortType4 = v
+          this.sortType5 = v
         }
         this.sort = v
         this.initLenderList()
@@ -370,6 +421,7 @@
         setStore('sortType2', this.sortType2)
         setStore('sortType3', this.sortType3)
         setStore('sortType4', this.sortType4)
+        setStore('sortType5', this.sortType5)
         setStore('sort', this.sort)
       }
     },

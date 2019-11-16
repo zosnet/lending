@@ -14,7 +14,7 @@
               {{scope.row.id}}
             </template>
           </el-table-column>
-          <el-table-column width="180" :label="$t('m.borrowsuccess.repayment_sum')" prop="rePayAmount">
+          <el-table-column width="170" :label="$t('m.borrowsuccess.repayment_sum')" prop="rePayAmount">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               <!-- <span v-if="scope.row.order_state===6">
@@ -32,23 +32,22 @@
           </el-table-column>
           <el-table-column width="150" :label="$t('m.borrowsuccess.repayment_day_state')" prop="expecttime">
             <template slot-scope="scope">
-              <span>{{rePayState(scope.row.repay_interest)}}</span>
-              <!-- <span>{{scope.row.expect_time | dateDiffDay($store.state.curDate)}}</span> -->
+              <span>{{rePayState(scope.row)}}</span>
               <br>
               <span class="secondaryInfo">{{scope.row.expecttime}}</span>
             </template>
           </el-table-column>
           <!--借款金额/期限-->
-          <el-table-column width="200" :label="$t('m.borrowsuccess.numNper')">
+          <el-table-column width="190" :label="$t('m.borrowsuccess.numNper')">
             <template slot-scope="scope">
               <span class="currency">{{scope.row.asset_to_loan.symbol}}</span>
               {{scope.row.amount_to_loan.amount / Math.pow(10, scope.row.asset_to_loan.precision) | formatLegalCurrencys(scope.row.asset_to_loan.symbol, scope.row.asset_to_loan.precision)}}
-              <div class="secondaryInfo">{{scope.row.loan_period}}{{$t('m.month')}}</div>
+              <div class="secondaryInfo">{{scope.row.loan_period}}{{$t('m.invest.perioduint' + scope.row.repayment_type.repayment_period_uint)}}</div>
             </template>
           </el-table-column>
           <el-table-column width="100" :label="$t('m.borrow.borrowRate')">
             <template slot-scope="scope">
-              <span>{{scope.row.interest_rate.interest_rate | converPercentage(100) }}/{{ $t('m.year')}}</span>
+              <span>{{scope.row.interest_rate.interest_rate | converPercentage(100) }}/{{$t('m.invest.perioduint' + scope.row.repayment_type.repayment_period_uint)}}</span>
             </template>
           </el-table-column>
           <!--抵押物数量/价值-->
@@ -136,23 +135,32 @@
       }
     },
     methods: {
-      rePayState (tableData) {
+      rePayState (order) {
+        let tableData = order.repay_interest
         let chainTime = this.$store.state.curDate
+        if (order.order_state === 11) {
+          let time = order.expect_principal_time.substr(0, order.expect_principal_time.indexOf('T'))
+          let d = Date.parse(time) - Date.parse(chainTime) - order.offset_time * 1000
+          let day = Math.ceil(d / (3600 * 24 * 1000))
+          // 逾期
+          return window.vm.$t('m.borrowsuccess.withOut') + '(' + Math.abs(day) + window.vm.$t('m.day') + ')'
+        }
         for (let index = 0; index < tableData.length; index++) {
           const itemData = tableData[index][1]
-          if (itemData.interest_state === 1 || itemData.interest_state === 2) {
+          if (itemData.interest_state === 1) {
             let time = itemData.expect_time.substr(0, itemData.expect_time.indexOf('T'))
-            let d = Date.parse(time) - Date.parse(chainTime)
+            let d = Date.parse(time) - Date.parse(chainTime) - order.offset_time * 1000
             let day = Math.ceil(d / (3600 * 24 * 1000))
             return window.vm.$t('m.borrowsuccess.normal') + ' (' + window.vm.$t('m.borrowsuccess.remaining') + day + window.vm.$t('m.day') + ')'
           } else if (itemData.interest_state === 3) {
             let time = itemData.expect_time.substr(0, itemData.expect_time.indexOf('T'))
-            let d = Date.parse(time) - Date.parse(chainTime)
+            let d = Date.parse(time) - Date.parse(chainTime) - order.offset_time * 1000
             let day = Math.ceil(d / (3600 * 24 * 1000))
             // 逾期
             return window.vm.$t('m.borrowsuccess.withOut') + '(' + Math.abs(day) + window.vm.$t('m.day') + ')'
           }
         }
+        return ''
       },
       collateralizeFeed (row) {
         return LendInstance.collateralizeFeed(row)

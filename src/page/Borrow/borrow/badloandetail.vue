@@ -15,10 +15,10 @@
           {{$t('m.orderList.operTime')}}: {{items.notify_time | formatDateStr}}
         </dd>
         <!--利息-->
-        <repay-info :tableListData="tableListData"></repay-info>
+        <repay-info :tableListData="tableListData"  :isCurLoginUser="isCurLoginUser"></repay-info>
         <div class="line"></div>
         <!--借款信息-->
-        <loan-info :items="items" :isAddCollate="isAddCollate"></loan-info>
+        <loan-info :items="items" :isCurLoginUser="isCurLoginUser"  @closeMortageAdd="closeMortageAdd"></loan-info>
         <!--已冻结-->
         <dd>{{$t('m.borrowsuccess.pawnState')}}: {{$t('m.borrow.frozen')}}</dd>
         <collateralize-info :infoData="Object.assign({}, items, itemList)" :isFeed="true"></collateralize-info>
@@ -66,8 +66,6 @@
         // 整体加载
         mainloading: true,
         // 是否显示
-        // 增加抵押物的弹窗
-        addPawnDialog: false,
         // 还款弹窗
         repaymentDialog: false,
         orderState: 1,
@@ -81,8 +79,8 @@
     watch: {
     },
     computed: {
-      isAddCollate () {
-        if (this.$route.query.accName === this.$store.state.userName) {
+      isCurLoginUser () {
+        if (this.$route.query.accName === this.$store.state.userName && this.$store.state.login) {
           return true
         } else {
           return false
@@ -90,10 +88,6 @@
       }
     },
     methods: {
-      // 关闭增加抵押物
-      closeMortage () {
-        this.addPawnDialog = false
-      },
       // 请求数据之后，把数据给data
       init () {
         this.orderId = this.$route.query.id
@@ -122,11 +116,8 @@
             this.mainloading = false
           })
       },
-      addDYW (item) {
-        let itemObj = {}
-        itemObj = item
-        this.appointtemI = itemObj
-        this.addPawnDialog = true
+      closeMortageAdd (v) {
+        if (v) this.init()
       }
     },
     mounted () {

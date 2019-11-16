@@ -1,8 +1,8 @@
 <!--商品详情-->
 <template>
   <div class="w store-content">
-    <div v-loading="loadingmain" :element-loading-text="$t('m.loading')" style="min-height: 10vw;">
-      <div v-if="!loadingmain">
+    <div v-loading="loadingmain>0" :element-loading-text="$t('m.loading')" style="min-height: 10vw;">
+      <div v-if="loadingmain<=0">
     <div class="gray-box">
       <div style="padding: 10px;">
         <h2>{{$t('m.investDetails.touBXXQR')}}</h2>
@@ -16,14 +16,17 @@
          <div style="display: flex;padding: 10px;">
            <p style="flex: 1">{{$t('m.investDetails.JKYH')}}: <router-link :to="{path: '/history/borrowHis?accName=' + borrowData.issuer_info.name + '&accID=' + borrowData.issuer_info.id}">{{borrowData.issuer_info.name}}</router-link></p>
          </div>
+         <div style="display: flex;padding: 10px;" v-if="authorinfo.length > 0">
+           <p style="flex: 1">{{$t('m.investDetails.KYC')}}: {{authorinfo}}</p>
+         </div>
           <div style="display: flex;padding: 10px;">
             <p style="flex: 1">{{$t('m.borrow.loanAmount')}}: {{borrowData.amount_to_loan.amount / Math.pow(10, borrowData.asset_to_loan.precision) | formatLegalCurrency(borrowData.asset_to_loan.symbol, borrowData.asset_to_loan.precision) }}</p>
           </div>
           <div style="display: flex;padding: 10px;">
-            <p style="flex: 1">{{$t('m.borrow.borrowRate')}}: {{borrowData.interest_rate | converPercentage() }}/{{$t('m.year')}}</p>
+            <p style="flex: 1">{{$t('m.borrow.borrowRate')}}: {{borrowData.interest_rate | converPercentage() }}/{{$t('m.invest.perioduint' + borrowData.repayment_type.repayment_period_uint)}}</p>
           </div>
           <div style="display: flex;padding: 10px;">
-            <p style="flex: 1">{{$t('m.borrow.borrowCycle')}}: {{borrowData.loan_period}}{{$t('m.month')}}/{{$t('m.invest.profit_after')}}</p>
+            <p style="flex: 1">{{$t('m.borrow.borrowCycle')}}: {{borrowData.loan_period}}{{$t('m.invest.perioduint' + borrowData.repayment_type.repayment_period_uint)}}/{{$t('m.invest.repayment' + borrowData.repayment_type.repayment_type)}}</p>
           </div>
         </div>
       </div>
@@ -80,12 +83,12 @@
           <div style="flex: 1;font-size: 12px;color: red">{{$t('m.investDetails.YJSY')}}: {{expected | formatLegalCurrency(borrowData.asset_to_loan.symbol, borrowData.asset_to_loan.precision) }}</div>
           <p>
             <!--了解收益与风险-->
-            <el-button type="text">{{$t('m.invest.benefits')}}</el-button>
+            <!-- <el-button type="text">{{$t('m.invest.benefits')}}</el-button> -->
           </p>
         </div>
-        <div>
+        <!-- <div>
           <div>{{$t('m.investDetails.HTMB')}}:<el-button @click="displayContract = true" type="text" class="margin-l10"><p>{{$t('m.investDetails.JKHT')}} </p></el-button></div>
-        </div>
+        </div> -->
         <!--燃料费-->
         <!--(约)-->
         <span>{{$t('m.fuelCost')}}: {{$t('m.transfer.about')}} {{feelAmount | formatLegalCurrency(feeSymbol, feePrecision)}}</span>
@@ -160,9 +163,9 @@
           <!--投资金额-->
           <p>{{$t('m.investList.investSum')}}: {{borrowNum | formatLegalCurrency(borrowData.asset_to_loan.symbol, borrowData.asset_to_loan.precision)}}</p>
           <!--投资期限-->
-          <p>{{$t('m.investList.investLimitTime')}}: {{borrowData.loan_period}}{{$t('m.month')}}</p>
+          <p>{{$t('m.investList.investLimitTime')}}: {{borrowData.loan_period}}{{$t('m.invest.perioduint' + borrowData.repayment_type.repayment_period_uint)}}</p>
           <!--投资利率-->
-          <p>{{$t('m.investList.investRate')}}: {{borrowData.interest_rate | converPercentage() }}/{{$t('m.year')}}</p>
+          <p>{{$t('m.investList.investRate')}}: {{borrowData.interest_rate | converPercentage() }}/{{$t('m.invest.perioduint' + borrowData.repayment_type.repayment_period_uint)}}</p>
           <!--预计收益-->
           <p>{{$t('m.investDetails.YJSY')}}: {{expected | formatLegalCurrency(borrowData.asset_to_loan.symbol, borrowData.asset_to_loan.precision)}}</p>
           <p>{{$t('m.fuelCost')}}: {{feelFeeAmount}} ZOS</p>
@@ -241,10 +244,12 @@
         rechargeDialog: false,
         Passwordvalid: false,
         zosDialog: false,
+        author: [],
+        authorinfo: '',
         tr: {},
         inputError: false,
         loading: true,
-        loadingmain: false,
+        loadingmain: 1,
         inputErrorInfo: '',
         kycStatusCode: false,
         kycInfo: {},
@@ -252,7 +257,7 @@
         couponVisible: false,
         hintKycDialog: false,
         checkinfoDialog: false,
-        curInvestCarrier: undefined,
+        curInvestCarrier: {investauthor_account: '1.2.0'},
         kycurl: ''
       }
     },
@@ -328,6 +333,12 @@
           this.inputError = true
           // '投标金额不能大于剩余可投金额'
           this.inputErrorInfo = this.$t('m.invest.investGreater')
+          return false
+        }
+        if ((this.borrowData.repayment_type.loan_mode & 0x02) && value * Math.pow(10, this.borrowData.asset_to_loan.precision) < this.borrowData.amount_to_loan.amount) {
+          this.inputError = true
+          // '必须一次性满标'
+          this.inputErrorInfo = this.$t('m.invest.investOne')
           return false
         }
         if (value < this.minInvest) {
@@ -430,7 +441,7 @@
             this.kycInfo = {}
             this.kycInfo.name = undefined
             this.accountDialog = true
-          } if (status === -5) {
+          } else if (status === -5) {
             this.$message({
               message: this.$t('m.kyc.statues5') + ' name: ' + this.curInvestCarrier.investauthor_name + ' asset: ' + this.borrowData.asset_to_loan.symbol,
               type: 'error'
@@ -489,52 +500,75 @@
           this.userId = this.$store.state.userDataSid
         }
         this.loading = true
-        this.loadingmain = true
+        this.loadingmain = 1
         ChainStore.setLoginAccount(this.$store.state.userDataSid)
         this.orderId = this.$route.query.id
         ZOSInstance.get_loan_object(this.orderId).then(res => {
           this.borrowData = res
-          this.current_price = LendInstance.calcFeedPrice(res.current_feed.settlement_price, res.asset_to_loan.id, res.asset_to_loan.precision, res.asset_to_collateralize.id, res.asset_to_collateralize.precision)
+          this.current_price = LendInstance.calcFeedPriceView(res.current_feed.settlement_price, res.asset_to_loan.id, res.asset_to_loan.precision, res.asset_to_collateralize.id, res.asset_to_collateralize.precision)
           this.getAboutFee()
           this.getBitlender()
           this.getCarrier()
+          this.getAuthor()
           this.loading = false
-          this.loadingmain = false
+          this.loadingmain--
         }).catch(err => {
           console.log(err)
           this.loading = false
+          this.loadingmain--
           this.$message.error({
             message: err
           })
         })
       },
       getAboutFee () {
+        this.loadingmain++
         ZOSInstance.getAboutFee(this.$store.state.userName, '1.3.0', 'bitlender_invest')
           .then((res) => {
             this.feelAmount = res.feeAmount.amount / Math.pow(10, res.precision)
             this.feePrecision = res.precision
             this.feeBalance = res.fee_balance / Math.pow(10, res.precision)
             this.feeSymbol = res.symbol
+            this.loadingmain--
           })
           .catch((error) => {
-            this.loadingmain = false
+            this.loadingmain--
             console.log(error)
           })
+        this.loadingmain++
         ZOSInstance.get_account_balance(this.$store.state.userName, this.borrowData.asset_to_loan.id).then((res) => {
           this.loanBalance = res / Math.pow(10, this.borrowData.asset_to_loan.precision)
+          this.loadingmain--
         }).catch((error) => {
-          this.loadingmain = false
+          this.loadingmain--
+          console.log(error)
+        })
+      },
+      getAuthor () {
+        this.loadingmain++
+        return Apis.instance().db_api().exec('get_account_author', [this.borrowData.issuer_info.id]).then(author => {
+          this.author = author
+          this.authorinfo = ''
+          this.author.forEach(item => {
+            this.authorinfo += item.name + '   '
+          })
+          this.loadingmain--
+        }).catch((error) => {
+          this.loadingmain--
           console.log(error)
         })
       },
       getCarrier () {
-        return Apis.instance().admin_api().exec('get_carrier', [this.$store.state.admin_id, this.borrowData.asset_to_loan.id, null]).then((account) => {
+        this.loadingmain++
+        let type = ZOSInstance.getOptionKeyToValue(this.borrowData.repayment_type)
+        return ZOSInstance.get_carrier(this.$store.state.admin_id, this.borrowData.asset_to_loan.id, type).then((account) => {
           if (!account) {
             this.$message({
               message: 'Please set carrier',
               type: 'error'
             })
             this.canInvest = 'Please set carrier'
+            this.loadingmain--
             return
           }
           this.curInvestCarrier = account
@@ -544,19 +578,23 @@
           if (!account.investvalidate) {
             this.canInvest = 'invest carrier not validate in bitlender option'
           }
+          this.loadingmain--
         }).catch((error) => {
-          this.loadingmain = false
+          this.loadingmain--
           console.log(error)
         })
       },
       getBitlender () {
-        ZOSInstance.getBitlender(this.borrowData.amount_to_loan.asset_id, this.borrowData.asset_to_loan.bitasset_data_id)
+        this.loadingmain++
+        let type = ZOSInstance.getOptionKeyToValue(this.borrowData.repayment_type)
+        ZOSInstance.getBitlenderOption(this.borrowData.amount_to_loan.asset_id, type)
           .then((res) => {
             this.minInvest = res.options.min_invest_amount / Math.pow(10, this.borrowData.asset_to_loan.precision)
             this.addInvest = res.options.min_invest_increase_range / Math.pow(10, this.borrowData.asset_to_loan.precision)
+            this.loadingmain--
           })
           .catch((error) => {
-            this.loadingmain = false
+            this.loadingmain--
             console.log(error)
           })
       },

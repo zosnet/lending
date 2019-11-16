@@ -1,16 +1,28 @@
 <template>
+  <div slot="content" class="container-params" v-loading="loading>0" :element-loading-text="$t('m.loading')" style="min-height: 10vw;">
   <dl>
     <dt class="feel">
       <span>
         <!--运营商-->
-        {{$t('m.borrow.radio')}}
+        {{$t('m.borrow.addrate')}}
       </span>
       <div style="flex:1"></div>
       <div>
+      <div v-if="loading <= 0 ">
+        <dt class="lh40 feel">
+        <div style="flex:1"></div>
         <!--提交-->
-        <el-button type="primary" @click="submit">{{$t('m.params.submit')}}</el-button>
+        <el-button type="primary" v-if="tableDataParamsShow && canEditRatio" @click="paramsEdit()">
+        {{$t('m.params.update')}}
+        </el-button>
+        <div v-if="!tableDataParamsShow">
+        <el-button type="primary" :disabled="!isEdit" @click="submit">{{$t('m.params.submit')}} </el-button>
+        <el-button @click="paramsCancel">{{$t('m.cancel')}}</el-button>
+       </div>
+       </dt>
+      </div>
         <!--输入资金密码-->
-        <password-dialog :visible="submitRatioPW" @bitlenderLendOrder="bitlenderLendOrder"></password-dialog>
+      <password-dialog :visible="submitRatioPW" @bitlenderLendOrder="bitlenderLendOrder"></password-dialog>
       </div>
     </dt>
     <lender-symbol :visible="lenderDialog" @lenderEvent="lenderEvent" :lenderData="lenderData"></lender-symbol>
@@ -29,18 +41,17 @@
           width="50"
         >
           <template slot-scope="scope">
-            <i class="el-icon-circle-plus-outline" style="font-size: 30px; vertical-align: middle" @click="lenderDialogShow(scope.$index)"></i>
+            <i class="el-icon-circle-plus-outline"  v-if="!tableDataParamsShow" style="font-size: 30px; vertical-align: middle" @click="lenderDialogShow(scope.$index)"></i>
           </template>
         </el-table-column>
         <el-table-column
           prop="newratio"
-          :label="$t('m.borrow.radio')"
+          :label="$t('m.borrow.addrate')"
         >
           <template slot-scope="cash">
             <el-table
               :data="cash.row.newratio"
               :show-header="false"
-              class="margin-b20"
             >
               <el-table-column
                 prop="lenderSymbol"
@@ -49,7 +60,7 @@
               </el-table-column>
               <el-table-column
                 prop="lenderRatio"
-                :label="$t('m.borrow.radio')"
+                :label="$t('m.borrow.addrate')"
               >
                 <template slot-scope="scope">
                   <span style="margin-left: 10px">{{ scope.row.lenderRatio }}%</span>
@@ -57,6 +68,7 @@
               </el-table-column>
               <el-table-column
                 align="right"
+                v-if="!tableDataParamsShow"
                 width="120">
                 <template slot-scope="scope">
                   <i class="el-icon-edit curp f26" @click="newRatioEdit(cash.$index, scope.$index, scope.row)"></i>
@@ -70,6 +82,7 @@
     </dd>
     <confirm-dialog :carrierVisible="carrierVisible" @submitCarrier="submitRatioTr" :carrierUpdate="updateContents"></confirm-dialog>
   </dl>
+  </div>
 </template>
 <script>
   import updateDialog from '/path-components/Admin/updateDialog'
@@ -80,12 +93,15 @@
   import editLenderSymbol from '/path-components/Admin/editLenderSymbol'
   import confirmDialog from '/path-components/Admin/confirmDialog'
   import passwordDialog from '/path-components/Login/passwordDialog'
-  import {getStore, setStore} from '/js-utils/storage'
   import deepClone from '/js-utils/deepClone'
   export default {
-    name: 'collateralratio',
+    name: 'addrate',
     components: {updateDialog, cashSymbol, lenderSymbol, editLenderSymbol, confirmDialog, passwordDialog},
     props: {
+      optionId: '',
+      symbol: '',
+      Type: '',
+      assetId: ''
     },
     data () {
       return {
@@ -107,6 +123,8 @@
         lenderSymbol: '',
         symbol: '',
         radioInput: false,
+        tableDataParamsShow: true,
+        loading: 1,
         // 新
         cashDialog: false,
         lenderDialog: false,
@@ -117,8 +135,7 @@
         // 提案弹框
         ratioVisible: false,
         ratioConfig: {},
-        isAdmin: false,
-        isCarrier: false,
+        isEdit: false,
         updateContents: {},
         del: [],
         updates: [],
@@ -138,82 +155,105 @@
       }
     },
     methods: {
-      async asyncUpdate () {
-        await this.isUpdate()
-        setStore('ratioUpdate', this.isModified)
-      },
       init () {
+        this.loading = 1
         this.canEditRatio = false
         this.isModified = false
+        this._canEditRatio()
         this._getAssetList()
         this._getConfig()
+        this.loading--
+      },
+      changeOption (id, assetId, type, symbol) {
+        this.assetId = assetId
+        this.symbol = symbol
+        this.optionId = id
+        this.Type = type
+        this.paramsCancel()
+        this.init()
+      },
+      paramsEdit () {
+        this.tableDataParamsShow = !this.tableDataParamsShow
+      },
+      paramsCancel () {
+        this.tableDataParamsShow = true
+        this.isEdit = false
+        this._getConfig()
+        this.setEdit(this.isEdit)
+      },
+      setEdit (st) {
+        this.isEdit = st
+      },
+      canLeave () {
+        return this.isEdit === false
       },
       // 得到借贷的币种
       _getAssetList () {
-        ZOSInstance.getAssetList()
-          .then(res => {
-            this.loading = false
-            if (res && (res.cash_list || res.lender_list)) {
-              this.cList = deepClone(res.cash_list)
-              this.lList = deepClone(res.lender_list)
-              this.copyClist = deepClone(res.cash_list)
-              this.copyLlist = deepClone(res.lender_list)
-              this.cashData = {
-                cList: this.cList
-              }
-            } else {
-              return false
+        this.loading++
+        ZOSInstance.getAssetList().then(res => {
+          if (res && (res.cash_list || res.lender_list)) {
+            this.cList = deepClone(res.cash_list)
+            this.lList = deepClone(res.lender_list)
+            this.copyClist = deepClone(res.cash_list)
+            this.copyLlist = deepClone(res.lender_list)
+            this.cashData = {
+              cList: this.cList
             }
+          }
+          this.loading--
+        }).catch(err => {
+          console.log(err)
+          this.$message({
+            message: err,
+            type: 'warning'
           })
-          .catch(err => {
-            console.log(err)
-            this.$message({
-              message: err,
-              type: 'warning'
-            })
-            this.loading = false
-          })
+          this.loading--
+        })
       },
       _getConfig () {
-        this.ratioData = []
-        console.log(this.$store.state.userDataSid, '===')
-        Apis.instance().db_api().exec('get_account_config', [this.$store.state.userDataSid, ['collateral_ratio_' + JSON.parse(getStore('selectedSymbols')).symbol]])
-          .then(result => {
-            if (result && result[0]) {
-              let config = JSON.parse(result[0])
-              let ratioList = config
-              for (let i in ratioList) {
-                let params = {}
-                if (i === JSON.parse(getStore('selectedSymbols')).symbol) {
-                  params.symbol = JSON.parse(getStore('selectedSymbols')).symbol
-                  params.newratio = []
-                  for (let ii in ratioList[i]) {
-                    let jsons = {}
-                    jsons['lenderSymbol'] = ii
-                    jsons['lenderRatio'] = ratioList[i][ii]
-                    params.newratio.push(jsons)
+        if (this.$store.state.userDataSid !== '') {
+          this.loading++
+          this.ratioData = []
+          Apis.instance().db_api().exec('get_account_config', [this.$store.state.userDataSid, ['add_rate_' + ZOSInstance.getOptionIndex(this.Type) + this.symbol]])
+            .then(result => {
+              if (result && result[0]) {
+                let config = JSON.parse(result[0])
+                let ratioList = config
+                for (let i in ratioList) {
+                  let params = {}
+                  if (i === this.symbol) {
+                    params.symbol = this.symbol
+                    params.newratio = []
+                    for (let ii in ratioList[i]) {
+                      let jsons = {}
+                      jsons['lenderSymbol'] = ii
+                      jsons['lenderRatio'] = ratioList[i][ii]
+                      params.newratio.push(jsons)
+                    }
+                  } else {
+                    params.symbol = this.symbol
+                    params.newratio = []
                   }
-                } else {
-                  params.symbol = JSON.parse(getStore('selectedSymbols')).symbol
-                  params.newratio = []
+                  this.ratioData.push(params)
                 }
-                this.ratioData.push(params)
+              } else {
+                // let params = {}
+                // params.symbol = this.symbol
+                // params.newratio = []
+                // this.ratioData.push(params)
               }
-            } else {
-              let params = {}
-              params.symbol = JSON.parse(getStore('selectedSymbols')).symbol
-              params.newratio = []
-              this.ratioData.push(params)
-            }
-            this._isDisabledLender(0)
-          })
-          .catch(err => {
-            console.log(err)
-            this.$message({
-              message: err,
-              type: 'warning'
+              this._isDisabledLender(0)
+              this.loading--
             })
-          })
+            .catch(err => {
+              this.loading--
+              console.log(err)
+              this.$message({
+                message: err,
+                type: 'warning'
+              })
+            })
+        }
       },
       // 抵押币弹框
       lenderDialogShow (cIndex) {
@@ -239,9 +279,11 @@
         }
         this.ratioData[data.cIndex].newratio.push(param)
         this._isDisabledLender(data.cIndex)
+        this.isEdit = true
       },
       // 抵押币已经有的就禁用
       _isDisabledLender (cIndex) {
+        if (cIndex >= this.ratioData.length) return
         this.lList = deepClone(this.copyLlist)
         this.lList.forEach((item, index) => {
           if (this.ratioData[cIndex].newratio) {
@@ -280,35 +322,28 @@
         this.ratioData[data.cIndex].newratio[data.lIndex] = param
         this.$set(this.ratioData[data.cIndex].newratio, [data.lIndex], param)
         this._isDisabledLender(data.cIndex)
+        this.isEdit = true
       },
       // 删除一条抵押币数据
       newRatioDelete (cIndex, lIndex) {
         this.ratioData[cIndex].newratio.splice(lIndex, 1)
         this._isDisabledLender(cIndex)
+        this.isEdit = true
       },
       submit () {
-        console.log(1, '----')
         this.isSubmitUpdate()
       },
       isSubmitUpdate () {
-        console.log(22222)
-        Promise.all([this._canEditRatio(), this.isUpdate()]).then(res => {
-          if (!res[1]) {
+        Promise.all([this.isUpdate()]).then(res => {
+          if (!res[0]) {
             this.$message({
               message: this.$t('m.params.noupdate'),
               type: 'warning'
             })
             return
           }
-          if (!res[0]) {
-            this.$message({
-              message: this.$t('m.params.unIs') + JSON.parse(getStore('selectedSymbols')).symbol + this.$t('m.params.isCarrier'),
-              type: 'warning'
-            })
-            return
-          }
-          if (res[0] && res[1]) {
-            let symbol = JSON.parse(getStore('selectedSymbols')).symbol
+          if (res[0]) {
+            let symbol = this.symbol
             let newRatio = this.ratioData[0]['newratio']
             let param = {}
             param[symbol] = {}
@@ -316,13 +351,13 @@
               param[symbol][item.lenderSymbol] = item.lenderRatio
             })
             let paramString = JSON.stringify(param)
-            this.newConfig = [['collateral_ratio_' + JSON.parse(getStore('selectedSymbols')).symbol, paramString]]
+            this.newConfig = [['add_rate_' + ZOSInstance.getOptionIndex(this.Type) + this.symbol, paramString]]
             this.submitRatioPW = true
           }
         })
       },
       _newConfig () {
-        let symbol = JSON.parse(getStore('selectedSymbols')).symbol
+        let symbol = this.symbol
         let newRatio = this.ratioData[0]['newratio']
         let param = {}
         param[symbol] = {}
@@ -330,13 +365,13 @@
           param[symbol][item.lenderSymbol] = item.lenderRatio
         })
         let paramString = JSON.stringify(param)
-        this.newConfig = [['collateral_ratio_' + JSON.parse(getStore('selectedSymbols')).symbol, paramString]]
+        this.newConfig = [['add_rate_' + ZOSInstance.getOptionIndex(this.Type) + this.symbol, paramString]]
       },
       // 检查用户是否有修改
       isUpdate () {
         return new Promise((resolve, reject) => {
-          Apis.instance().db_api().exec('get_account_config', [this.$store.state.userDataSid, ['collateral_ratio_' + JSON.parse(getStore('selectedSymbols')).symbol]]).then(res => {
-            if (res && res[0]) {
+          Apis.instance().db_api().exec('get_account_config', [this.$store.state.userDataSid, ['add_rate_' + ZOSInstance.getOptionIndex(this.Type) + this.symbol]]).then(res => {
+            if (res && res[0] && res[0] !== '') {
               let config = JSON.parse(res[0])
               this._newConfig()
               if (this.newConfig[0][1] === JSON.stringify(config)) {
@@ -357,24 +392,29 @@
       },
       // 提交时再检查一下，是否有权限修改
       _canEditRatio () {
-        return new Promise((resolve, reject) => {
-          Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['carrierList']]).then(res => {
-            if (res && res[0]) {
-              let config = JSON.parse(res[0])
-              for (let i in config) {
-                if (JSON.parse(getStore('selectedSymbols')).symbol === i) {
-                  if (this.$store.state.userName === config[i].investCarrier) {
-                    this.canEditRatio = true
-                  } else {
-                    this.canEditRatio = false
-                  }
+        this.loading++
+        Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['carrierList' + ZOSInstance.getOptionIndex(this.Type)]]).then(res => {
+          if (res && res[0]) {
+            let config = JSON.parse(res[0])
+            for (let i in config) {
+              if (this.symbol === i) {
+                if (this.$store.state.userName === config[i].investCarrier) {
+                  this.canEditRatio = true
+                } else {
+                  this.canEditRatio = false
                 }
               }
-            } else {
-              this.canEditRatio = false
             }
-            console.log(this.canEditRatio, '_canEditRatio')
-            return resolve(this.canEditRatio)
+          } else {
+            this.canEditRatio = false
+          }
+          this.loading--
+        }).catch(err => {
+          this.loading--
+          console.log(err)
+          this.$message({
+            message: err,
+            type: 'warning'
           })
         })
       },
@@ -402,6 +442,8 @@
       submitRatioTr (bool) {
         if (bool) {
           this.init()
+          this.tableDataParamsShow = true
+          this.isEdit = false
         }
         this.carrierVisible = false
       }

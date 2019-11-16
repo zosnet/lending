@@ -8,7 +8,7 @@ var CopyWebpackPlugin = require('copy-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
-
+var Version = new Date().getTime()
 var env = config.build.env
 
 var webpackConfig = merge(baseWebpackConfig, {
@@ -21,24 +21,28 @@ var webpackConfig = merge(baseWebpackConfig, {
   devtool: config.build.productionSourceMap ? '#source-map' : false,
   output: {
     path: config.build.assetsRoot,
-    filename: utils.assetsPath('js/[name].[chunkhash].js'),
-    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+    filename: utils.assetsPath('js/[name].' + Version + '.[chunkhash].js'),
+    chunkFilename: utils.assetsPath('js/[id].' + Version + '.[chunkhash].js')
   },
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': env
     }),
+    new webpack.BannerPlugin(new Date().toString()),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
-        warnings: false
+        warnings: true,
+        drop_debugger: false,
+        drop_console: false
       },
+      parallel: true,
       uglifyOptions: { ecma: 8 },
-      sourceMap: true
+      sourceMap: config.build.productionSourceMap
     }),
     // extract css into its own file
     new ExtractTextPlugin({
-      filename: utils.assetsPath('css/[name].[contenthash].css')
+      filename: utils.assetsPath('css/[name].' + Version + '.[contenthash].css')
     }),
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
@@ -108,8 +112,9 @@ if (config.build.productionGzip) {
         config.build.productionGzipExtensions.join('|') +
         ')$'
       ),
-      threshold: 10240,
-      minRatio: 0.8
+      threshold: 100,
+      minRatio: 0.8,
+      deleteOriginalAssets: false// 删除原文件
     })
   )
 }

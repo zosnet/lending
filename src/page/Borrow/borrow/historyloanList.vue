@@ -61,7 +61,7 @@
             </div>
           </el-table>
           <div style="text-align: right">
-            <el-pagination background @current-change="handleCurrentChange" :current-page="listQuery.page" :page-size="pageSize" layout="total, prev, pager, next, jumper" :total="total">
+            <el-pagination background @current-change="handleCurrentChange" :current-page="listQuery.page" :page-size="listQuery.limit" layout="total, prev, pager, next, jumper" :total="total">
             </el-pagination>
           </div>
         </div>
@@ -152,7 +152,7 @@
         this.firstDay = formatUnixTime(new Date(y, m, 1, 0, 0, 0))
         y = this.historyEndDate.getFullYear()
         m = this.historyEndDate.getMonth()
-        this.lastDay = formatUnixTime(new Date(y, m + 1, 0, 0, 0, 0))
+        this.lastDay = formatUnixTime(new Date(y, m + 1, 0, 24, 0, 0))
         this.getList(1)
       },
       init () {

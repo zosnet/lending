@@ -11,6 +11,7 @@
         <div v-if="loginPage" class="content">
           <ul class="common-form">
             <li class="username border-1p">
+              <div >{{membership}} </div>
               <div class="input">
                 <input type="text" v-model="ruleForm.userName"
                        @keyup="ruleForm.userName = ruleForm.userName.replace(/[^\w\.\-\/]/ig,'');onNameChange()"
@@ -55,7 +56,8 @@
 import YFooter from '/path-page/Frame/footer'
 import YButton from '/path-components/element/YButton'
 import {ZOSInstance} from 'zos-wallet-js'
-import {ChainStore} from 'zosjs/es'
+import {Apis} from 'zosjs-ws'
+import {ChainStore, FetchChain} from 'zosjs/es'
 import { setStore, setLocalStore, getLocalStore } from '/js-utils/storage'
 require('/path-static/geetest/gt.js')
 // var captcha
@@ -79,6 +81,11 @@ export default {
       autoLogin: false,
       logintxt: this.$t('m.login'),
       mainloading: true,
+      validName: false,
+      membership: '',
+      userID: '',
+      isvisible: false,
+      timename: undefined,
       disabledRegs: true
     }
   },
@@ -88,16 +95,71 @@ export default {
     },
     // Ella  无效状态有点问题
     isDisabled () {
-      if ((this.ruleForm.userPwd && this.ruleForm.userName && this.logintxt === this.$t('m.login')) && this.disabledRegs) {
+      if ((this.ruleForm.userPwd && this.ruleForm.userName && this.logintxt === this.$t('m.login')) && this.disabledRegs && this.validName) {
         return true
       } else {
         return false
       }
     }
   },
+  watch: {
+    visible: {
+      handler: function (val, oldVal) {
+        this.isvisible = val
+        if (!val) this.$root.$off('RpcConnectionStatus')
+        else {
+          this.$root.$on('RpcConnectionStatus', (data) => {
+            this.connectSucess(data)
+          })
+        }
+      },
+      deep: true
+    }
+  },
   methods: {
+    isLifetimeMember (expirationDate) {
+      return expirationDate === '1969-12-31T23:59:59'
+    },
+    isBasicMember (expirationDate) {
+      return (
+        new Date(expirationDate).getTime() >
+        new Date('1969-12-31T23:59:59').getTime()
+      )
+    },
+    getMemberShip (account) {
+      let membership = 'basic'
+      let membershipExpirationDate = account.membership_expiration_date
+      if (membershipExpirationDate) {
+        if (this.isLifetimeMember(membershipExpirationDate)) {
+          membership = 'lifetime'
+        } else if (!this.isBasicMember(membershipExpirationDate)) {
+          membership = 'annual'
+        }
+      }
+      return membership
+    },
     onNameChange () {
-      ChainStore.getAccount(this.ruleForm.userName, true)
+      if (this.$store.state.connectionStatus === 'closed' || this.$store.state.connectionStatus === 'error' || Apis.instance().db_api() === undefined) {
+        this.validName = false
+        this.membership = this.$t('m.page.connection')
+      } else if (this.ruleForm.userName === undefined || this.ruleForm.userName.length <= 0) {
+        this.validName = false
+        this.membership = this.$t('m.member.accountName')
+      } else {
+        this.ruleForm.userName = this.ruleForm.userName.trim()
+        this.validName = false
+        this.membership = this.$t('m.member.no')
+        Apis.instance().db_api().exec('get_account_by_name', [this.ruleForm.userName]).then((account) => {
+          if (account) {
+            this.userID = account.id
+            this.validName = true
+            this.membership = this.$t('m.member.' + this.getMemberShip(account))
+            FetchChain('getAccount', this.userID, 5000)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+      }
     },
     open (t, m) {
       this.$notify.info({
@@ -127,6 +189,23 @@ export default {
         path: '/register'
       })
     },
+    connectWait () {
+      if (Apis.instance().db_api() !== undefined) {
+        clearInterval(this.timename)
+        this.timename = undefined
+        this.onNameChange()
+      }
+    },
+    connectSucess (data) {
+      if (this.isvisible !== true) return
+      if (this.ruleForm.userName !== null && data === 'connect') {
+        this.timename = setInterval(this.connectWait, 3000)
+      }
+      if (data !== 'connect') {
+        this.validName = false
+        this.membership = this.$t('m.page.connection')
+      }
+    },
     // 登录返回按钮
     login_back () {
       this.$router.push({
@@ -140,6 +219,10 @@ export default {
         this.mainloading = false
         return false
       }
+      this.ruleForm.userName = this.ruleForm.userName.trim()
+      this.ruleForm.userPwd = this.ruleForm.userPwd.trim()
+      FetchChain('getAccount', this.userID, 5000)
+      this.$store.state.accountObj = undefined
       let userId = ZOSInstance.accountLogin(this.ruleForm.userName, this.ruleForm.userPwd)
       if (userId) {
         this.$store.state.userDataSid = undefined
@@ -158,6 +241,12 @@ export default {
           this.$router.push(this.$router.options.nextpath)
         }
         this.$router.options.nextpath = undefined
+        ZOSInstance.get_user_phoneinfo(this.$store.state.userDataSid).then(res => {
+          if (res !== undefined) {
+            this.$store.state.userInfo.phone = res.mobile
+            this.$store.state.userInfo.mail = res.mail
+          }
+        })
       } else {
         // '账号或者密码错误!'
         this.$message(this.$t('m.register.nameErr'))
@@ -166,9 +255,12 @@ export default {
     },
     init_geetest () {
       this.ruleForm.userName = getLocalStore('userNameLast')
-      if (this.ruleForm.userName !== null) ChainStore.getAccount(this.ruleForm.userName, true)
+      if (this.ruleForm.userName !== null) this.onNameChange()
       this.login()
     }
+  },
+  destroyed () {
+    this.$root.$off('RpcConnectionStatus')
   },
   mounted () {
     // 组件创建完成，属性已绑定，但DOM还没有生成前就要loading,等请求完成后，再显示DOM

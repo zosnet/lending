@@ -43,7 +43,8 @@
 </template>
 
 <script>
-import {Apis} from 'zosjs-ws'
+import {ZOSInstance} from 'zos-wallet-js'
+// import {Apis} from 'zosjs-ws'
 // import {FetchChain} from 'zosjs/es'
 
 export default {
@@ -86,7 +87,7 @@ export default {
       this.assetId = asset
       this.getDataFlag = false
       this.gatewayArray = []
-      return Apis.instance().admin_api().exec('get_gateway', [this.$store.state.admin_id, this.assetId]).then(res => {
+      return ZOSInstance.get_gateway(this.$store.state.admin_id, this.assetId).then(res => {
         let gateNum = res.length
         if (gateNum > 0) {
           for (var index = 0; index < res.length; index++) {

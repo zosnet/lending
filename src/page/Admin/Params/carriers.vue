@@ -198,6 +198,7 @@
     components: {passwordDialog, getzosdialog, couponDialog, YButton},
     props: {
       optionId: '',
+      Type: '',
       assetId: ''
     },
     computed: {
@@ -206,7 +207,7 @@
         if (!assetsArr || assetsArr.length === 0) {
           return 0
         } else {
-          return assetsArr[0].amount / Math.pow(10, assetsArr[0].precision)
+          return assetsArr[0].amount
         }
       },
       // zos燃料费，够不够
@@ -362,18 +363,19 @@
       },
       setEdit (st) {
         this.isEdit = st
-        this.$emit('carriersChange', this.isEdit)
       },
-      changeOption (id, assetId) {
-        if (this.optionId !== id) {
-          this.assetId = assetId
-          this.paramsCancel()
-          this.optionId = id
-          this.loading = 1
-          this._getConfig()
-          this._getOptions()
-          this.loading--
-        }
+      canLeave () {
+        return this.isEdit === false
+      },
+      changeOption (id, assetId, type) {
+        this.assetId = assetId
+        this.paramsCancel()
+        this.optionId = id
+        this.Type = type
+        this.loading = 1
+        this._getConfig()
+        this._getOptions()
+        this.loading--
       },
       add_loan (x) {
         let y = this.allCarriers.filter((val) => {
@@ -449,7 +451,7 @@
       },
       _getOptions () {
         this.loading++
-        ZOSInstance.getBitlenderOption(this.assetId).then(res => {
+        ZOSInstance.getBitlenderOption(this.assetId, this.Type).then(res => {
           this.options = res.options
           this.author = res.author
           Apis.instance().db_api().exec('get_objects', [res.options.invest_carriers]).then(data1 => {
@@ -497,17 +499,21 @@
         })
       },
       _getConfig () {
-        this.loading++
-        ZOSInstance.can_edit_bitlender_option(this.optionId, this.$store.state.userDataSid).then(edit => {
-          this.canEdit = edit
-          this.loading--
-        }).catch(errmess => {
-          this.loading--
-          this.$message({
-            message: errmess,
-            type: 'error'
+        if (this.$store.state.userDataSid !== '' && this.optionId !== '') {
+          this.loading++
+          ZOSInstance.can_edit_bitlender_option(this.optionId, this.$store.state.userDataSid, this.Type).then(edit => {
+            this.canEdit = edit
+            this.loading--
+          }).catch(errmess => {
+            this.loading--
+            this.$message({
+              message: errmess,
+              type: 'error'
+            })
           })
-        })
+        } else {
+          this.canEdit = false
+        }
       }
     },
     mounted () {

@@ -1,25 +1,34 @@
 <template>
-    <div v-if="visible" class="kyc-dialog">
-      <iframe
-          id="iframe"
-          ref="iframe"
-          :src="kycAddress"
-          width="100%"
-          height="100%"
-          frameborder="0"
-          vspace="0"
-          hspace="0"
-          allowtransparency="true"
-          scrolling="yes"
-          allowfullscreen="true"
-      ></iframe>
-    </div>
+      <el-dialog
+        :title="$t('m.authentication.title')"
+        @close="close"
+        :visible.sync="visible"
+        width="45%"
+        append-to-body="isAppend"
+        >
+          <div v-loading="loading" :element-loading-text="$t('m.applyWaiting')" :style="{'height': iframeHeight + 'px'}">
+                <iframe
+                    id="iframe"
+                    ref="iframe"
+                    :src="kycAddress"
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    vspace="0"
+                    hspace="0"
+                    allowtransparency="true"
+                    scrolling="yes"
+                    allowfullscreen="true"
+                ></iframe>
+          </div>
+        </el-dialog>
 </template>
 
 <script>
+import axios from 'axios'
+import {ZOSInstance} from 'zos-wallet-js'
 import {getStore, getLocalStore, setLocalStore} from '/js-utils/storage'
 import {getKycAddress} from '/js-api/index'
-
 export default {
   components: {
   },
@@ -83,10 +92,12 @@ export default {
             console.log('6', Date.now())
             break
           case 'closeDialog':
+            this.loading = false
             this.close()
             break
           case 'completeKyc':
             if (data.url) {
+              this.updateRecode = true
               let statusStr = getLocalStore(this.$store.state.userName + 'kycStatus')
               let kycStatus = statusStr !== null ? JSON.parse(statusStr) : []
               if (!kycStatus) {
@@ -101,7 +112,6 @@ export default {
                 }
               }
               if (!kyc) {
-                this.updateRecode = true
                 kycStatus.unshift({url: data.url})
                 setLocalStore(this.$store.state.userName + 'kycStatus', kycStatus)
               }
@@ -126,13 +136,16 @@ export default {
       this.loading = true
       this.username = getStore('userName')
       this.userid = getStore('userId')
+      let token = Number((new Date().getTime() / 30000).toFixed(0)) + 12356
       let kycUrl = this.kycUrl + '/zos-kyc/'
       getKycAddress(kycUrl, {module: 'WEB'}).then(res => {
         let kycWebUrl = res.url
+        kycWebUrl = ZOSInstance.ReplaceAddress(kycWebUrl)
+        console.log('2', Date.now(), kycWebUrl)
         if (kycWebUrl && kycWebUrl !== '') {
           this.kycAddress = kycWebUrl + '/?userName=' + this.username +
           '&userId=' + this.userid + '&kycUrl=' + kycUrl + '&lang=' + this.$i18n.locale +
-          '&authorid=' + this.authorid + '&theme=' + this.$store.state.configTheme
+          '&authorid=' + this.authorid + '&theme=' + this.$store.state.configTheme + '&token=' + token
           console.log('kycAddress', this.kycAddress)
           let timeout = () => {
             this.$message({
@@ -141,7 +154,7 @@ export default {
             })
             this.close()
           }
-          this.loadTimeout = setTimeout(timeout, 5000)
+          this.loadTimeout = setTimeout(timeout, axios.defaults.timeout * 2)
           let iframe = this.$refs.iframe
           if (iframe.attachEvent) {
             iframe.attachEvent('onload', function () {
@@ -177,6 +190,7 @@ export default {
           message: this.$t('m.httpUtils.warning'),
           type: 'error'
         })
+        this.loading = false
         this.close()
       })
     }

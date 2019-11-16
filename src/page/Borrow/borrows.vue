@@ -68,7 +68,7 @@
                 placement="bottom"
                 width="300"
                 trigger="hover"
-                :content="ruleForm.collateralValue.symbol + '/' + ruleForm.loanSymbolValue.symbol + $t('m.investDetails.proportion')+': '+ruleForm.mortgagedFeed">
+                :content="ruleForm.loanSymbolValue.symbol + '/' + ruleForm.collateralValue.symbol + $t('m.investDetails.proportion')+': '+ruleForm.mortgagedFeedView">
                 <span slot="reference">
                   <img src="/static/images/exchange.png" width="30" height="30"/>
                 </span>
@@ -128,19 +128,26 @@
             </div>
           </div>
           <!--第二部分-->
-          <el-form-item prop="borrowTimeLimit" style="margin-top: 0">
-            <div class="feel loan-period">
+          <el-form-item prop="borrowTimeLimit" style="margin-top: 0;">
+            <div class="feel">
               <!--借款期限-->
-              <h1 style="margin-top: 0">{{$t('m.borrow.borrowCycle')}}</h1>
-              <span style="flex:1"></span>
-              <span>{{borrowTimeLimit}}{{$t('m.year')}}</span>
+            <h1  style="min-width: 100px;">{{$t('m.transfer.XZMS')}}</h1>&nbsp;&nbsp;
+            <span  style="margin-top: 7px; min-width: 400px;" v-if="Type.length===1">
+              {{$t(Type[0].label)}}({{$t(Type[0].des)}})
+            </span>
+            <span v-if="Type.length>1">
+            <el-radio-group v-model="selectedTypeId" style="margin-top: 18px; min-width: 400px;"  class="feel">
+            <el-radio v-for="item in Type" :label="item.id" :key="item.id" :disabled="item.disable" @change="changeType" >{{$t(item.label)}}({{$t(item.des)}}) </el-radio>
+            </el-radio-group>
+            </span>
+              <h1 style="min-width: 100px;">{{$t('m.borrow.borrowCycle')}}</h1> &nbsp;&nbsp;
+              <span style="float: right; margin-top: 6px; min-width: 30px;"> {{borrowTimeLimit}}&nbsp;{{perioduint}}</span>
             </div>
             <el-slider
-              :min="minBidTime"
+              :min="minBidTimeIndex"
               v-model="borrowTimeselect"
               :step="1"
-              :max="maxBidTimeIndex + 1"
-              show-stops
+              :max="maxBidTimeIndex"
               :format-tooltip="formatTooltip"
             >
             </el-slider>
@@ -148,20 +155,21 @@
 
           <el-form-item prop="borrowRate" style="margin-top: 0">
             <!--借款利率-->
-            <div class="feel loan-rate" style="justify-content: space-between">
-              <div class="borrow-rate">
-                <h1 style="margin-top: 0">{{$t('m.borrow.borrowRate')}}</h1>
+            <div class="feel loan-rate flex-horizontal-between">
+              <div class="borrow-rate flex flex1">
+                <span style="color: #191A5E; font-weight: 500; margin-top: 1px;">{{$t('m.borrow.borrowRate')}}</span>
                 <span>
                   <el-input v-model="interestRates"
-                            maxlength="6"
+                            maxlength="4"
                           @blur="interestValite"
                           @keyup.native="interestRates < 0 ? interestRates = '' : interestRates = interestRates.replace(/[^.\d]/g, '')"
-                          class="write-loan-amount" style="width: 50px;"></el-input>‰ /{{$t('m.year')}}
+                          class="write-loan-amount" style="width: 50px;"></el-input>‰ /{{perioduint}}
                 </span>
               </div>
 
+
               <!--<span>3天内没有投满，抵押物全数返还</span>-->
-              <div class="borrow-rate">
+              <div class="borrow-rate flex flex1" style="margin-left: 60px;">
                 <span style="color: #191A5E; font-weight: 500">
                   {{$t('m.fuelCost')}}
                   <el-popover
@@ -189,9 +197,9 @@
           <el-form-item style="margin-bottom: 10px">
             <!--我已阅读并同意相关-->
             <div class="feel">
-              <el-checkbox v-model="ruleForm.isRead">{{$t('m.borrow.WYDKCheck')}}<a @click="agreementDialog=true">
+              <!-- <el-checkbox v-model="ruleForm.isRead">{{$t('m.borrow.WYDKCheck')}}<a @click="agreementDialog=true">
                 {{$t('m.borrow.agreement')}}
-              </a></el-checkbox>
+              </a></el-checkbox> -->
               <!-- <div>-->
                 <!--<span>{{$t('m.information.KYC')}}:</span>-->
                 <!--<span v-if="$store.state.kycStatusCode==='3'">{{$t('m.information.nokyc')}}</span>-->
@@ -208,9 +216,10 @@
                   <!--{{$t('m.information.lookinfo')}}-->
                 <!--</a>-->
               <!--</div>-->
-              <!--<span v-if="!$store.state.userInfo.phone">-->
-                <!--{{$t('m.information.noBind')}}-->
-              <!--</span> -->
+              <span v-if="!$store.state.userInfo.phone">
+                {{$t('m.information.noBind1')}} <a @click="doBind()">{{$t('m.information.bind')}}</a>
+                <a @click="doMail()">{{$t('m.information.bindMail')}}</a>
+              </span>
             </div>
 
           </el-form-item>
@@ -218,7 +227,7 @@
             <div class="feel submit-loan">
               <!--申请借款-->
               <y-button :text="$t('m.borrow.loan')"
-                        :classStyle="ruleForm.isRead ?'main-btn':'disabled-btn'"
+                        :classStyle="ruleForm.isRead ? 'main-btn':'disabled-btn'"
                         @btnClick="submitForm('ruleForm')"
                         style="flex:1; display: flex; justify-content: center;align-items: center; border-radius: 23px; height: 50px;font-size: 16px"
               ></y-button>
@@ -273,7 +282,7 @@
         <div class="to-hand margin-b20" style="min-height: 62px">
           <div class="top margin-b10">
             <!--每月还款利息-->
-            <span class="title">{{$t('m.borrow.payments')}}</span>
+            <span class="title">{{$t('m.borrow.payments' + TypeIndex.repayment_period_uint)}}</span>
             <span class="title-symbol margin-l10">{{ruleForm.loanSymbolValue.symbol}}</span>
             <span class="to-hand-amount">
                 {{repayInterest | formatLegalCurrencys(ruleForm.loanSymbolValue.symbol, ruleForm.loanSymbolValue.precision)}}
@@ -282,10 +291,10 @@
           <div class="bottom">
             <span>
                 <!--先息后本还款方式，你需要在每月还款日之前还款；每月利息=-->
-              {{$t('m.borrow.reimbursement')}}
+              {{$t('m.borrow.reimbursement' + TypeIndex.repayment_period_uint)}}
               {{borrowNum | formatLegalCurrencys(ruleForm.loanSymbolValue.symbol, ruleForm.loanSymbolValue.precision)}}*{{interestMonth}}‰= {{repayInterest | formatLegalCurrencys(ruleForm.loanSymbolValue.symbol, ruleForm.loanSymbolValue.precision)}}；
               <!--本金在最后一期利息到期日还-->
-              {{$t('m.borrow.principal')}}
+              {{$t('m.borrow.principal' + TypeIndex.repayment_period_uint)}}
               </span>
           </div>
         </div>
@@ -347,7 +356,7 @@
             <span>
                 <!--当-->{{$t('m.borrow.when')}}
               {{ruleForm.loanSymbolValue.symbol + '/' + ruleForm.collateralValue.symbol}}
-              <!--价格降低至-->{{$t('m.borrow.down')}}
+              <!--价格降低至-->{{$t('m.borrow.up')}}
               {{cover | formatLegalCurrencys(ruleForm.collateralValue.symbol, ruleForm.collateralValue.precision)}}
               <!--时，你需要增加额外的-->
               {{$t('m.borrow.additional')}}
@@ -356,7 +365,7 @@
               <br>
               {{$t('m.borrow.when')}}
               {{ruleForm.loanSymbolValue.symbol + '/' + ruleForm.collateralValue.symbol}}
-              <!--价格降低至-->{{$t('m.borrow.down')}}
+              <!--价格降低至-->{{$t('m.borrow.up')}}
               {{unwind | formatLegalCurrencys(ruleForm.collateralValue.symbol, ruleForm.collateralValue.precision)}}
               <!--时，你的借款将会被平仓-->{{$t('m.borrow.will')}}
             </span>
@@ -386,6 +395,8 @@
 
     <!--输入资金密码-->
     <password-dialog :visible="comfirmPassword" @bitlenderLendOrder="bitlenderLendOrder"></password-dialog>
+    <bindphone :popupOpen="BindShow" @BindShowClose="doBindClose"></bindphone>
+    <bindmail :popupOpen="MailShow" @MailShowClose="doMailClose"></bindmail>
 
     <!--信息确认-->
     <!--申请借款确认-->
@@ -397,9 +408,9 @@
       <!--正在提交-->
       <div v-loading="loading" :element-loading-text="$t('m.borrow.submiting')" style="min-height: 10vw;">
         <p>{{$t('m.borrow.loanAmount')}}: {{ruleForm.borrowNum | formatLegalCurrency(ruleForm.loanSymbolValue.symbol, ruleForm.loanSymbolValue.precision)}}<br>
-          {{$t('m.borrow.borrowCycle')}}: {{borrowTimeLimit}}{{$t('m.year')}}<br>
+          {{$t('m.borrow.borrowCycle')}}: {{borrowTimeLimit}}{{perioduint}}<br>
           <!--借款利率-->
-          {{$t('m.borrow.borrowRate')}}: {{interestRates}}‰ /{{$t('m.year')}}<br>
+          {{$t('m.borrow.borrowRate')}}: {{interestRates}}‰ /{{perioduint}}<br>
           <!--截标时间-->
           {{$t('m.invest.endDate')}}: {{(Date.parse(new Date()) + this.ruleForm.LValue * 24 * 60 * 60 * 1000) | formatProposalTime()}}<br>
           <!--抵押物-->
@@ -468,9 +479,11 @@
   import { ChainStore } from 'zosjs/es'
   import {kycStatus} from '/js-api/index'
   import gotoKyc from '/path-components/KYC'
+  import bindphone from '/path-components/Setting/bindPhone'
+  import bindmail from '/path-components/Setting/bindmail'
   export default {
     components: {
-      YButton, RechargeCoin, passwordDialog, formatAssets, gotoKyc},
+      YButton, RechargeCoin, passwordDialog, formatAssets, gotoKyc, bindphone, bindmail},
     data () {
       // 借款数量
       var borrowNumVa = (rule, value, callback) => {
@@ -507,14 +520,17 @@
       var mortgageNumVa = (rule, value, callback) => {
         let num = Number(this.ruleForm.mortgageNum)
         if (this.feeMode === 'fee_invest') {
-          if ((num + this.ruleForm.collFee + this.ruleForm.collRisk > this.available) && this.ruleForm.collateralValue.symbol) {
+          if ((num > this.available) && this.ruleForm.collateralValue.symbol) {
             // '抵押物数量不足，请充币'
-            callback(new Error(this.$t('m.borrow.unNum')))
+            callback(new Error(this.$t('m.borrow.unNum') + ' ' + (Number(num) + Number(this.ruleForm.collFee) + Number(this.ruleForm.collRisk) - Number(this.available)).toFixed(this.ruleForm.collateralValue.precision)))
+          } else if ((num + this.ruleForm.collFee + this.ruleForm.collRisk > this.available) && this.ruleForm.collateralValue.symbol) {
+            // '抵押物数量不足，请充币'
+            callback(new Error(this.$t('m.borrow.unRish') + ' ' + (Number(num) + Number(this.ruleForm.collFee) + Number(this.ruleForm.collRisk) - Number(this.available)).toFixed(this.ruleForm.collateralValue.precision)))
           }
         } else {
           if ((num > this.available) && this.ruleForm.collateralValue.symbol) {
             // '抵押物数量不足，请充币'
-            callback(new Error(this.$t('m.borrow.unNum')))
+            callback(new Error(this.$t('m.borrow.unNum') + ' ' + (Number(num) - Number(this.available)).toFixed(this.ruleForm.collateralValue.precision)))
           }
         }
         if (value < 0) {
@@ -546,7 +562,7 @@
             callback(new Error(this.$t('m.borrow.unNum')))
           }
         }
-        if (this.ruleForm.collFee + this.ruleForm.collRisk + this.ruleForm.mortgageNum > this.available) {
+        if (Number(this.ruleForm.collFee) + Number(this.ruleForm.collRisk) + Number(this.ruleForm.mortgageNum) > Number(this.available)) {
           // '可用数量不足，请充币'
           callback(new Error(this.$t('m.borrow.useLess')))
         } else {
@@ -564,7 +580,6 @@
             {validator: collateralValueVa, trigger: 'change'}
           ],
           mortgageNum: [
-            {required: true, message: this.$t('m.borrow.inputMortgage')},
             {validator: mortgageNumVa, trigger: ['change', 'blur']}
           ],
           mortgageRates: [
@@ -574,6 +589,7 @@
             {validator: collRiskVa, trigger: 'change'}
           ]
         },
+        canSubmit: false,
         // 借款币种
         loanSymbol: [],
         loanSymbol_sel: '',
@@ -589,8 +605,8 @@
           collateralValue: {
             symbol: 'ZOS'
           },
-          mortgagedFeedShow: '',
           mortgagedFeed: '',
+          mortgagedFeedView: '',
           // 金额
           borrowNum: '',
           // 到手金额
@@ -603,6 +619,7 @@
           mortgageNum: '',
           // 最小保证金倍数
           multiple: 0, // 这里最小保证金倍数需要大一些，这里需要优化
+          interest: 0,
           // 保证金倍数
           ratio: 0,
           // 预计zos总数
@@ -614,7 +631,7 @@
           // zos总数
           zos_balance: '',
           // 已阅读
-          isRead: false,
+          isRead: true,
           // 抵押费用
           collFee: '',
           // 风险保证金
@@ -622,6 +639,7 @@
           // 运营商服务费
           carrierServiceRate: ''
         },
+        borrowTimeArray: [],
         borrowTimeLimitOptions: 0,
         // 选择币种后，除利率后，其它的参数
         otherOptions: {},
@@ -666,6 +684,8 @@
         copyCollateralSymbol: [],
         feeSymbol: 'ZOS',
         feePrecision: 2,
+        BindShow: false,
+        MailShow: false,
         feeMode: '',
         curLendCarrierAccount: '',
         feeCarrierPrecision: '',
@@ -686,10 +706,16 @@
         isAuthenticator: 0,
         gotoAuthor: false,
         getLendingAsset: [],
-        minBidTime: 0,
-        maxBidTimeIndex: 0,
+        minBidTimeIndex: 1,
+        maxBidTimeIndex: 1,
         borrowTimeLimit: 0,
         borrowTimeselect: 1,
+        borrowTimelast: -1,
+        selectedTypeId: '33',
+        selectedTypeLast: '',
+        Type: [],
+        TypeIndex: {repayment_period_uint: 1},
+        loanAssetArr: [],
         canloan: '',
         kycurl: ''
       }
@@ -705,6 +731,9 @@
     },
     computed: {
       // 币种
+      perioduint () {
+        return this.$t('m.invest.perioduint' + this.TypeIndex.repayment_period_uint)
+      },
       currency () {
         for (let v of this.optionsB) {
           if (v.value === this.ruleForm.BValue) {
@@ -736,7 +765,7 @@
         if (!assetsArr || assetsArr.length === 0) {
           return 0
         } else if (this.ruleForm.collateralValue && assetsArr.length > 0) {
-          return assetsArr[0].amount / Math.pow(10, assetsArr[0].precision)
+          return assetsArr[0].amount
         }
       }
     },
@@ -758,33 +787,86 @@
     },
     methods: {
       _maxBidTime (max) {
-        let first = this.borrowTimeLimitOptions[0][0]
-        this.minBidTime = first
-        let maxTimeIndex = 0
-        for (let [key, val] of this.borrowTimeLimitOptions.entries()) {
-          if (first <= max.max_repayment_period) {
-            first = val[0]
-            maxTimeIndex = key
+        if (this.borrowTimeLimitOptions.length <= 0) {
+          this.minBidTimeIndex = 1
+          this.maxBidTimeIndex = 1
+          this.borrowTimeselect = 1
+        } else {
+          this.minBidTimeIndex = 1
+          this.maxBidTimeIndex = 1
+          for (let [key, val] of this.borrowTimeLimitOptions.entries()) {
+            if (val[0] <= max.max_repayment_period) {
+              this.maxBidTimeIndex = key + 1
+            }
           }
         }
-        return maxTimeIndex
+      },
+      changeType (v) {
+        if (this.selectedTypeLast !== v) {
+          this.selectedTypeLast = v
+          this.selectedTypeId = v
+          this.loanSymbol_sel = ''
+          this.TypeIndex = ZOSInstance.getOptionKey(this.selectedTypeId)
+          this.borrowTimeselect = this.borrowTimeArray[this.TypeIndex.repayment_period_uint]
+          setStore('selectedTypeBorrowID', this.selectedTypeId)
+          this.getCurrencyData()
+        }
+      },
+      getOptionList () {
+        let Type = ZOSInstance.getOptionSupport(this.$store.state.loanMode)
+        this.Type = []
+        Apis.instance().db_api().exec('get_bitlender_option', [this.ruleForm.loanSymbolValue.id]).then(options => {
+          Type.forEach(item => {
+            let key = ZOSInstance.getOptionKey(item.id)
+            options.options.forEach(option => {
+              if (option[0].repayment_period_uint === key.repayment_period_uint && option[0].repayment_type === key.repayment_type) {
+                this.Type.push(item)
+              }
+            })
+          })
+        })
+      },
+      getOptionDisable () {
+        this.Type.forEach(item => {
+          let TIndex = ZOSInstance.getOptionKey(item.id)
+          Apis.instance().admin_api().exec('get_lending_asset', [this.$store.state.admin_id, TIndex]).then(symbolArr => {
+            if (!symbolArr || symbolArr.length < 1) {
+              item.disable = true
+            } else {
+              item.disable = false
+            }
+          }).catch((error) => {
+            console.log(error)
+            this.$message({
+              message: error,
+              type: 'error'
+            })
+          })
+        })
       },
       formatTooltip (val) {
-        if (this.borrowTimeLimitOptions.length > 0) {
-          this.interestRates = this.borrowTimeLimitOptions[val - 1][1].interest_rate / 10
+        if (val !== null && this.borrowTimelast !== val && this.borrowTimeLimitOptions.length > 0 && val <= this.borrowTimeLimitOptions.length) {
+          this.borrowTimelast = val
+          this.interestRates = (this.borrowTimeLimitOptions[val - 1][1].interest_rate / 10).toFixed(1)
           // 基准利率
           this.copyInterestRate = {...(this.borrowTimeLimitOptions[val - 1][1])}
+          if (this.ruleForm.interest > 0) {
+            this.interestRates = (this.interestRates * (1 + this.ruleForm.interest / 100)).toFixed(1)
+            this.copyInterestRate.interest_rate = (this.copyInterestRate.interest_rate * (1 + this.ruleForm.interest / 100)).toFixed(0)
+          }
           this.borrowTimeLimit = this.borrowTimeLimitOptions[val - 1][0]
+          this.borrowTimeArray[this.TypeIndex.repayment_period_uint] = val
           return this.borrowTimeLimit
-        }
+        } else return 0.0
       },
       // 利率变化，
       watchFee () {
         if (this.ruleForm.borrowNum) {
           this._watchRatio()
-          // this.ratio = this.ruleForm.ratio = ((this.ruleForm.mortgageNum * this.ruleForm.mortgagedFeedShow) / this.ruleForm.borrowNum).toFixed(2)
-          this.cover = this.ruleForm.borrowNum * this.collateralRatio / this.ruleForm.mortgageNum // 补仓线
-          this.unwind = this.ruleForm.borrowNum * this.squeezeRatio / this.ruleForm.mortgageNum // 平仓线
+          // 补仓线
+          this.cover = this.ruleForm.mortgageNum / (this.ruleForm.borrowNum * this.collateralRatio)
+          // 平仓线
+          this.unwind = this.ruleForm.mortgageNum / (this.ruleForm.borrowNum * this.squeezeRatio)
         }
         this.carrierServiceRate = this.ruleForm.carrierServiceRate
         this.borrowNum = this.ruleForm.borrowNum
@@ -843,23 +925,80 @@
           this.nexts(false)
         }
       },
+      getCurrencyData () {
+        this.canloan = ''
+        this.TypeIndex = ZOSInstance.getOptionKey(this.selectedTypeId)
+        this.borrowTimeselect = this.borrowTimeArray[this.TypeIndex.repayment_period_uint]
+        this._loanAssetArr().then(ass => {
+          this.getLendingAsset = this.loanAssetArr
+          this.loanSymbol = []
+          this.loanAssetArr.forEach(item => {
+            if (item[1].length > 0) this.loanSymbol.push(item[0])
+          })
+          if (this.loanAssetArr.length <= 0) {
+            this.$message({
+              message: 'no lend asset set',
+              type: 'error'
+            })
+            this.canSubmit = false
+            this.canloan = 'no asset set '
+            return
+          }
+          this.ipGet() // 借款币种,根据IP获取得到币种
+          this.feeGet() // 获取预计手续费
+        }).catch((error) => {
+          console.log(error)
+        })
+      },
       // 初始化币种，抵押物等
       init () {
         ChainStore.setLoginAccount(this.$store.state.userDataSid)
-        this.getLendingAsset = this.$store.state.loanAssetArr
-        this.$store.state.loanAssetArr.forEach(item => {
-          if (item[1].length > 0) this.loanSymbol.push(item[0])
+        this.Type = ZOSInstance.getOptionSupport(this.$store.state.loanMode)
+        this.getOptionDisable()
+        this.borrowTimeArray = getStore('borrowTime') ? JSON.parse(getStore('borrowTime')) : [2, 2, 2, 2, 2, 2, 2, 2]
+        this.selectedTypeId = getStore('selectedTypeBorrowID') ? getStore('selectedTypeBorrowID') : this.Type[0].id
+        this.checkType()
+        this.getCurrencyData()
+      },
+      checkType () {
+        let find = false
+        this.Type.forEach(item => {
+          if (this.selectedTypeId === item.id) find = true
         })
-        if (this.$store.state.loanAssetArr.length <= 0) {
+        if (!find) this.selectedTypeId = this.Type[0].id
+      },
+      _loanAssetArr () {
+        this.TypeIndex = ZOSInstance.getOptionKey(this.selectedTypeId)
+        return Apis.instance().admin_api().exec('get_lending_asset', [this.$store.state.admin_id, this.TypeIndex]).then(symbolArr => {
+          if (!symbolArr || symbolArr.length < 1) {
+            this.$message({
+              message: this.$t('m.borrow.notAsset'),
+              type: 'error'
+            })
+            return Promise.reject(this.$t('m.borrow.notAsset'))
+          }
+          this.loanAssetArr = symbolArr
+          return Promise.resolve(symbolArr)
+        }).catch((error) => {
+          console.log(error)
           this.$message({
-            message: 'no lend asset set',
+            message: error,
             type: 'error'
           })
-          this.canloan = 'no asset set '
-          return
-        }
-        this.ipGet() // 借款币种,根据IP获取得到币种
-        this.feeGet() // 获取预计手续费
+          return Promise.reject(error)
+        })
+      },
+      doBindClose () {
+        this.BindShow = false
+      },
+      doBind () {
+        this.BindShow = true
+      },
+      doMailClose () {
+        this.MailShow = false
+      },
+      doMail () {
+        this.MailShow = true
       },
       _isAuthenticator () {
         Apis.instance().db_api().exec('is_authenticator', [this.$store.state.userDataSid, 2, this.ruleForm.loanSymbolValue.id, this.curLendCarrierAccount.lendaccount]).then(status => {
@@ -867,7 +1006,7 @@
             this.kycInfo = {}
             this.kycInfo.name = undefined
             this.comfirmPassword = true
-          } if (status === -5) {
+          } else if (status === -5) {
             this.$message({
               message: this.$t('m.kyc.statues5') + ' name: ' + this.curLendCarrierAccount.lendauthor_name + ' asset: ' + this.ruleForm.loanSymbolValue.symbol,
               type: 'error'
@@ -949,20 +1088,25 @@
       },
       // 获取运营商
       getCarrier () {
-        return Apis.instance().admin_api().exec('get_carrier', [this.$store.state.admin_id, this.ruleForm.loanSymbolValue.id, null]).then((account) => {
+        return ZOSInstance.get_carrier(this.$store.state.admin_id, this.ruleForm.loanSymbolValue.id, this.selectedTypeId).then((account) => {
           if (account === undefined) {
+            let msg = 'no carrier ' + this.ruleForm.loanSymbolValue.symbol
             this.$message({
-              message: 'no carrier ' + this.ruleForm.loanSymbolValue.symbol,
+              message: msg,
               type: 'error'
             })
+            this.mainloading = false
             this.canloan = 'no carrier '
-            return Promise.reject(account)
+            this.canSubmit = false
+            return Promise.reject(msg)
           }
           this.curLendCarrierAccount = account
           if (!account.lendenable) {
+            this.canSubmit = false
             this.canloan = 'loan carrier stop'
           }
           if (!account.lendvalidate) {
+            this.canSubmit = false
             this.canloan = 'loan carrier not validate in bitlender option'
           }
           return Promise.resolve(account)
@@ -972,6 +1116,9 @@
             message: '' + error,
             type: 'error'
           })
+          this.mainloading = false
+          this.canSubmit = false
+          this.curLendCarrierAccount = ''
           this.canloan = 'no carrier '
           return Promise.reject(this.curLendCarrierAccount)
         })
@@ -987,7 +1134,7 @@
         this.collateralSymbol_sel = ''
         // 运营商
         this.getCarrier().then((res) => {
-          ZOSInstance.getBitlenderOption(this.ruleForm.loanSymbolValue.id).then((res) => {
+          ZOSInstance.getBitlenderOption(this.ruleForm.loanSymbolValue.id, this.selectedTypeId).then((res) => {
             // 重置所有的值
             this.$refs['ruleForm'].resetFields()
             this.ruleForm.getAmount = 0
@@ -1005,16 +1152,17 @@
             this.borrowTimeLimitOptions = res.interest_rate
             // 配置参数
             this.otherOptions = res.options
-            if (this.borrowTimeLimitOptions && this.borrowTimeLimitOptions.length > 0) {
-              this.maxBidTimeIndex = this._maxBidTime(res.options)
-            }
+            this._maxBidTime(res.options)
             this.allowedCollateralize(this.ruleForm.loanSymbolValue.id) // 可抵押币
+            this.formatTooltip(this.borrowTimeselect)
+            this.canSubmit = true
           }).catch((error) => {
             console.log(error)
             this.$message({
               message: error + this.$t('m.borrow.selectOther'),
               type: 'error'
             })
+            this.canSubmit = false
             this.canloan = 'no option '
           })
         })
@@ -1055,23 +1203,23 @@
         } else {
           if (this.ruleForm.borrowNum) {
             this._watchRatio()
-            // this.ratio = this.ruleForm.ratio = ((this.ruleForm.mortgageNum * this.ruleForm.mortgagedFeedShow) / this.ruleForm.borrowNum).toFixed(3)
             this.cover = this.ruleForm.borrowNum * this.collateralRatio / this.ruleForm.mortgageNum // 补仓线
             this.unwind = this.ruleForm.borrowNum * this.squeezeRatio / this.ruleForm.mortgageNum // 平仓线
+            this.unwind = 1 / this.unwind
+            this.cover = 1 / this.cover
           }
         }
       },
       // 得到各种手续费loanSymbolValue collateralValue
       getAllFee () {
         ZOSInstance.get_loan_info(
-          this.$store.state.userDataSid,
           this.ruleForm.borrowNum * Math.pow(10, this.ruleForm.loanSymbolValue.precision),
           this.ruleForm.loanSymbolValue.id,
           this.borrowTimeLimit,
           this.interestRates * 10,
           this.ruleForm.LValue * 24 * 3600,
           this.ruleForm.multiple * 1000,
-          0,
+          this.selectedTypeId,
           this.ruleForm.collateralValue.id
         )
           .then((cid) => {
@@ -1096,6 +1244,8 @@
             this.ruleForm.carrierServiceRate = cid.carrier_fee.amount / Math.pow(10, this.feeCarrierPrecision)
             this.ruleForm.mortgageNum = cid.amount_to_collateralize.amount / Math.pow(10, this.ruleForm.collateralValue.precision)
             this.copyMortgageNum = deepClone(this.ruleForm.mortgageNum)
+            this.ruleForm.mortgagedFeed = cid.feed_price
+            this.ruleForm.mortgagedFeedView = cid.feed_price_view
             this.mortgageNumInput()
             // 到手金额
             this.watchFee()
@@ -1110,13 +1260,7 @@
       },
       _watchRatio () {
         if (this.ruleForm.borrowNum && this.ruleForm.mortgageNum) {
-          this.ratio = this.ruleForm.ratio = ((this.ruleForm.mortgageNum * this.ruleForm.mortgagedFeedShow) / this.ruleForm.borrowNum).toFixed(3)
-        }
-      },
-      // 手动输入，抵押物数量，失去焦点时，要改变滑杆的值
-      mortgageNumEvent () {
-        if (this.ruleForm.borrowNum && !isNaN(this.ruleForm.borrowNum) && !isNaN(this.ruleForm.mortgageNum) && this.ruleForm.collateralValue) {
-          this.ratio = this.ruleForm.ratio = Math.round((this.ruleForm.mortgageNum / (this.ruleForm.borrowNum / this.ruleForm.mortgagedFeedShow)) * 1000) / 1000
+          this.ratio = this.ruleForm.ratio = ((this.ruleForm.mortgageNum * this.ruleForm.mortgagedFeed) / this.ruleForm.borrowNum).toFixed(3)
         }
       },
       // 得到喂价
@@ -1134,13 +1278,14 @@
               this.collateralRatio = res.maintenance_collateral_ratio
               this.squeezeRatio = res.maximum_short_squeeze_ratio
               this.getCollaboration()
-              this.ruleForm.mortgagedFeedShow = res.feed_price
-              this.ruleForm.mortgagedFeed = (1 / res.feed_price).toFixed(this.ruleForm.collateralValue.precision > this.ruleForm.loanSymbolValue.precision ? this.ruleForm.collateralValue.precision : this.ruleForm.loanSymbolValue.precision)
+              this.ruleForm.mortgagedFeed = res.feed_price
+              this.ruleForm.mortgagedFeedView = res.feed_price_view
               if (this.ruleForm.mortgagedFeed <= 0) {
                 this.$message({
                   message: 'no feed',
                   type: 'error'
                 })
+                this.canSubmit = false
                 this.canloan = 'no feed'
               }
             })
@@ -1150,6 +1295,7 @@
                 message: error,
                 type: 'error'
               })
+              this.canSubmit = false
               this.canloan = 'no feed'
             })
         }
@@ -1167,15 +1313,23 @@
           })
       },
       getCollaboration () {
-        return Apis.instance().admin_api().exec('get_collaboration', [this.curLendCarrierAccount.investaccount, this.ruleForm.loanSymbolValue.id, this.ruleForm.collateralValue.id]).then((account) => {
-          if (account === undefined) {
+        this.TypeIndex = ZOSInstance.getOptionKey(this.selectedTypeId)
+        return Apis.instance().admin_api().exec('get_collaboration', [this.curLendCarrierAccount.investaccount, this.ruleForm.loanSymbolValue.id, this.ruleForm.collateralValue.id, this.TypeIndex]).then((account) => {
+          if (account === undefined || account === null) {
             this.$message({
               message: 'no feed',
               type: 'error'
             })
+            this.canSubmit = false
             this.canloan = 'no feed'
+            return
           }
           this.ruleForm.multiple = account.rate / 1000
+          if (this.ruleForm.interest !== account.interest) {
+            this.ruleForm.interest = account.interest
+            this.borrowTimelast = -1
+            this.formatTooltip(this.borrowTimeselect)
+          }
         })
           .catch((error) => {
             console.log(error)
@@ -1183,6 +1337,7 @@
               message: error,
               type: 'error'
             })
+            this.canSubmit = false
             this.canloan = 'no collaboration'
           })
       },
@@ -1191,6 +1346,7 @@
         if (this.collateralSymbol_sel === v.symbol) {
           return
         }
+        this.borrowTimelast = -1
         this.collateralSymbol_sel = v.symbol
         setStore('collateralSymbol', v.symbol)
         this.ruleForm.collateralValue = v
@@ -1209,7 +1365,7 @@
             this.ruleForm.mortgageNum = into.toFixed(this.ruleForm.collateralValue.precision)
           }
         }
-        this.mortgageNumEvent()
+        this._watchRatio()
       },
       // 充币
       chargeMoney () {
@@ -1328,6 +1484,9 @@
         this.authenticationDialog = true
       }
     },
+    destroyed () {
+      setStore('borrowTime', this.borrowTimeArray)
+    },
     mounted () {
       // mounted挂载结束后，如果已经初始化成功，initFinished是true就直接请求。
       this.mainloading = true
@@ -1403,8 +1562,9 @@
   }
   /*11-13改版*/
   .borrow-main{
-    display: flex;
-    flex: 1;
+    width: 760px;
+    //display: flex;
+    //flex: 1;
     flex-direction: column;
     padding: 30px 50px 0;
     background: #fff;
@@ -1472,9 +1632,10 @@
 
   }
   .borrow-show-info{
+    width: 386px;
     margin-left: 24px;
-    display: flex;
-    flex: 1;
+    //display: flex;
+    //flex: 1;
     flex-direction: column;
     justify-content: space-between;
     .to-hand{
@@ -1515,11 +1676,36 @@
     background: none!important;
   }
   .exchange-icon{
-    display: flex; flex:1; justify-content: center;align-items: center; font-size: 18px; margin-top: 50px;
     width: 60px;
+    //display: flex;
+
+    // display: box;              /* OLD - Android 4.4- */
+
+    // display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+    // display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+    // display: -ms-flexbox;      /* TWEENER - IE 10 */
+    // display: -webkit-flex;     /* NEW - Chrome */
+
+    // display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
+
+    // -webkit-box-flex: 1;      /* OLD - iOS 6-, Safari 3.1-6 */
+    // -moz-box-flex: 1;         /* OLD - Firefox 19- */
+
+    // -webkit-flex: 1;          /* Chrome */
+    // -ms-flex: 1;              /* IE 10 */
+    // flex: 1;                  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+
+    // justify-content: center;
+    // align-items: center;
+    font-size: 18px;
+    margin-top: 120px;
+    padding-left: 15px;
   }
   .borrow-rate{
-    display: flex; flex: 1; justify-content: space-between; align-items: center; max-width: 300px
+    width: 300px;
+    // display: flex; flex: 1;
+    justify-content: space-between;
+    align-items: center;
   }
   .m-line{
     margin-left: 5px;

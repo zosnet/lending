@@ -62,7 +62,7 @@
                 <template slot-scope="scope">
                   <!--interest_state:状态（1:未还息；2:已还息；3:逾期；4:逾期还息）-->
                   <i class="el-icon-check"
-                    v-if="(scope.row[1].interest_state === 2 || scope.row[1].interest_state === 4) && (tableListData.orderState !== 12 && tableListData.orderState !== 15)">
+                    v-if="(scope.row[1].interest_state === 2 || scope.row[1].interest_state === 4)"> {{scope.row[1].interest_state === 2 ? $t('m.borrowsuccess.repayedN') : $t('m.borrowsuccess.repayedO')}}
                   </i>
                   <!--正常,剩余-->
                   <span v-else-if="scope.row[1].interest_state === 1 && (tableListData.orderState!==12 && tableListData.orderState!==15)"
@@ -83,7 +83,7 @@
             </el-table>
             <!--interest_state状态判断，重新调用一下，就是下一期还款-->
             <el-button
-              v-if="(tableListData.orderState < 11) && isShow"
+              v-if="(tableListData.orderState < 11) && isShow && isCurLoginUser"
               type="primary" class="repayment pa"
               :style="{top: `${(toppx + 1)  * 58}px`}"
               v-show="tableListData.orderState !== 6 && toppx >=0"
@@ -143,44 +143,38 @@
                 :label="$t('m.borrowsuccess.repayment_state')">
                 <template slot-scope="scope">
                   <!--order_state：订单状态（1:发标；2:订单逾期；3:正在应标；4:满标；5:开始付息；6:还息结束；7:还本结束；8:提前还本结束；9:逾期还本结束；10:利息逾期；11:本金逾期；12:不良资产；13:不良资产处理完成）-->
-                  <span
-                    v-if="tableListData.orderState === 6"
-                    v-show="isPrincipal"
-                  >
-                    {{$t('m.borrowsuccess.normal')}}
-                    ({{$t('m.borrowsuccess.remaining')}}{{Math.abs(Math.ceil(remaining))}}{{$t('m.day')}})
-                  </span>
-                  <span
-                    v-else-if="tableListData.orderState === 11"
-                    v-show="isPrincipal">
+                  <span v-if="tableListData.orderState === 11">
                     {{$t('m.borrowsuccess.withOut')}}
                     ({{Math.abs(Math.ceil(remaining))}}{{$t('m.day')}})
                   </span>
-                  <i class="el-icon-check" v-if="tableListData.orderState === 7"></i>
+                  <i class="el-icon-check" v-else-if="tableListData.orderState === 7">{{$t('m.borrowsuccess.repayed')}}</i>
                   <i class="el-icon-check" v-else-if="tableListData.orderState === 8">
                     <!--提前还本-->
-                    {{$t('m.borrowsuccess.early')}}
+                    {{$t('m.borrowsuccess.early' + tableListData.repaymentType.repayment_type)}}
                   </i>
                   <!--逾期还本-->
-                  <i class="el-icon-check" v-else-if="tableListData.orderState == 9">{{$t('m.borrowsuccess.overdueRepay')}}</i>
+                  <i class="el-icon-check" v-else-if="tableListData.orderState == 9">{{$t('m.borrowsuccess.overdueRepay' + tableListData.repaymentType.repayment_type)}}</i>
                   <!--已核销-->
-                  <span v-else-if="tableListData.orderState >= 12" v-show="isPrincipal">{{$t('m.borrowsuccess.hasDel')}}</span>
-
+                  <span v-else-if="tableListData.orderState === 12">{{$t('m.badloan_overdue')}}</span>
+                  <span v-else-if="tableListData.orderState === 15">{{$t('m.badloan_selling')}}</span>
+                  <span v-else-if="tableListData.orderState === 17">{{$t('m.flow')}}</span>
+                  <span v-else-if="tableListData.orderState >= 12">{{$t('m.borrowsuccess.hasDel')}}</span>
+                  <span v-else-if="tableListData.orderState !== 11">
+                    {{$t('m.borrowsuccess.normal')}}
+                    ({{$t('m.borrowsuccess.remaining')}}{{Math.abs(Math.ceil(remaining))}}{{$t('m.day')}})
+                  </span>
                 </template>
               </el-table-column>
             </el-table>
             <el-button type="primary" class="repayment pa" style="bottom: 10px"
-                       @click="onceRepayOption=3; getRemaining(tableListData.id)"
-                        v-show="isPrincipal && isShow"
-                        :disabled="isDisabled">
-              <!--还本-->
-              {{$t('m.borrowsuccess.repayment')}}
+                       @click="onceRepayOption=2;getRemaining(tableListData.id)"
+                        v-show="isPrincipal >0 && isShow && isCurLoginUser">
+              <i v-if="this.principalState === 1">{{$t('m.borrowsuccess.overdueRepay' + tableListData.repaymentType.repayment_type)}}</i>
+              <i v-else-if="this.principalState === 2">{{$t('m.borrowsuccess.prepayment' + tableListData.repaymentType.repayment_type)}}</i>
+              <i v-else-if="this.principalState === 3">{{$t('m.borrowsuccess.repayment' + tableListData.repaymentType.repayment_type)}}</i>
+              <i v-else-if="this.principalState === 4">{{$t('m.borrowsuccess.early' + tableListData.repaymentType.repayment_type)}}</i>
             </el-button>
           </dd>
-          <el-button v-if="orderState !== 12 && orderState !== 15 && isShow" type="primary" style="margin-top: 10px" v-show="!isPrincipal" @click="onceRepayOption=2;getRemaining(tableListData.id)">
-            <!--提前还款-->
-            {{$t('m.borrowsuccess.prepayment')}}
-          </el-button>
           <!--还款信息确认-->
           <repay-dialog
             :visible="repaymentDialog"
@@ -230,6 +224,10 @@
         type: Boolean,
         default: false
       },
+      isCurLoginUser: {
+        type: Boolean,
+        default: false
+      },
       isInvest: {
         type: Boolean,
         default: false
@@ -237,8 +235,7 @@
     },
     data () {
       return {
-        // 是否是一次性还清,1是单期还,2是一次性还清,3还本
-        onceRepayOption: '',
+        onceRepayOption: 0,
         total: 0,
         // 罚息
         withoutRemaining: 0,
@@ -251,6 +248,8 @@
         // 此订单的所需要还的利息总和，包含应还利息和罚息(没有处理精度)
         interest: 0,
         repaymentDialog: false,
+        // 0 不能 1 逾期还本 2 提前还款 3 还本 4  提前还本
+        principalState: 0,
         // 确认还款
         confirmDialog: false,
         // 密码
@@ -279,6 +278,9 @@
           data.orderState = this.orderState
           data.interestState = this.tableListData.interestData[this.toppx][1].interest_state
           data.total = this.total
+          data.repaymentType = this.tableListData.repaymentType
+          data.principalState = 0
+          data.offsetTime = this.tableListData.offsetTime
           return data
         }
       },
@@ -291,63 +293,97 @@
           // 提前还本的违约金
           data.breach = this.breach
           data.interest = this.interest
+          data.amount = this.total
           data.symbol = this.tableListData.symbol
           data.precision = this.tableListData.precision
           data.orderState = this.tableListData.orderState
           data.total = this.total
+          data.repaymentType = this.tableListData.repaymentType
+          data.principalState = this.principalState
+          data.offsetTime = this.tableListData.offsetTime
           return data
         }
       },
       isPrincipal () {
-        if (this.tableListData.interestData) {
-          if (this.tableListData.orderState === 11 || this.tableListData.interestData.length === 1) {
-            if (this.tableListData.orderState === 12 || this.tableListData.orderState === 15) {
-              return false
-            }
-            return true
-          } else {
-            // 最后一期应还时间
-            let expectTime = this.tableListData.interestData[this.tableListData.interestData.length - 1][1].expect_time
-            let date = expectTime.replace('T', ' ')
-            let dateu = new Date(date).getTime()
-            // 倒数第二期
-            let erTime = this.tableListData.interestData[this.tableListData.interestData.length - 2][1].expect_time
-            let erdate = erTime.replace('T', ' ')
-            // 倒数第二期应还时间
-            let erDateu = new Date(erdate).getTime()
-            let chainTime = new Date()
-            if ((erDateu < chainTime && chainTime < dateu) && this.tableListData.orderState < 11) {
-              return true
-            } else {
-              return false
-            }
-          }
+        // 不良资产之后的不能还本
+        if (this.tableListData.orderState > 11 || this.tableListData.orderState === 7 || this.tableListData.orderState === 8 || this.tableListData.orderState === 9) {
+          this.principalState = 0
+          return this.principalState
         }
-      },
-      // 还本按钮是否置灰,还息列表的数据
-      isDisabled () {
-        if (this.tableListData.interestData) {
-          if (this.tableListData.orderState === 11 || this.tableListData.orderState === 6) {
-            return false
+        // 本金逾期 逾期还本
+        if (this.tableListData.orderState === 11) {
+          this.principalState = 1
+          return this.principalState
+        }
+        //
+        if (this.tableListData.repaymentType.repayment_type === 2) {
+          let expectTime = this.tableListData.principalData[0].expect_principal_time
+          let date = expectTime.replace('T', ' ')
+          let dateu = new Date(date)
+          let chainTime = this.$store.state.curDate
+          let def = (dateu - chainTime) / (1000 * 24 * 3600) - this.tableListData.offsetTime / (24 * 3600)
+          // 提前还款,多余1天
+          if (def >= 1.0) {
+            this.principalState = 2
+            return this.principalState
+          // 一天之内
+          } else if (def >= 0) {
+            // 还本
+            this.principalState = 3
+            return this.principalState
           } else {
-            let interset = this.tableListData.interestData[this.tableListData.interestData.length - 1].interest_state
-            return interset === 1 || interset === 3 || this.tableListData.orderState < 11 ? 'true' : false
+            // 逾期还本
+            this.principalState = 1
+            return this.principalState
+          }
+        } else {
+          if (this.tableListData.interestData) {
+            let payInterset = true
+            this.tableListData.interestData.forEach(item => {
+              if (item[1].interest_state === 1 || item[1].interest_state === 3) {
+                payInterset = false
+              }
+            })
+            // 还有利息没有还，提前还款
+            if (!payInterset) {
+              this.principalState = 2
+              return this.principalState
+            }
+            // 所有利息都还完了
+            // 最后一期应还时间
+            let thisMonth = true
+            // 倒数第二期
+            if (this.tableListData.interestData.length >= 2) {
+              let erTime = this.tableListData.interestData[this.tableListData.interestData.length - 2][1].expect_time
+              let erdate = erTime.replace('T', ' ')
+              // 倒数第二期应还时间
+              let erDateu = new Date(erdate).getTime()
+              let chainTime = new Date()
+              let def = (erDateu - chainTime) / (1000 * 24 * 3600) - this.tableListData.offsetTime / (24 * 3600)
+              if (def < 0) thisMonth = false
+            }
+            // 当月，还本
+            if (thisMonth === true) this.principalState = 3
+            // 不是当月，提前还本
+            else this.principalState = 4
+            return this.principalState
           }
         }
       },
       // 剩余多少天
       remaining () {
-        let time
+        let time = Date.now()
         if (this.toppx !== -1) {
           time = this.tableListData.interestData[this.toppx][1].expect_time.substr(0, this.tableListData.interestData[this.toppx][1].expect_time.indexOf('T'))
         } else {
           time = this.tableListData.principalData[0].expect_time.substr(0, this.tableListData.principalData[0].expect_time.indexOf('T'))
         }
-        let d = Date.parse(time) - Date.parse(this.$store.state.curDate)
+        let d = Date.parse(time) - Date.parse(this.$store.state.curDate) - this.tableListData.offsetTime * 1000
         return d / (3600 * 24 * 1000)
       },
       // 还款按钮的位置,根据哪一期没有还的索引，决定按钮的位置
       toppx () {
+        if (this.tableListData.repaymentType.repayment_type === 2) return -1
         if (this.tableListData.interestData && this.tableListData.interestData.length > 0) {
           return this.tableListData.interestData.findIndex((val, index, arr) => {
             return val[1].interest_state === 1 || val[1].interest_state === 3
@@ -379,7 +415,7 @@
       },
       // 一共需要还多少是否是一次性还清,1是单期还,2是一次性还清,3还本
       totals () {
-        let repayInest
+        let repayInest = 0
         if (this.toppx !== -1) {
           repayInest = this.tableListData.interestData[this.toppx][1].expect_repay_interest.amount / Math.pow(10, this.tableListData.precision)
         }
@@ -387,7 +423,7 @@
           this.total = this.withoutRemaining + repayInest
         } else if (this.onceRepayOption === 1 && this.tableListData.interestData[this.toppx][1].interest_state === 1) {
           this.total = repayInest
-        } else if (this.onceRepayOption === 2 || this.onceRepayOption === 3) {
+        } else if (this.principalState === 1 || this.principalState === 2 || this.principalState === 3 || this.principalState === 4) {
           this.total = Number(this.remainingAmount) + Number(this.breach) + Number(this.interest)
         }
         this.repaymentDialog = true
@@ -431,7 +467,7 @@
       },
       // 确认还款
       confirmSubmit () {
-        let currentData = this.tableListData.interestData[this.toppx]
+        let currentData = this.onceRepayOption === 1 ? this.tableListData.interestData[this.toppx] : undefined
         this.loading = true
         if (this.onceRepayOption === 1 && currentData[1].interest_state === 1) {
           console.log('正常还息')
@@ -444,10 +480,12 @@
                 confirmButtonText: this.$t('m.sure')
               })
               this.$parent.init()
+              this.loading = false
               this.confirmDialog = false
             })
             .catch((err) => {
               console.log(err)
+              this.loading = false
               this.btnText = this.$t('m.sure')
               this.confirmDialog = false
               MessageBox.alert(this.$t('m.borrow.repayFail'), {
@@ -467,17 +505,19 @@
               })
               this.$parent.init()
               this.confirmDialog = false
+              this.loading = false
             })
             .catch((err) => {
               console.log(err)
               this.btnText = this.$t('m.sure')
               this.confirmDialog = false
+              this.loading = false
               MessageBox.alert(this.$t('m.borrow.repayFail'), {
                 confirmButtonText: this.$t('m.sure')
               })
             })
           // 逾期还本。
-        } else if (this.onceRepayOption === 3 && this.tableListData.orderState === 11) {
+        } else if (this.principalState === 1 && this.tableListData.orderState === 11) {
           ZOSInstance.bitlender_overdue_repay(this.$store.state.userDataSid, this.tableListData.id)
             .then((res) => {
               return ZOSInstance.broadcastTransaction(res.tr)
@@ -488,18 +528,20 @@
               })
               this.$parent.init()
               this.confirmDialog = false
+              this.loading = false
               this.$router.push({name: 'historyloanList'})
             })
             .catch((err) => {
               console.log(err)
               this.btnText = this.$t('m.sure')
               this.confirmDialog = false
+              this.loading = false
               MessageBox.alert(this.$t('m.borrow.repayFail'), {
                 confirmButtonText: this.$t('m.sure')
               })
             })
             // 正常还本
-        } else if (this.onceRepayOption === 3 && this.tableListData.orderState === 6) {
+        } else if (this.principalState === 3 && this.tableListData.orderState === 6) {
           // order_id,               //'1.18.x'
           //   fee_asset_id = "1.3.0" //手续费资产IDe
           console.log('正常还本')
@@ -513,18 +555,20 @@
                 confirmButtonText: this.$t('m.sure')
               })
               this.confirmDialog = false
+              this.loading = false
               this.$router.push({name: 'historyloanList'})
             })
             .catch((err) => {
               console.log(err)
               this.btnText = this.$t('m.sure')
               this.confirmDialog = false
+              this.loading = false
               MessageBox.alert(this.$t('m.borrow.repayFail'), {
                 confirmButtonText: this.$t('m.sure')
               })
             })
             // 提前还本
-        } else if (this.onceRepayOption === 2) {
+        } else if (this.principalState === 4 || this.principalState === 2) {
           // order_id,               //'1.18.x'
           //   fee_asset_id = "1.3.0" //手续费资产ID
           console.log('一性清还清，提前还本')
@@ -537,15 +581,23 @@
                 confirmButtonText: this.$t('m.sure')
               })
               this.confirmDialog = false
+              this.loading = false
               this.$router.push({name: 'historyloanList'})
             })
             .catch((err2) => {
               console.log(err2)
               this.confirmDialog = false
+              this.loading = false
               MessageBox.alert(this.$t('m.borrow.repayFail'), {
                 confirmButtonText: this.$t('m.sure')
               })
             })
+        } else {
+          this.confirmDialog = false
+          this.loading = false
+          MessageBox.alert(this.$t('m.borrow.borrow' + this.onceRepayOption + this.tableListData.orderState), {
+            confirmButtonText: this.$t('m.sure')
+          })
         }
       }
     },

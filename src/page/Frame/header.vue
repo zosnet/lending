@@ -4,8 +4,8 @@
         <div class="w-box">
           <div class="nav-logo">
             <h1 @click="changePage(11, 0)">
-              <router-link :to="logo ? '/logo' : '/home'" :title="`Zos${$t('m.website')}`">
-                <img :src="`/static/images/global-logo-${_theme}.jpg`" width="100" height="35">
+              <router-link :to="logo ? '/logo' : '/home'" :title="$store.state.companyName + $t('m.website')">
+                <img :src="`/static/images/global-logo-${_theme}.png`" width="100" height="35">
               </router-link>
             </h1>
           </div>
@@ -39,28 +39,50 @@
                       <a @click="changePage(3, 0)" class="dHMsll gTHKWe">
                         <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===3}">
                           <svg class="icon" aria-hidden="true">
-                            <use xlink:href="#icon-invest"></use>
+                            <use xlink:href="#icon-investment"></use>
                           </svg>
                           <span class="bgdPDV">{{$t("m.toInvest")}}</span>
                         </div>
                       </a>
                     </router-link>
 
+                    <a v-if="(this.$store.state.loanMode & 0x08) > 0" @click="loginDia('/sell')" class="dHMsll gTHKWe">
+                      <a @click="changePage(13)" class="dHMsll gTHKWe">
+                        <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===13}">
+                          <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-trading"></use>
+                          </svg>
+                          <span class="bgdPDV">{{$t("m.header.transaction")}}</span>
+                        </div>
+                      </a>
+                    </a>
+
+                    <a v-if="(this.$store.state.loanMode & 0x04) > 0" @click="loginDia('/locktoken')" class="dHMsll gTHKWe">
+                      <a @click="changePage(14)" class="dHMsll gTHKWe">
+                        <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===14}">
+                          <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-lock"></use>
+                          </svg>
+                          <span class="bgdPDV">{{$t("m.locktoken.title")}}</span>
+                        </div>
+                      </a>
+                    </a>
+
                     <a @click="loginDia('/balance')" class="dHMsll gTHKWe">
                       <a @click="changePage(4)" class="dHMsll gTHKWe">
                         <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===4}">
                           <svg class="icon" aria-hidden="true">
-                            <use xlink:href="#icon-account"></use>
+                            <use xlink:href="#icon-assets"></use>
                           </svg>
                           <span class="bgdPDV">{{$t("m.zhang")}}</span>
                         </div>
                       </a>
                     </a>
                     <a @click="loginDia('/admin/params')" class="dHMsll gTHKWe">
-                      <a @click="changePage(5)" class="dHMsll gTHKWe">
+                      <a @click="changePage(5, 0)" class="dHMsll gTHKWe">
                         <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===5}">
                           <svg class="icon" aria-hidden="true">
-                            <use xlink:href="#icon-admin"></use>
+                            <use xlink:href="#icon-management"></use>
                           </svg>
                           <span class="bgdPDV">{{$t("m.admin")}}</span>
                         </div>
@@ -80,7 +102,7 @@
                       <a @click="changePage(7, 0)" class="dHMsll gTHKWe">
                         <div class="rsdjt gTHKWe Navbar__link" :class="{lineBottom:choosePage===7}">
                           <svg class="icon" aria-hidden="true">
-                            <use xlink:href="#icon-history"></use>
+                            <use xlink:href="#icon-query"></use>
                           </svg>
                           <span class="bgdPDV">{{$t("m.history")}}</span>
                         </div>
@@ -94,21 +116,27 @@
           </div>
           <div>
             <div class="right-box" id="login">
+              <div v-if="this.$store.state.login && this.$store.state.authoradmin !== undefined" class="link-a">
+                <a @click="doExchange(1)" style="margin-left: 10px">{{$t('m.information.KYC')}}</a>
+              </div>
+              <!-- <div v-if="this.$store.state.login && this.$store.state.exchangegateway !== undefined" class="link-a">
+                <a @click="doExchange(0)" style="margin-left: 10px">{{$t('m.orderList.exchange')}}</a>
+              </div> -->
               <div class="link-a">
                 <a @click="loginDia('/invite')" :class="{lineBottom:choosePage===9}" style="margin-left: 10px">{{$t('m.invites')}}</a>
               </div>
               <div class="username">
                 <el-popover
                   placement="bottom"
-                  width="420"
+                  width="480"
                   trigger="hover"
                   v-if="$store.state.userName"
                   class="margin-l20"
                 >
                   <el-table :data="gridData">
                     <el-table-column width="140" property="symbol" :label="$t('m.orderList.bitType')"></el-table-column>
-                    <el-table-column width="125" property="amount" :label="$t('m.transfer.KY')"></el-table-column>
-                    <el-table-column width="125" property="lock_amount" :label="$t('m.orderList.freeze')"></el-table-column>
+                    <el-table-column width="155" property="amount" :label="$t('m.transfer.KY')"></el-table-column>
+                    <el-table-column width="155" property="lock_amount" :label="$t('m.orderList.unused')"></el-table-column>
                   </el-table>
                   <a slot="reference" style="width: 50px">{{$store.state.userName}}</a>
                 </el-popover>
@@ -119,11 +147,7 @@
                 <span class="margin-l10">|</span>
                 <router-link to="/register" :class="{lineBottom:choosePage===10}" style="margin-left: 10px">{{$t('m.register.title')}}</router-link>
               </div>
-
-
-
               <a v-if="$store.state.login" href="javascript:;" class="margin-l20" @click="_loginOut">{{$t("m.quit")}}</a>
-
               <div class="shop pr">
                 <el-dropdown @command="change($event)">
                   <span class="el-dropdown-link">
@@ -138,12 +162,10 @@
                 </el-dropdown>
               </div>
           </div>
-
-
-              </div>
+          </div>
         </div>
       </header>
-    <!--登录-->
+       <!--登录-->
     <login-dialog :visible="$store.state.loginPath !== undefined"></login-dialog>
     <el-dialog
       :title="$t('m.notSupport')"
@@ -163,14 +185,16 @@ import '/path-assets/style/theme/95262b/index.css'
 import '/path-assets/style/theme/1a1d5c/index.css'
 import '/path-assets/style/theme/1a2d5c/index.css'
 import {ZOSInstance} from 'zos-wallet-js'
+import filters from '/js-filters'
 import { removeStore, getLocalStore, setLocalStore } from '/js-utils/storage'
 import { ChainTypes as GraphChainTypes, ChainStore } from 'zosjs/es'
 import Notify from 'notifyjs'
 import Immutable from 'immutable'
 import {Apis} from 'zosjs-ws'
+import RechargeCoin from '/path-components/ChargeCoin'
 import loginDialog from '/path-page/Login/loginDialog'
 export default{
-  components: {loginDialog},
+  components: {loginDialog, RechargeCoin},
   data () {
     return {
       options: [{
@@ -256,11 +280,14 @@ export default{
       this.$store.state.login = false
       this.$store.state.userName = ''
       this.$store.state.userDataSid = ''
+      this.$store.state.accountObj = undefined
       removeStore('userName')
       removeStore('userId')
       this.changePage(1, 0)
       this.$router.push('/')
       this.$store.state.loginPath = undefined
+      this.$store.state.userInfo.phone = undefined
+      this.$store.state.userInfo.mail = undefined
     },
 
     // 通过路由改变导航文字样式
@@ -288,6 +315,29 @@ export default{
         this.changePage(10)
       } else if (this.$route.path === '/logo') {
         this.changePage(11)
+      } else if (this.$route.path === '/sell') {
+        this.changePage(13)
+      } else if (this.$route.path === '/locktoken') {
+        this.changePage(14)
+      }
+    },
+    doExchange (v) {
+      if (v === 0) {
+        this.$router.push({
+          path: '/balance/balances',
+          query: {
+            type: 'exchange'
+          }
+        })
+        this.$root.eventHub.$emit('exchange', true)
+      } else if (v === 1) {
+        this.$router.push({
+          path: '/balance/authors',
+          query: {
+            type: 'author'
+          }
+        })
+        this.$root.eventHub.$emit('author', true)
       }
     },
     loginDia (path) {
@@ -302,7 +352,8 @@ export default{
       // 通知keepalive 不要发get_objects
       Apis.instance().usersubscribe()
       if (this.$store.state.userDataSid && ChainStore.getLoginAccountBalanceChange(0)) {
-        ZOSInstance.get_account_allbalances(this.$store.state.userDataSid).then(resbalas => {
+        ZOSInstance.get_account_allbalances(this.$store.state.userDataSid, 0xFFFF).then(resbalas => {
+          // console.log(resbalas)
           var allDate = resbalas['balances']
           this.$store.state.coupon.amount = resbalas['coupon']
           this.$store.state.coupon.amountstr = this.$store.state.coupon.amount.toFixed(5)
@@ -312,35 +363,13 @@ export default{
           for (let index = 0; index < allDate.length; index++) {
             this.gridData.push(Object.assign({}, allDate[index]))
             let element = this.gridData[index]
-            element.amount = this.scientificToNumber(element.amount / Math.pow(10, element.precision))
-            element.lock_amount = element.lock_amount / Math.pow(10, element.precision)
+            element.amount = filters['formatLegalCurrency'](element.amount, '', element.precision)
+            element.lock_amount = filters['formatLegalCurrency'](element.lock_amount, '', element.precision)
           }
-          // eventInstance.$emit('updateUserAssets', allDate)
         })
       }
       this.getAccountCoupon()
     },
-    // 禁用科学计数法
-    scientificToNumber (num) {
-      let str = num.toString()
-      let reg = /^(\d+)(e)([-]?\d+)$/
-      let arr = ''
-      let len = ''
-      let zero = ''
-      // /*6e7或6e+7 都会自动转换数值*/
-      if (!reg.test(str)) {
-        return num
-      } else {
-        // /*6e-7 需要手动转换*/
-        arr = reg.exec(str)
-        len = Math.abs(arr[3]) - 1
-        for (var i = 0; i < len; i++) {
-          zero += '0'
-        }
-        return '0.' + zero + arr[1]
-      }
-    },
-    // 获得用户优惠
     getAccountCoupon () {
       if (this.$store.state.userDataSid && ChainStore.getLoginAccountBalanceChange(1)) {
         ZOSInstance.get_account_coupon(this.$store.state.userDataSid)
@@ -430,15 +459,16 @@ export default{
         const assetId = lastOperationNew.getIn(['op', 1, 'amount', 'asset_id'])
         const from = lastOperationNew.getIn(['op', 1, 'from'])
         const amount = lastOperationNew.getIn(['op', 1, 'amount', 'amount'])
-        console.log('assetId:', assetId)
-        console.log('from:', from)
-        console.log('amount:', amount)
-        const title = '转账通知'
-        const notifyParams = {
-          body: '您有一笔资金到账了!'
-        }
-        const notify = new Notify(title, notifyParams)
-        notify.show()
+        const title = this.$t('m.trNotify')
+        Apis.instance().db_api().exec('get_objects', [[assetId, from]]).then(res => {
+          if (res && res[0] && res[1]) {
+            const notifyParams = {
+              body: this.$t('m.trNotify1') + '  ' + Number(amount) / Math.pow(10, res[0].precision) + '  ' + res[0].symbol + '  ' + this.$t('m.transfer.from') + '  ' + res[1].name
+            }
+            const notify = new Notify(title, notifyParams)
+            notify.show()
+          }
+        })
       }
       // 投资订单通知
       if (
@@ -448,21 +478,25 @@ export default{
         const assetId = lastOperationNew.getIn(['op', 1, 'amount_to_invest', 'asset_id'])
         const from = lastOperationNew.getIn(['op', 1, 'issuer'])
         const amount = lastOperationNew.getIn(['op', 1, 'amount_to_invest', 'amount'])
-        console.log('assetId:', assetId)
-        console.log('from:', from)
-        console.log('amount:', amount)
-        const title = '投资通知'
-        const notifyParams = {
-          body: '您收到一笔投资!'
-        }
-        const notify = new Notify(title, notifyParams)
-        notify.show()
+        const title = this.$t('m.lendingnotify')
+        Apis.instance().db_api().exec('get_objects', [[assetId, from]]).then(res => {
+          if (res && res[0] && res[1]) {
+            const notifyParams = {
+              body: this.$t('m.lendingnotify1') + '  ' + Number(amount) / Math.pow(10, res[0].precision) + '  ' + res[0].symbol + '  ' + this.$t('m.transfer.from') + '  ' + res[1].name
+            }
+            const notify = new Notify(title, notifyParams)
+            notify.show()
+          }
+        })
       }
 
       this.account.set('history', Immutable.fromJS(newObj.get('history')))
       this.account.set('id', Immutable.fromJS(newObj.get('id')))
       this.account.set('balances', Immutable.fromJS(newObj.get('balances')))
       // Immutable.fromJS(newObj.get('history'))
+    },
+    rechargeclose () {
+      this.gatewayWebDialog = false
     },
     openLink () {
       let newWnd = window.open(
@@ -473,7 +507,6 @@ export default{
     },
     isShowChromeTip () {
       const userAgent = navigator.userAgent.toLowerCase()
-      console.log(userAgent)
       if (!(userAgent.indexOf('firefox') > -1 ||
           userAgent.indexOf('chrome') > -1 ||
           userAgent.indexOf('edge') > -1)) {

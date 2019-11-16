@@ -5,7 +5,7 @@
         :title="titleName"
         @close="close"
         :visible.sync="webvisible"
-        width="45%"
+        :width="iframeWidth"
         append-to-body="isAppend"
         >
           <div v-loading="loading" :element-loading-text="$t('m.applyWaiting')" :style="{'height': iframeHeight + 'px'}">
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import {ZOSInstance} from 'zos-wallet-js'
 import SelectGateway from '/path-components/ChargeCoin/SelectGateway'
 import formatAssets from '/js-api/public'
@@ -63,6 +64,10 @@ export default {
       type: Object,
       'default': undefined
     },
+    defGateway: {
+      type: Object,
+      'default': undefined
+    },
     // 类型
     dialogType: {
       type: String,
@@ -78,6 +83,7 @@ export default {
       titleName: '',
       gatewayAddress: '',
       iframeHeight: 100,
+      iframeWidth: '50%',
       symbol: '',
       realSymbol: '',
       precision: 8,
@@ -117,7 +123,7 @@ export default {
         return 0
       } else if (assetsArr.length > 0) {
         this.zosprecision = assetsArr[0].precision
-        return (assetsArr[0].amount / Math.pow(10, assetsArr[0].precision))
+        return assetsArr[0].amount
       }
     }
   },
@@ -127,7 +133,8 @@ export default {
         this.gatewayUrl = undefined
         this.authorUrl = undefined
         this.workStep = 0
-        this.initCharge()
+        if (this.defGateway === undefined) this.initCharge()
+        else this.doExchange(this.defGateway)
       } else {
         this.workStep = 0
         this.selectGatewayDialog = false
@@ -168,6 +175,13 @@ export default {
       if (this.gatewayAddress.indexOf(event.origin) !== -1) {
         let data = event.data
         switch (data.type) {
+          case 'autoWidth':
+            setLocalStore(this.symbol + this.funType + 'chargewidth', data.value)
+            this.iframeWidth = data.value.toString() + '%'
+            break
+          case 'settitle':
+            this.titleName = data.value
+            break
           case 'autoHeight':
             this.loading = false
             this.iframeHeight = data.value
@@ -261,51 +275,78 @@ export default {
       this.gatewayConfig = this.gatewayUrl + '/zos-gateway'
       let high = getLocalStore(this.symbol + this.funType + 'chargehigh')
       if (high !== undefined && parseInt(high) > 100) this.iframeHeight = parseInt(high)
+      let width = getLocalStore(this.symbol + this.funType + 'chargewidth')
+      if (width !== undefined && parseInt(width) > 10) this.iframeHeight = parseInt(width).toString() + '%'
       console.log('1', Date.now())
-      getGatewayAddress(this.gatewayConfig, {module: 'WEB'}).then(res => {
+      getGatewayAddress(this.gatewayConfig, {
+        module: 'WEB',
+        gatewayId: this.selectGatewayId,
+        // 此处必须是链上名，因为网关和链上名才是唯一对应
+        coin_type: this.symbol
+      }).then(res => {
+        if (res.ret_code === '0') {
+          this.$message({
+            message: this.$t('m.httpUtils.warning') + ' url: ' + this.gatewayUrl + ' Error :' + res.ret_msg,
+            type: 'error'
+          })
+          this.workStep = 4
+          this.close()
+          return
+        }
         console.log('2', Date.now())
-        let gatewayUrl = res.url
+        let token = Number((new Date().getTime() / 30000).toFixed(0)) + 12356
+        let gatewayUrl = res.data.url
+        let payMode = res.data.payMode
+        if (payMode === '') payMode = this.realSymbol
+        gatewayUrl = ZOSInstance.ReplaceAddress(gatewayUrl)
+        console.log('2', Date.now(), gatewayUrl, payMode)
         switch (this.funType) {
           case '1':
             this.titleName = this.$t('m.orderList.depositMoney')
-            this.gatewayAddress = gatewayUrl + '/?funType=1&symbol=zos' + this.symbol + '&realSymbol=' + this.realSymbol +
-            '&assetId=' + this.assetId + '&userName=' + this.username + '&userId=' + this.userid +
+            this.gatewayAddress = gatewayUrl + '/?funType=1&symbol=' + this.symbol + '&realSymbol=' + this.realSymbol + '&precision=' + this.precision +
+            '&assetId=' + this.assetId + '&userName=' + this.username + '&userId=' + this.userid + '&feel=' + this.feel +
+            '&zosAmount=' + this.zosAmount + '&couponAmount=' + this.$store.state.coupon.amount +
+            '&available=' + this.available + '&precision=' + this.precision + '&kycName=' + this.kycName +
             '&gatewayUrl=' + this.gatewayConfig + '&lang=' + this.$i18n.locale + '&selectGatewayId=' + this.selectGatewayId +
-            '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName
+            '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName + '&payMode=' + payMode +
+            '&recordOrder=' + this.recordOrder + '&token=' + token
             console.log(this.funType, 'gatewayAddress', this.gatewayAddress)
             this.webvisible = true
             this.workStep = 4
             break
           case '2':
             this.titleName = this.$t('m.rechargeDialog.deposit')
-            this.gatewayAddress = gatewayUrl + '?funType=2&symbol=zos' + this.symbol + '&realSymbol=' + this.realSymbol +
-            '&assetId=' + this.assetId + '&userName=' + this.username + '&userId=' + this.userid +
+            this.gatewayAddress = gatewayUrl + '?funType=2&symbol=' + this.symbol + '&realSymbol=' + this.realSymbol + '&precision=' + this.precision +
+            '&assetId=' + this.assetId + '&userName=' + this.username + '&userId=' + this.userid + '&feel=' + this.feel +
+            '&zosAmount=' + this.zosAmount + '&couponAmount=' + this.$store.state.coupon.amount +
+            '&available=' + this.available + '&precision=' + this.precision + '&kycName=' + this.kycName +
             '&gatewayUrl=' + this.gatewayConfig + '&lang=' + this.$i18n.locale + '&selectGatewayId=' + this.selectGatewayId +
-            '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName
+            '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName + '&payMode=' + payMode +
+            '&recordOrder=' + this.recordOrder + '&token=' + token
             console.log(this.funType, 'gatewayAddress', this.gatewayAddress)
             this.webvisible = true
             this.workStep = 4
             break
           case '3':
             this.titleName = this.$t('m.orderList.WithdrawMoney')
-            this.gatewayAddress = gatewayUrl + '?funType=3&symbol=zos' + this.symbol + '&realSymbol=' + this.realSymbol + '&assetId=' + this.assetId +
+            this.gatewayAddress = gatewayUrl + '?funType=3&symbol=' + this.symbol + '&realSymbol=' + this.realSymbol + '&assetId=' + this.assetId +
               '&userName=' + this.username + '&userId=' + this.userid + '&feel=' + this.feel +
               '&zosAmount=' + this.zosAmount + '&couponAmount=' + this.$store.state.coupon.amount +
-              '&available=' + this.available + '&precision=' + this.precision +
+              '&available=' + this.available + '&precision=' + this.precision + '&kycName=' + this.kycName +
               '&gatewayUrl=' + this.gatewayConfig + '&lang=' + this.$i18n.locale + '&selectGatewayId=' + this.selectGatewayId +
-              '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName
+              '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName + '&payMode=' + payMode + '&token=' + token
             console.log(this.funType, 'gatewayAddress', this.gatewayAddress)
             this.webvisible = true
             this.workStep = 4
             break
           case '4':
             this.titleName = this.$t('m.drawDialog.withdraw')
-            this.gatewayAddress = gatewayUrl + '?funType=4&symbol=zos' + this.symbol + '&realSymbol=' + this.realSymbol + '&assetId=' + this.assetId +
+            this.gatewayAddress = gatewayUrl + '?funType=4&symbol=' + this.symbol + '&realSymbol=' + this.realSymbol + '&assetId=' + this.assetId +
               '&userName=' + this.username + '&userId=' + this.userid + '&feel=' + this.feel +
               '&zosAmount=' + this.zosAmount + '&couponAmount=' + this.$store.state.coupon.amount +
               '&available=' + this.available + '&precision=' + this.precision + '&kycName=' + this.kycName +
               '&gatewayUrl=' + this.gatewayConfig + '&lang=' + this.$i18n.locale + '&selectGatewayId=' + this.selectGatewayId +
-              '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName
+              '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName + '&payMode=' + payMode + '&token=' + token
             console.log(this.funType, 'gatewayAddress', this.gatewayAddress)
             this.webvisible = true
             this.workStep = 4
@@ -324,7 +365,7 @@ export default {
         if (this.loadTimeout) {
           clearTimeout(this.loadTimeout)
         }
-        this.loadTimeout = setTimeout(timeout, 10000)
+        this.loadTimeout = setTimeout(timeout, axios.defaults.timeout * 2)
         let iframe = this.$refs.iframe
         if (iframe) {
           if (iframe.attachEvent) {
@@ -359,10 +400,66 @@ export default {
         this.close()
       })
     },
+    doExchange (item) {
+      this.selectGatewayItem = item
+      this.selectGatewayId = item.accountId
+      this.selectGatewayName = item.name
+      this.selectAsset = item.assetId
+      this.assetId = item.assetId
+      this.gatewayUrl = item.url
+      this.authorUrl = item.authourUrl
+      this.symbol = item.symbol
+      this.realSymbol = item.realSymbol
+      this.precision = item.precision
+
+      this.gatewayConfig = this.gatewayUrl + '/zos-gateway'
+      this.gatewayConfig = ZOSInstance.ReplaceAddress(this.gatewayConfig)
+      getGatewayAddress(this.gatewayConfig, {
+        module: 'WEB',
+        gatewayId: this.selectGatewayId,
+        // 此处必须是链上名，因为网关和链上名才是唯一对应
+        coin_type: this.symbol
+      }).then(res => {
+        if (res.ret_code === '0') {
+          this.$message({
+            message: this.$t('m.httpUtils.warning') + ' url: ' + this.gatewayUrl + ' Error :' + res.ret_msg,
+            type: 'error'
+          })
+          this.workStep = 4
+          this.close()
+          return
+        }
+
+        window.addEventListener('message', this.windowEventListener)
+        this.username = this.$store.state.userName
+        this.userid = this.$store.state.userDataSid
+        let high = getLocalStore(this.symbol + this.funType + 'chargehigh')
+        if (high !== undefined && parseInt(high) > 100) this.iframeHeight = parseInt(high)
+        let width = getLocalStore(this.symbol + this.funType + 'chargewidth')
+        if (width !== undefined && parseInt(width) > 10) this.iframeHeight = parseInt(width).toString() + '%'
+
+        let token = Number((new Date().getTime() / 30000).toFixed(0)) + 12356
+        let gatewayUrl = res.data.url
+        let payMode = 'exchange'
+        gatewayUrl = ZOSInstance.ReplaceAddress(gatewayUrl)
+
+        this.titleName = this.$t('m.orderList.exchange')
+        this.gatewayAddress = gatewayUrl + '/?funType=1&symbol=' + this.symbol + '&realSymbol=' + this.realSymbol + '&precision=' + this.precision +
+          '&assetId=' + this.assetId + '&userName=' + this.username + '&userId=' + this.userid + '&feel=' + this.feel +
+          '&zosAmount=' + this.zosAmount + '&couponAmount=' + this.$store.state.coupon.amount +
+          '&available=' + this.available + '&precision=' + this.precision + '&kycName=' + this.kycName +
+          '&gatewayUrl=' + this.gatewayConfig + '&lang=' + this.$i18n.locale + '&selectGatewayId=' + this.selectGatewayId +
+          '&theme=' + this.$store.state.configTheme + '&selectGatewayName=' + this.selectGatewayName + '&payMode=' + payMode +
+          '&recordOrder=' + this.recordOrder + '&token=' + token
+        console.log(this.funType, 'gatewayAddress', this.gatewayAddress)
+        this.webvisible = true
+        this.workStep = 4
+      })
+    },
     SelectGatewaySucess (item) {
       this.selectGatewayItem = item
-      this.selectGatewayId = this.selectGatewayItem.accountId
-      this.selectGatewayName = this.selectGatewayItem.name
+      this.selectGatewayId = item.accountId
+      this.selectGatewayName = item.name
       this.selectAsset = item.assetId
       this.gatewayUrl = item.url
       this.authorUrl = item.authourUrl
@@ -370,7 +467,17 @@ export default {
       this.realSymbol = item.realSymbol
       this.precision = item.precision
       this.selectGatewayDialog = false
+
+      if (item.enable !== true) {
+        this.$message({
+          message: this.$t('m.params.gateway') + ' name: ' + item.name + this.$t('m.params.stop'),
+          type: 'error'
+        })
+        this.SelectGatewayClose()
+        return
+      }
       this.workStep = 1
+      this.titleName = ''
       if (this.dialogType === 'withdraw') {
         if (item.assetProperty & 0x00000040) this.withdrawBit_()
         else this.withdrawCash_()
@@ -427,7 +534,7 @@ export default {
           this.kycName = ''
           this.webvisible = true
           this.initGateway()
-        } if (status === -5) {
+        } else if (status === -5) {
           this.$message({
             message: this.$t('m.kyc.statues5') + ' name: ' + this.selectGatewayItem.authourName + ' asset: ' + this.selectGatewayItem.symbol,
             type: 'error'
@@ -446,8 +553,8 @@ export default {
             return
           }
           console.log('3', Date.now())
-          kycStatus(this.kycurl + '/zos-kyc/', {chainid: this.userid, authorid: this.selectGatewayItem.accountId}).then(res => {
-            console.log('kycStatus', res)
+          kycStatus(this.kycurl + '/zos-kyc/', {chainid: this.userid, authorid: this.selectGatewayItem.authourAccount}).then(res => {
+            console.log('kycStatus', res, this.userid, this.selectGatewayItem.authourAccount)
             console.log('4', Date.now())
             // 直接充值
             if (status > 0) {
@@ -464,6 +571,7 @@ export default {
                 this.kycInfo.chainstatus = this.$t('m.kyc.statues' + Math.abs(status))
                 this.kycInfo.remark = res.remark
                 this.workStep = 3
+                this.kycName = res.name
                 this.checkinfoDialog = true
               } else {
                 this.workStep = 3

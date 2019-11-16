@@ -14,7 +14,7 @@ import { Apis, ChainConfig } from 'zosjs-ws'
 import { Button, Pagination, Checkbox, CheckboxButton, CheckboxGroup, Icon, Autocomplete, Loading, Message, Notification, Steps, Step, Table, TableColumn, DatePicker, TimeSelect, TimePicker, Input, InputNumber, Dialog, Select, Option, Collapse, CollapseItem, Cascader, Tabs, TabPane, Radio, RadioGroup, RadioButton, Form, FormItem, Progress, Carousel, CarouselItem, Alert, Slider, Row, Col, Card, Container, Header, Aside, Main, Footer, Tooltip, popover, Dropdown, DropdownMenu, DropdownItem, Tag } from 'element-ui'
 import locale from 'element-ui/lib/locale/lang/en'
 import i18n from './langue'
-import { getGatewayConfig } from '/js-api/index'
+import { getGatewayConfig, orderRecordList } from '/js-api/index'
 import echarts from 'echarts'
 import 'element-ui/lib/theme-chalk/index.css'
 import { getLocalStore, setLocalStore, traceTimer, isTheme, getStore, setStore, setDomain } from '/js-utils/storage'
@@ -106,18 +106,23 @@ router.beforeEach(function (to, from, next) {
     next()
   }
 })
-
+const versin = '1.2.19'
 /* eslint-disable no-new */
 window.vm = new Vue({
   el: '#app',
   store,
   i18n,
   router,
+  data: {
+    eventHub: new Vue()
+  },
   created () {
     traceTimer('0')
-    setDomain(this.getDomain())
+    this._getClean()
+    setDomain(this.getDomain() + versin)
     this._getVersion()
     Apis.setRpcConnectionStatusCallback(this.onUpdateRpcConnectionStatus)
+    this._intThemeConfig()
     getGatewayConfig(!this.$store.state.newVersion).then(res => {
       try {
         traceTimer('1')
@@ -132,12 +137,20 @@ window.vm = new Vue({
         this.$store.state.themeEn = res.themeEn
         this.$store.state.copyRight = res.copyRight
         this.$store.state.copyRightEn = res.copyRightEn
+        this.$store.state.loanMode = res.loanMode
+        this.$store.state.exchangegateway = res.exchangegateway
+        this.$store.state.authoradmin = res.authoradmin
+        this.$store.state.ucurl = res.ucurl
+        this.$store.state.companyName = res.companyName ? res.companyName : 'ZOS'
+        this.$store.state.serveType = res.serveType ? res.serveType : 0
         this.$store.state.link = res.link.slice(0, 5)
         this.$store.state.linkEn = res.linkEn.slice(0, 5)
         this.$store.state.userName = getStore('userName')
         this.$store.state.userDataSid = getStore('userId')
         this.$store.state.login = false
         this._getLogo(res)
+        filters.setCompanyName(this.$store.state.companyName)
+        document.getElementsByTagName('title')[0].innerText = this.$store.state.companyName + '  ' + 'Lending'
         ZOSInstance.init(res.settingsAPIs, () => {
           traceTimer('2')
           if (Apis.instance().chain_id === res.chain.chain_id) {
@@ -168,6 +181,7 @@ window.vm = new Vue({
               this.$emit('initFinished', true) // 网络初始化完成事件
               traceTimer('4')
             })
+            this._checkNode()
           })
         }, () => {
           this.$store.state.initFinished = false
@@ -183,6 +197,7 @@ window.vm = new Vue({
         this.$store.state.initFinished = false
         this.$emit('initFail', true)
         this.$message({ message: 'JSON文件格式错误' + errs, type: 'warning' })
+        setLocalStore('LendingVersion', '0')
       }
     })
   },
@@ -223,7 +238,7 @@ window.vm = new Vue({
         this.$store.state.userName = ''
         this.$store.state.userDataSid = ''
       }
-      console.log('loginUserId :', this.$store.state.userDataSid)
+      // console.log('loginUserId :', this.$store.state.userDataSid)
     },
     _getLogo (res) {
       if (res.logo) {
@@ -237,17 +252,72 @@ window.vm = new Vue({
         localStorage.setItem('index', 'home')
       }
     },
+    _checkNode () {
+      if (this.$store.state.serveType === 1) {
+        ZOSInstance.setReplaceAddress('zos.io')
+      } else if (this.$store.state.serveType === 2) {
+        ZOSInstance.setReplaceAddress('zostu.com')
+      } else {
+        let sref = `${window.document.location.href}`
+        if (sref.indexOf('?=checknode') >= 0) {
+          setStore('checkNode' + versin, '')
+          ZOSInstance.setReplaceAddress('')
+          return
+        }
+        var fNode = getStore('checkNode' + versin)
+        var DateCur = Date.now()
+        var t1 = 0
+        if (fNode !== null && fNode !== undefined) ZOSInstance.setReplaceAddress(fNode)
+        let sDomain = this.getDomain()
+        if (sDomain.indexOf('localhost') >= 0 || sDomain.indexOf('47.75.107.157') >= 0) {
+          ZOSInstance.setReplaceAddress('')
+          return
+        }
+        orderRecordList('https://gateway.zos.io/zos-gateway', {userNo: '1.3.0'}).then(res => {
+          t1 = Date.now() - DateCur
+          DateCur = Date.now()
+          var t2 = 0
+          orderRecordList('https://gateway.zostu.com/zos-gateway', {userNo: '1.3.0'}).then(res => {
+            t2 = Date.now() - DateCur
+            if (t1 !== 0 && t2 !== 0) {
+              if (t1 < t2) fNode = 'zos.io'
+              else fNode = 'zostu.com'
+              ZOSInstance.setReplaceAddress(fNode)
+              setStore('checkNode' + versin, fNode)
+            }
+          })
+        })
+      }
+    },
+    _getClean () {
+      let sref = `${window.document.location.href}`
+      if (sref.indexOf('?=clean') >= 0) {
+        console.log('clean')
+        window.sessionStorage.clear()
+        window.localStorage.clear()
+      }
+    },
     _getVersion () {
-      if (getLocalStore('LendingVersion') === '1.3') {
+      if (getLocalStore('LendingVersion') === versin) {
         this.$store.state.newVersion = false
       } else {
+        window.sessionStorage.clear()
+        window.localStorage.clear()
         this.$store.state.newVersion = true
-        setLocalStore('LendingVersion', '1.3')
+        setLocalStore('LendingVersion', versin)
       }
       let configTheme = getLocalStore('choosedStyleslast')
       if (isTheme(configTheme)) {
         this.$store.state.configTheme = configTheme
         toggleClass(document.body, 'theme-' + this.$store.state.configTheme)
+      }
+      if (this.$store.state.newVersion) {
+        var meta = '<meta http-equiv="pragma" content="no-cache">'
+        $('head').prepend(meta)
+        var meta1 = '<meta http-equiv="cache-control" content="no-cache">'
+        $('head').prepend(meta1)
+        var meta2 = '<meta http-equiv="expires" content="0">'
+        $('head').prepend(meta2)
       }
     },
     _adminNotify () {
@@ -255,9 +325,15 @@ window.vm = new Vue({
         this.$store.state.adminNotifyId = account.id
       })
     },
+    _intThemeConfig () {
+      let configThemelast = getLocalStore('choosedStyleslast')
+      if (configThemelast !== undefined && configThemelast !== null && configThemelast !== '') {
+        this.$store.state.configTheme = configThemelast
+      }
+      toggleClass(document.body, 'theme-' + this.$store.state.configTheme)
+    },
     _getThemeConfig () {
       let configTheme = ''
-      this.$store.state.configTheme = '1a1d5c'
       Apis.instance().db_api().exec('get_account_config', [this.$store.state.admin_id, ['theme']]).then(res => {
         if (res && res.length > 0 && res[0]) {
           const resParse = JSON.parse(res[0])
@@ -274,7 +350,6 @@ window.vm = new Vue({
         if (configThemelast !== configTheme) {
           setLocalStore('choosedStyleslast', configTheme)
           toggleClass(document.body, 'theme-' + this.$store.state.configTheme)
-          console.log(configTheme)
         }
         traceTimer('6')
       }).catch(err => {
