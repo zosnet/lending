@@ -1,11 +1,13 @@
-## ZOS-web
-### 基于Vue开发的前台页面
+Lending
+========
+Lending 是由ZOS独立开发整理维护的区块链去中心化借贷平台，它秉持着让“所有人都可以成为银行家，让金融更简单”的理念，惠及大众。
 
-### 新增与优化
+如果项目有误，可通过issue反馈给我们。
 
+#版本
+- Version: 1.0.0
 
-### 所用技术
-
+#使用技术
 - Vue 2.x
 - Vuex
 - Vue Router
@@ -15,34 +17,33 @@
 - axios
 - Node.js
 
-### 本地开发运行 ###
-### zos-web依赖于 Node.js v6 以上版本。
-### 在 Linux 和 macOS 上，安装 Node 最简单的方式是用 NVM。
-### 将以下命令复制到终端中执行即可安装 NVM。
-- curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash
-- nvm install v6
-- nvm use v6
+#环境依赖
+- Nodejs 6+
 
-### Node 安装完成后，获取项目的源代码：
-- git clone http://www.fcloudchain.com:8083/debt/zos-web.git
-- cd zos-web
+#下载安装
+```
+##下载项目
+git clone https://github.com/zosnet/lending.git
 
-### 全局安装 vue-cli
-- npm install --global vue-cli
+##安装依赖
+npm install
 
-### 在启动之前，需要先安装 npm 软件包
-- npm install
+##运行
+npm run start
+```
+### 安装时可能会遇到的问题
+```
+####如果提示 "No ESlint configuration found." 是因为缺少.eslintrc.js文件导致。
+*** 解决办法：请完整下载仓库中代码 ***
 
-### 修改配置文件
-- 进入static文件夹,复制config-example.json,并在当前文件夹拷贝出一份,改名为:config.json
+####在node 8+版本 node-sass可能会与本机的node环境不兼容导致依赖安装失败，一般不会出现这个问题，但不排除部分用户电脑配置复杂，可能会导致该情况。
+*** 解决办法：使用cnpm命令进行安装（如何让使用cnpm请自行查询使用方法） ***
+```
 
-### 运行开发服务器 ###
-### 所有软件包安装好后，可以使用以下命令启动开发服务器：
-- npm run dev
 
-### 商城前台端口默认9999 http://localhost:9999
-
-### 部署 ###
-- npm run build
-
-## 将打包生成的 `dist` 静态文件放置服务器中，并配置路由代理
+### 编译部署
+```
+#编译
+npm run build
+```
+将打包生成的 `dist` 静态文件放置服务器中，并配置路由代理
